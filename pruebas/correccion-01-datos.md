@@ -32,13 +32,16 @@ Pasar el validador no quiere decir que no haya incoherencias. Al leer los datos 
 | 5 | Nota en `calefactor`: "Unidades adicionales a las que ya tiene la terraza del Mirador." | Así el comercial no confunde los incluidos con los extra. |
 | 6 | Tagline del Mirador: "Salón panorámico con terraza privada y vistas al mar y al puerto". | El tagline y el full_profile prometen lo mismo. |
 | 9 | El validador exige al menos un plano **aprobado** por espacio. | Un plano no aprobado no se puede enseñar al cliente, así que no cuenta. |
-| 2, 3, 7, 8 | Sin cambios en esta revisión. | Pendiente de decidir por el equipo. |
+| 2 | Sin cambios en los datos. | Se resuelve en el chat web, que mostrará imagen o enlace y nunca la ruta. |
+| 3 | Sin cambios. | Lo cubre la regla del 90 % del recomendador, que lo marcará como "al límite". |
+| 7 | Sin cambios por ahora. | Se cambiará cuando decidamos el nombre de la empresa. |
+| 8 | Sin cambios. | Es correcto: en cóctel no hace falta silla para todos. |
 
 ## Después
 
 - El validador vuelve a dar "todo correcto": 6 espacios, 24 elementos de media (23 aprobados) y 10 artículos de inventario. La única media no aprobada es `jardi-gracia-foto-02` (foto anterior a la reforma).
 - Prueba del nuevo control: en una copia de los datos con el plano de Llum del Poblenou marcado como no aprobado, el validador da el error "sp-llum-poblenou: no tiene ningún plano aprobado".
-- Pendiente: las incoherencias 2, 3, 7 y 8.
+- Las 9 incoherencias tienen decisión. Quedan dos tareas para más adelante: el chat web no debe mostrar rutas (2) y hay que cambiar `project` cuando tengamos el nombre de la empresa (7).
 
 ## Lección
 
