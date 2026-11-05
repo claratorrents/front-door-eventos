@@ -1,0 +1,460 @@
+{
+  "project": "Space Enquiry - Barcelona Venues",
+  "city": "Barcelona",
+  "currency": "EUR",
+  "metadata": {
+    "total_venues": 6,
+    "synthetic_data": true,
+    "purpose": "Academic class project - Chatbot & n8n pipeline",
+    "pricing_note": "Precios orientativos, IVA no incluido. USO INTERNO: el chatbot nunca da precios; el presupuesto lo hace el comercial.",
+    "field_usage": {
+      "tagline": "frase corta en la tarjeta de recomendación",
+      "full_profile": "solo si el cliente pide más detalles",
+      "best_for": "lo usa el recomendador para encajar el tipo de evento"
+    }
+  },
+  "venues": [
+    {
+      "id": "sp-llum-poblenou",
+      "name": "Llum del Poblenou",
+      "city": "Barcelona",
+      "neighborhood": "Poblenou (Distrito 22@)",
+      "tagline": "Antigua nave textil reconvertida con luz cenital e interior industrial",
+      "full_profile": "Ubicada en el distrito 22@ de Poblenou, esta nave diáfana cuenta con techos de 6 metros, vigas de forja y grandes ventanales. Combina estética industrial con conectividad de alta velocidad y acústica acondicionada para eventos corporativos y celebraciones.",
+      "best_for": [
+        "Lanzamientos de producto",
+        "Jornadas de innovación",
+        "Cenas de gala",
+        "Hackathons"
+      ],
+      "pricing": {
+        "day_rate_eur": 2400,
+        "half_day_rate_eur": 1400,
+        "cleaning_deposit_eur": 350
+      },
+      "capacities": {
+        "cocktail": 250,
+        "theater": 200,
+        "banquet": 150,
+        "classroom": 100,
+        "absolute_max": 250
+      },
+      "amenities_included": [
+        "Wifi 1 Gbps simétrico",
+        "Proyector láser 4K",
+        "Pantalla retráctil 4x3m",
+        "Equipo de sonido PA con mesa digital",
+        "Mesas y sillas para 200 personas",
+        "Acceso accesible sin barreras"
+      ],
+      "chatbot_guardrails": {
+        "min_lead_time_days": 7,
+        "catering_policy": "Catering externo permitido con registro previo",
+        "noise_curfew": "Música permitida hasta las 02:00 h en interior",
+        "parking": "Carga y descarga en puerta; parking público a 150m"
+      },
+      "media": [
+        {
+          "id": "llum-poblenou-foto-01",
+          "type": "foto",
+          "url": "/media/placeholders/llum-poblenou/foto-01.jpg",
+          "description": "Nave industrial montada para cena de gala, con luz cenital",
+          "approved": true
+        },
+        {
+          "id": "llum-poblenou-foto-02",
+          "type": "foto",
+          "url": "/media/placeholders/llum-poblenou/foto-02.jpg",
+          "description": "Montaje de teatro frente a la pantalla de 4x3 m",
+          "approved": true
+        },
+        {
+          "id": "llum-poblenou-plano",
+          "type": "plano",
+          "url": "/media/placeholders/llum-poblenou/plano.pdf",
+          "description": "Plano de planta con accesos, salidas y zona de carga",
+          "approved": true
+        },
+        {
+          "id": "llum-poblenou-tour360",
+          "type": "tour360",
+          "url": "/media/placeholders/llum-poblenou/tour-360.html",
+          "description": "Recorrido virtual por la nave",
+          "approved": true
+        }
+      ],
+      "n8n_routing": {
+        "sales_rep": "Marta Soler",
+        "zone": "Litoral / 22@"
+      }
+    },
+    {
+      "id": "sp-jardi-gracia",
+      "name": "Jardí de Gràcia",
+      "city": "Barcelona",
+      "neighborhood": "Vila de Gràcia",
+      "tagline": "Oasis botánico y patio íntimo entre callejuelas históricas",
+      "full_profile": "Casa modernista rehabilitada con patio exterior arbolado con olivos, buganvillas y suelos de mosaico hidráulico. Ideal para offsites de equipo reducidos, presentaciones de prensa y cócteles que buscan privacidad y encanto mediterráneo.",
+      "best_for": [
+        "Retiros de liderazgo",
+        "Cocktails de networking",
+        "Presentaciones de marca",
+        "Workshops creativos"
+      ],
+      "pricing": {
+        "day_rate_eur": 1100,
+        "half_day_rate_eur": 650,
+        "cleaning_deposit_eur": 200
+      },
+      "capacities": {
+        "cocktail": 110,
+        "theater": 80,
+        "banquet": 60,
+        "classroom": 40,
+        "absolute_max": 110
+      },
+      "amenities_included": [
+        "Wifi alta velocidad",
+        "Smart TV 75 pulgadas sobre soporte móvil",
+        "Altavoz profesional Bluetooth/XLR",
+        "Mobiliario de patio y mesas de madera",
+        "Iluminación cálida con guirnaldas"
+      ],
+      "chatbot_guardrails": {
+        "min_lead_time_days": 3,
+        "catering_policy": "Libre elección de catering u opción de coffee break interno",
+        "noise_curfew": "Zona residencial: música en exterior hasta las 22:30 h",
+        "parking": "Sin aparcamiento propio; zona peatonal"
+      },
+      "media": [
+        {
+          "id": "jardi-gracia-foto-01",
+          "type": "foto",
+          "url": "/media/placeholders/jardi-gracia/foto-01.jpg",
+          "description": "Patio ajardinado con olivos y guirnaldas encendidas",
+          "approved": true
+        },
+        {
+          "id": "jardi-gracia-foto-02",
+          "type": "foto",
+          "url": "/media/placeholders/jardi-gracia/foto-02.jpg",
+          "description": "Patio antes de la reforma (foto desactualizada)",
+          "approved": false
+        },
+        {
+          "id": "jardi-gracia-plano",
+          "type": "plano",
+          "url": "/media/placeholders/jardi-gracia/plano.pdf",
+          "description": "Plano de la casa y del patio con accesos",
+          "approved": true
+        },
+        {
+          "id": "jardi-gracia-tour360",
+          "type": "tour360",
+          "url": "/media/placeholders/jardi-gracia/tour-360.html",
+          "description": "Recorrido virtual por la casa y el patio",
+          "approved": true
+        }
+      ],
+      "n8n_routing": {
+        "sales_rep": "Oriol Puig",
+        "zone": "Gràcia / Centre"
+      }
+    },
+    {
+      "id": "sp-mirador-montjuic",
+      "name": "Mirador de Montjuïc",
+      "city": "Barcelona",
+      "neighborhood": "Montjuïc (Sants-Montjuïc)",
+      "tagline": "Salón panorámico con terraza privada y vistas al mar y al puerto",
+      "full_profile": "Pabellón acristalado de líneas contemporáneas situado en la montaña de Montjuïc. Cuenta con una terraza mirador con vistas directas al mar y al puerto. Idóneo para cenas de gala, cierres de año corporativos y encuentros institucionales.",
+      "best_for": [
+        "Cenas corporativas",
+        "Entrega de premios",
+        "Eventos C-Level",
+        "Recepciones nocturnas"
+      ],
+      "pricing": {
+        "day_rate_eur": 2100,
+        "half_day_rate_eur": 1250,
+        "cleaning_deposit_eur": 300
+      },
+      "capacities": {
+        "cocktail": 210,
+        "theater": 160,
+        "banquet": 120,
+        "classroom": 80,
+        "absolute_max": 210
+      },
+      "amenities_included": [
+        "Wifi para eventos",
+        "Proyector HD gran angular",
+        "Pantalla motorizada",
+        "2 micrófonos inalámbricos Shure",
+        "Mesas y sillas de banquete y cóctel",
+        "Terraza privada con calefactores de exterior"
+      ],
+      "chatbot_guardrails": {
+        "min_lead_time_days": 10,
+        "catering_policy": "Requiere catering homologado o suplemento de cocina",
+        "noise_curfew": "Terraza hasta las 23:30 h; salón interior hasta las 03:00 h",
+        "parking": "Parking propio gratuito para 40 vehículos"
+      },
+      "media": [
+        {
+          "id": "mirador-montjuic-foto-01",
+          "type": "foto",
+          "url": "/media/placeholders/mirador-montjuic/foto-01.jpg",
+          "description": "Terraza mirador con vistas al puerto al atardecer",
+          "approved": true
+        },
+        {
+          "id": "mirador-montjuic-foto-02",
+          "type": "foto",
+          "url": "/media/placeholders/mirador-montjuic/foto-02.jpg",
+          "description": "Salón acristalado en montaje banquete",
+          "approved": true
+        },
+        {
+          "id": "mirador-montjuic-plano",
+          "type": "plano",
+          "url": "/media/placeholders/mirador-montjuic/plano.pdf",
+          "description": "Plano del pabellón, la terraza y el parking",
+          "approved": true
+        },
+        {
+          "id": "mirador-montjuic-tour360",
+          "type": "tour360",
+          "url": "/media/placeholders/mirador-montjuic/tour-360.html",
+          "description": "Recorrido virtual por el salón y la terraza",
+          "approved": true
+        }
+      ],
+      "n8n_routing": {
+        "sales_rep": "Marta Soler",
+        "zone": "Sants-Montjuïc"
+      }
+    },
+    {
+      "id": "sp-atelier-sant-antoni",
+      "name": "Atelier de Sant Antoni",
+      "city": "Barcelona",
+      "neighborhood": "Sant Antoni (Eixample)",
+      "tagline": "Estudio boutique diáfano para diseño, sprints y dinámicas ágiles",
+      "full_profile": "Espacio íntimo, luminoso y de diseño escandinavo en pleno barrio de Sant Antoni. Dotado de pizarras móviles, mobiliario flexible y rincón barista. Pensado para sesiones intensivas de co-creación, design thinking y reuniones directivas.",
+      "best_for": [
+        "Design sprints",
+        "Focus groups",
+        "Formaciones reducidas",
+        "Reuniones de consejo"
+      ],
+      "pricing": {
+        "day_rate_eur": 650,
+        "half_day_rate_eur": 400,
+        "cleaning_deposit_eur": 150
+      },
+      "capacities": {
+        "cocktail": 65,
+        "theater": 50,
+        "banquet": 35,
+        "classroom": 24,
+        "absolute_max": 65
+      },
+      "amenities_included": [
+        "Wifi fibra óptica dedicada",
+        "Monitor táctil 65 pulgadas para presentaciones",
+        "2 pizarras móviles magnéticas con material de facilitación",
+        "Mesas configurables y sillería ergonómica",
+        "Rincón de café de especialidad y agua filtrada"
+      ],
+      "chatbot_guardrails": {
+        "min_lead_time_days": 2,
+        "catering_policy": "Permite traer comida propia o contratar catering libre",
+        "noise_curfew": "Actividades formativas y acústicas moderadas; cierre a las 21:00 h",
+        "parking": "Parking subterráneo a 80m"
+      },
+      "media": [
+        {
+          "id": "atelier-sant-antoni-foto-01",
+          "type": "foto",
+          "url": "/media/placeholders/atelier-sant-antoni/foto-01.jpg",
+          "description": "Estudio luminoso con mesas configurables y pizarras",
+          "approved": true
+        },
+        {
+          "id": "atelier-sant-antoni-foto-02",
+          "type": "foto",
+          "url": "/media/placeholders/atelier-sant-antoni/foto-02.jpg",
+          "description": "Montaje de reunión en U frente al monitor táctil",
+          "approved": true
+        },
+        {
+          "id": "atelier-sant-antoni-plano",
+          "type": "plano",
+          "url": "/media/placeholders/atelier-sant-antoni/plano.pdf",
+          "description": "Plano del estudio con el rincón de café",
+          "approved": true
+        },
+        {
+          "id": "atelier-sant-antoni-tour360",
+          "type": "tour360",
+          "url": "/media/placeholders/atelier-sant-antoni/tour-360.html",
+          "description": "Recorrido virtual por el estudio",
+          "approved": true
+        }
+      ],
+      "n8n_routing": {
+        "sales_rep": "Oriol Puig",
+        "zone": "Eixample / Sant Antoni"
+      }
+    },
+    {
+      "id": "sp-forum-les-corts",
+      "name": "Fòrum de les Corts",
+      "city": "Barcelona",
+      "neighborhood": "Les Corts (Eje Diagonal)",
+      "tagline": "Sala ejecutiva y polivalente junto a los principales centros de negocio",
+      "full_profile": "Ubicada en el distrito financiero de Les Corts, ofrece aislamiento acústico profesional, paneles divisorios para modular sub-salas y un atril técnico completo. Es la elección habitual para juntas generales, certificaciones y congresos sectoriales.",
+      "best_for": [
+        "Cursos de formación",
+        "Asambleas generales",
+        "Simposios técnicos",
+        "Jornadas corporativas"
+      ],
+      "pricing": {
+        "day_rate_eur": 1500,
+        "half_day_rate_eur": 900,
+        "cleaning_deposit_eur": 250
+      },
+      "capacities": {
+        "cocktail": 170,
+        "theater": 130,
+        "banquet": 90,
+        "classroom": 60,
+        "absolute_max": 170
+      },
+      "amenities_included": [
+        "Wifi corporativo con ancho de banda garantizado",
+        "Proyector dual con doble pantalla",
+        "Atril con micro de cuello de cisne y micrófono de mano",
+        "Pizarra interactiva digital",
+        "Cabina técnica de control",
+        "Mobiliario de formación y sillas de conferencia"
+      ],
+      "chatbot_guardrails": {
+        "min_lead_time_days": 5,
+        "catering_policy": "Servicio de catering propio disponible en zona foyer anexa",
+        "noise_curfew": "Horario comercial y de eventos hasta las 22:00 h",
+        "parking": "Convenio con parking edificio contiguo"
+      },
+      "media": [
+        {
+          "id": "forum-les-corts-foto-01",
+          "type": "foto",
+          "url": "/media/placeholders/forum-les-corts/foto-01.jpg",
+          "description": "Sala en montaje de teatro con atril y doble pantalla",
+          "approved": true
+        },
+        {
+          "id": "forum-les-corts-foto-02",
+          "type": "foto",
+          "url": "/media/placeholders/forum-les-corts/foto-02.jpg",
+          "description": "Sala dividida en dos subsalas de formación",
+          "approved": true
+        },
+        {
+          "id": "forum-les-corts-plano",
+          "type": "plano",
+          "url": "/media/placeholders/forum-les-corts/plano.pdf",
+          "description": "Plano con paneles divisorios, cabina técnica y foyer",
+          "approved": true
+        },
+        {
+          "id": "forum-les-corts-tour360",
+          "type": "tour360",
+          "url": "/media/placeholders/forum-les-corts/tour-360.html",
+          "description": "Recorrido virtual por la sala y el foyer",
+          "approved": true
+        }
+      ],
+      "n8n_routing": {
+        "sales_rep": "David Ramos",
+        "zone": "Les Corts / Diagonal"
+      }
+    },
+    {
+      "id": "sp-nau-besos",
+      "name": "Nau del Besòs",
+      "city": "Barcelona",
+      "neighborhood": "Sant Martí / Besòs",
+      "tagline": "Nave monumental de 800 m² para ferias, convenciones y montajes de gran formato",
+      "full_profile": "Gran nave diáfana con 8 metros de altura libre, suelo de hormigón pulido y estructura de truss para iluminación y sonido. Cuenta con puerta de acceso para vehículos de gran tonelaje y potencia trifásica apta para ferias, exhibiciones y convenciones multitudinarias.",
+      "best_for": [
+        "Convenciones anuales",
+        "Ferias comerciales",
+        "Producciones audiovisuales",
+        "Cenas de empresa masivas"
+      ],
+      "pricing": {
+        "day_rate_eur": 3200,
+        "half_day_rate_eur": 2000,
+        "cleaning_deposit_eur": 600
+      },
+      "capacities": {
+        "cocktail": 400,
+        "theater": 300,
+        "banquet": 220,
+        "classroom": 160,
+        "absolute_max": 400
+      },
+      "amenities_included": [
+        "Wifi de alta densidad (hasta 500 conexiones simultáneas)",
+        "Escenario modular de 8x4m regulable en altura",
+        "Proyector de 12.000 lúmenes con pantalla gigante",
+        "Equipo de sonido line-array con mesa de 32 canales",
+        "Cuadro eléctrico trifásico 63A",
+        "Mobiliario básico para 300 asistentes"
+      ],
+      "chatbot_guardrails": {
+        "min_lead_time_days": 14,
+        "catering_policy": "Requiere plan de producción y catering homologado",
+        "noise_curfew": "Aislamiento acústico completo; eventos autorizados hasta las 05:00 h",
+        "parking": "Zona de carga/descarga propia y campa para camiones"
+      },
+      "media": [
+        {
+          "id": "nau-besos-foto-01",
+          "type": "foto",
+          "url": "/media/placeholders/nau-besos/foto-01.jpg",
+          "description": "Nave con escenario modular e iluminación en truss",
+          "approved": true
+        },
+        {
+          "id": "nau-besos-foto-02",
+          "type": "foto",
+          "url": "/media/placeholders/nau-besos/foto-02.jpg",
+          "description": "Montaje de cena masiva con mesas redondas",
+          "approved": true
+        },
+        {
+          "id": "nau-besos-plano",
+          "type": "plano",
+          "url": "/media/placeholders/nau-besos/plano.pdf",
+          "description": "Plano de la nave con acceso de camiones y cuadro eléctrico",
+          "approved": true
+        },
+        {
+          "id": "nau-besos-tour360",
+          "type": "tour360",
+          "url": "/media/placeholders/nau-besos/tour-360.html",
+          "description": "Recorrido virtual por la nave",
+          "approved": true
+        }
+      ],
+      "n8n_routing": {
+        "sales_rep": "David Ramos",
+        "zone": "Sant Martí / Besòs"
+      }
+    }
+  ]
+}

@@ -9,7 +9,7 @@ El contexto completo está en KNOWLEDGE.md.
 ## Las 5 reglas que nunca se rompen
 
 1. **Solo datos sintéticos.** Nada de datos reales de personas ni claves de API en el chat o en el repo.
-2. **Nunca inventar precios ni disponibilidad.** Solo catálogo y base de conocimiento; la disponibilidad se confirma únicamente con dato real de n8n.
+2. **Nunca dar precios ni presupuestos.** El chatbot recoge necesidades y presupuesto del cliente; el precio lo da el comercial. La disponibilidad solo se confirma con dato real de n8n.
 3. **Decidir con reglas, redactar con el LLM.** Router, puntuación de leads y decisiones van por script con pesos fijos, nunca por el LLM.
 4. **Consentimiento antes de guardar datos.** Aviso de IA primero; sin consentimiento, registro anónimo (sin nombre, email ni teléfono).
 5. **Nunca descuentos; lo delicado va a una persona.** Descuentos, quejas, temas legales y excepciones se escalan a humano.
