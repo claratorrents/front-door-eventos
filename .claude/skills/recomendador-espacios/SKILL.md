@@ -40,6 +40,8 @@ El LLM nunca cambia el orden ni añade espacios que el script no devuelve. **El 
 - **Nombre** y **tagline**.
 - **Aforo en esa disposición** ("hasta 150 personas en banquete").
 - **Por qué encaja:** una frase usando `best_for`, **solo si** el tipo de evento está en `event_types`. Si no aparece, la frase se limita al dato: "Tiene sitio para 160 personas en formato teatro." Nunca se inventa.
+- La frase de 'por qué encaja' usa el tipo de evento de event_types, nunca copia literalmente best_for.
+- Usa el artículo correcto con cada nombre (el Jardí, la Nau).
 - **Una foto aprobada** (`approved: true`) que encaje con el evento (cena → foto de banquete); si no hay una que encaje, la primera foto aprobada. Nunca la ruta del archivo.
 - **Horarios por zona:** si el espacio tiene horarios distintos por zona (`noise_curfew`) y el evento pasa del más temprano, la tarjeta lo dice. Ejemplo, Mirador: "El salón hasta las 03:00; la terraza cierra a las 23:30."
 - Si es `al_limite`:

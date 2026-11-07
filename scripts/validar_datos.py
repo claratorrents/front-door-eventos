@@ -116,6 +116,16 @@ def validar_espacios(datos):
         elif not isinstance(hora, str) or not FORMATO_HORA.match(hora):
             error(f"{eid}: max_end_time {hora!r} no tiene formato HH:MM")
 
+        # Horarios por zona (opcional): {"zona": "HH:MM"}
+        zonas = esp.get("chatbot_guardrails", {}).get("zone_end_times")
+        if zonas is not None:
+            if not isinstance(zonas, dict) or not zonas:
+                error(f"{eid}: zone_end_times debe ser un objeto {{zona: HH:MM}} no vacío")
+            else:
+                for zona, h in zonas.items():
+                    if not isinstance(h, str) or not FORMATO_HORA.match(h):
+                        error(f"{eid}: zone_end_times.{zona} {h!r} no tiene formato HH:MM")
+
         # Textos que ve el cliente
         revisar_texto_cliente(esp.get("tagline"), f"{eid}.tagline")
         revisar_texto_cliente(esp.get("full_profile"), f"{eid}.full_profile")

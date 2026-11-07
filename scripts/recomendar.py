@@ -8,7 +8,9 @@ Uso:
   python3 scripts/recomendar.py --asistentes 180 --disposicion theater --dias 5
 
 Salida (JSON):
-  recomendados: [{id, nombre, ocupacion, grupo, alternativa}]   (máximo 3, ya ordenados)
+  recomendados: [{id, nombre, ocupacion, grupo, alternativa, avisos_zona}]   (máximo 3, ya ordenados)
+                avisos_zona: zonas que cierran antes de la hora de fin pedida, p. ej.
+                [{"zona": "terraza", "hasta": "23:30"}]
   descartados:  [{id, nombre, motivo, detalle}]    (solo por antelación u horario)
 
 Solo lee data/espacios.json. No da precios ni disponibilidad.
@@ -97,8 +99,15 @@ def recomendar(asistentes, disposicion, dias=None, hora_fin=None, espacios=None)
 
         # 4. Ocupación
         ocupacion = Fraction(asistentes, aforo)
+        # Aviso si alguna zona cierra antes de la hora de fin pedida
+        avisos_zona = []
+        if fin is not None:
+            for zona, h in reglas.get("zone_end_times", {}).items():
+                if minutos(h) < fin:
+                    avisos_zona.append({"zona": zona, "hasta": h})
+
         candidatos.append({
-            "id": esp["id"], "nombre": esp["name"], "aforo": aforo,
+            "id": esp["id"], "nombre": esp["name"], "aforo": aforo, "avisos_zona": avisos_zona,
             "ocupacion_exacta": ocupacion, "grupo": grupo(ocupacion),
         })
 
@@ -123,7 +132,7 @@ def recomendar(asistentes, disposicion, dias=None, hora_fin=None, espacios=None)
     recomendados = [
         {"id": c["id"], "nombre": c["nombre"],
          "ocupacion": round(float(c["ocupacion_exacta"]) * 100), "grupo": c["grupo"],
-         "alternativa": c["alternativa"]}
+         "alternativa": c["alternativa"], "avisos_zona": c["avisos_zona"]}
         for c in candidatos[:MAX_RECOMENDADOS]
     ]
 

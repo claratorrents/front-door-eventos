@@ -59,6 +59,19 @@ def test_desempate():
     return ok
 
 
+def test_aviso_zona():
+    """Cena de 120 hasta las 00:00: el Mirador avisa de la terraza (23:30); Llum no avisa."""
+    r = recomendar(120, "banquet", hora_fin="00:00")
+    avisos = {x["id"]: x["avisos_zona"] for x in r["recomendados"]}
+    esperado = {"sp-llum-poblenou": [], "sp-mirador-montjuic": [{"zona": "terraza", "hasta": "23:30"}]}
+    sin_hora = recomendar(120, "banquet")
+    ok = avisos == esperado and all(x["avisos_zona"] == [] for x in sin_hora["recomendados"])
+    print(f"{'OK   ' if ok else 'FALLO'} aviso de zona (cena 120 hasta las 00:00)")
+    if not ok:
+        print(f"      esperado: {esperado}\n      obtenido: {avisos}")
+    return ok
+
+
 def main():
     fallos = 0
     for nombre, args, esp_rec, esp_desc in CASOS:
@@ -73,7 +86,9 @@ def main():
             print(f"      obtenido: {rec} · descartados {desc}")
     if not test_desempate():
         fallos += 1
-    total = len(CASOS) + 1
+    if not test_aviso_zona():
+        fallos += 1
+    total = len(CASOS) + 2
     print(f"\n{total - fallos}/{total} casos correctos")
     sys.exit(1 if fallos else 0)
 

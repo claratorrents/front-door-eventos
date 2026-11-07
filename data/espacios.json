@@ -219,6 +219,9 @@
         "catering_policy": "Requiere catering homologado o suplemento de cocina",
         "noise_curfew": "Terraza hasta las 23:30 h; salón interior hasta las 03:00 h",
         "max_end_time": "03:00",
+        "zone_end_times": {
+          "terraza": "23:30"
+        },
         "parking": "Parking propio gratuito para 40 vehículos"
       },
       "media": [
