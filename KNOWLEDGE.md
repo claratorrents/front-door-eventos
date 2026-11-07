@@ -267,8 +267,19 @@ plugins/eventos-front-door/
 - Archivo en la raíz del repo: `.claude-plugin/marketplace.json`, con `name`, `owner` y la lista `plugins` (cada uno con `name` y `source`, por ejemplo `"./plugins/eventos-front-door"`).
 - Añadir el marketplace: `/plugin marketplace add ./` (carpeta local) o `/plugin marketplace add usuario/repo` (GitHub).
 - Instalar: `/plugin install eventos-front-door@<nombre-del-marketplace>`, o desde el menú de `/plugin`.
-- **Por comprobar:** si hay que reiniciar Claude Code o abrir una sesión nueva después de instalar para que carguen las skills.
-- **Por comprobar:** si `/plugin` funciona dentro de la app de escritorio de Claude o hay que usarlo desde `claude` en el terminal.
+
+### Comprobado al instalar el plugin (7 de noviembre, Claude Code 2.1.317)
+- **El plugin se genera, no se edita:** `python3 scripts/empaquetar_plugin.py` crea `plugins/eventos-front-door/` (6 skills, 4 scripts sin tests, `data/`, `KNOWLEDGE.md`, `AGENTS.md`, README) y `.claude-plugin/marketplace.json`.
+- **Validación:** `claude plugin validate plugins/eventos-front-door` y `claude plugin validate .` pasan. Solo avisa de que falta una licencia, que únicamente exige el directorio público de plugins.
+- **Instalación desde el terminal (funciona):** `claude plugin marketplace add <ruta-del-repo>` y después `claude plugin install eventos-front-door@front-door-eventos --scope user`. No pide iniciar sesión. `claude plugin list` lo muestra activado y `claude plugin details eventos-front-door` lista las 6 skills (unos 670 tokens fijos por sesión).
+- **Marketplace local:** con un marketplace de carpeta local, Claude Code lee el plugin directamente de `plugins/eventos-front-door` del repositorio, sin copiarlo aparte.
+- **Cuándo cargan las skills:** en el mismo mensaje en que se instala, la skill todavía no existe ("Unknown skill"). Desde el mensaje siguiente ya aparece también en la sesión que estaba abierta (`eventos-front-door:recomendador-espacios` cargó con sus rutas sustituidas). No hace falta reiniciar la app ni abrir una sesión nueva, aunque en una sesión nueva también funciona.
+- **Rutas:** al cargar una skill, Claude Code sustituye `${CLAUDE_SKILL_DIR}` por la carpeta de la skill (visto en el código de la CLI). Aplicando esa sustitución sobre el plugin instalado, las rutas a scripts, datos y `KNOWLEDGE.md` de las 6 skills existen. `recomendar.py` y `validar_datos.py` funcionan ejecutados desde otra carpeta.
+- **Desinstalar:** `claude plugin uninstall eventos-front-door@front-door-eventos` y `claude plugin marketplace remove front-door-eventos`.
+- **Prueba en una sesión nueva, fuera del proyecto** (carpeta `prueba-plugin`, app de escritorio):
+  - La skill `eventos-front-door:recomendador-espacios` carga por su nombre.
+  - Las rutas a `recomendar.py` y a `data/` resuelven dentro del plugin instalado (con el marketplace local, `plugins/eventos-front-door/` del repo). Con 120 personas en banquete sale Llum del Poblenou `comodo` (foto-01) y Mirador de Montjuïc `al_limite` (foto-02), sin porcentajes para el cliente.
+- **`/plugin` en la app de escritorio:** no comprobado. La instalación por terminal (`claude plugin marketplace add` / `claude plugin install`) sí funciona, así que es la vía que se usa.
 
 ### Codex vs. Claude Code (mismos conceptos, otros nombres)
 | | Codex | Claude Code |
