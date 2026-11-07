@@ -2,7 +2,7 @@
 
 Conocimiento acumulado del proyecto: enunciado, decisiones del grupo, cómo trabajar con Codex y lecciones de la prueba. Sirve a la vez de memoria para el equipo y de contexto para cualquier agente (Codex o Claude) que trabaje en el proyecto.
 
-Última actualización: 5 de noviembre de 2026 · Clara Torrents
+Última actualización: 7 de noviembre de 2026 · Clara Torrents
 
 ---
 
@@ -79,7 +79,7 @@ Además existe la skill **buying-committee-simulator** (ya probada, con correcci
 | Concepto | Dónde aparece |
 |---|---|
 | Where AI gets it wrong | Guardrails, base de conocimiento, permisos limitados de n8n |
-| LLMs vs. modelos de decisión | Router y cualificador deciden con reglas; el LLM redacta |
+| LLMs vs. modelos de decisión | El router clasifica con el LLM sobre una lista cerrada de intenciones; lo que se hace con cada una, la puntuación de leads y las demás decisiones van por script o tabla fija; el LLM redacta |
 | AI workflows | Skills + n8n como herramientas + chatbot como agente |
 | Aceleración vs. automatización | Consultas simples en automático; eventos grandes, quejas y excepciones con revisión humana |
 | Capacity and total cost | Diapositiva: beneficios frente a integración, revisión, formación y mantenimiento |
@@ -195,7 +195,8 @@ Fijar estos campos desde el principio. Cambiarlos a mitad es el fallo más habit
 |---|---|
 | id_conversacion | conv-0012 |
 | fecha_hora | 2026-11-04T21:30:00+01:00 |
-| ruta | informacion / lead / reserva / cambio / incidencia |
+| ruta | informacion / lead / reserva / cambio / incidencia / privacidad / fuera_tema |
+| rutas_adicionales | lista con las rutas de las demás intenciones del mensaje; el dashboard cuenta un lead si lead aparece en ruta o en rutas_adicionales |
 | tipo_evento | cena de empresa |
 | asistentes | 120 |
 | fecha_evento | 2027-03 |
@@ -323,12 +324,18 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 - [x] Prueba completa en `reservas-eventos` (contexto, 5 skills, correcciones, plugin, chat web).
 - [x] Guía `Guia_rapida_Codex.docx`.
 - [x] Paso 1: carpeta `front-door-eventos` creada y abierta en Claude Code.
-- [x] Paso 2: `AGENTS.md` (commit `4b17310`; regla 2 actualizada a "nunca dar precios" en `7a5ebe4`).
+- [x] Paso 2: `AGENTS.md` (commit `4b17310`; regla 2 actualizada a "nunca dar precios" en `7a5ebe4`) y `CLAUDE.md` (`5f00b31`).
 - [x] Paso 3: catálogo, inventario y validador (commits `7a5ebe4` y `121a83b`), con corrección 01 documentada.
+- [x] Paso 4: skills de guardrails (`e323834`, `6a11b2c`, `1d8b780`) y consentimiento (`bea7691`), con pruebas y correcciones 02 y 03.
+- [x] Paso 5 (en parte): recomendador-espacios con `scripts/recomendar.py` (`591885a` a `5596168`), cualificador-leads con `scripts/puntuar_lead.py` (`7968a5d`, `2e175ae`) y media-espacios (`434d83a`, `7387f50`), con pruebas y correcciones 04, 05 y 06.
+- [x] Resumen del trabajo: `RESUMEN.md` (`b368618`) y `SUMMARY.md` en inglés (`6bba9a5`).
+- [x] Paso 5: router-intenciones con `scripts/router.py` y validación del espacio elegido en `scripts/recomendar.py`, con pruebas 01-02 y corrección 07.
+- Tests al 7/11: `test_recomendar.py` 24/24, `test_puntuar_lead.py` 10/10, `test_router.py` 12/12; validador correcto.
 
 ### Pendiente inmediato
 - [ ] Decidir el nombre de la empresa.
-- [ ] Paso 4: skills de guardrails y consentimiento, escritas por el equipo regla a regla.
+- [ ] Paso 7: plugin `eventos-front-door`.
+- [ ] Paso 8: chat web + resumen estructurado por conversación (en local), con las tareas de "Pendiente" de §3.1.
 
 ### Plan
 1. Carpeta y proyecto en Claude Code.

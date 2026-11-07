@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from recomendar import media_aprobada, recomendar  # noqa: E402
+from recomendar import media_aprobada, recomendar, validar_espacio  # noqa: E402
 
 # (descripción, argumentos, recomendados esperados [(id, %, grupo)], descartados esperados [(id, motivo)])
 CASOS = [
@@ -125,6 +125,37 @@ def test_fotos():
     return fallos
 
 
+# Validar el espacio elegido. 14 de marzo de 2027 visto desde el 7/11/2026 = 127 días.
+# (descripción, argumentos, encaja, motivos esperados {motivo: (campo, valor)}, alternativas esperadas)
+CASOS_VALIDAR = [
+    ("validar: Mirador, 300 cocktail, 14 de marzo → no encaja: aforo en cóctel 210; alternativa Nau",
+     dict(espacio_id="sp-mirador-montjuic", asistentes=300, disposicion="cocktail", dias=127),
+     False, {"aforo": ("aforo", 210)}, ["sp-nau-besos"]),
+    ("validar: Mirador, 100 banquet, 14 de marzo → encaja",
+     dict(espacio_id="sp-mirador-montjuic", asistentes=100, disposicion="banquet", dias=127),
+     True, {}, None),
+    ("validar: Nau, 180 theater, dentro de 5 días → no encaja: antelación (necesita 14 días)",
+     dict(espacio_id="sp-nau-besos", asistentes=180, disposicion="theater", dias=5),
+     False, {"antelacion": ("necesita_dias", 14)}, None),
+]
+
+
+def test_validar():
+    fallos = 0
+    for nombre, args, encaja, motivos, alternativas in CASOS_VALIDAR:
+        r = validar_espacio(**args)
+        obtenidos = {m["motivo"]: m for m in r["motivos"]}
+        ok = r["encaja"] == encaja and set(obtenidos) == set(motivos)
+        ok &= all(obtenidos[m][campo] == valor for m, (campo, valor) in motivos.items() if m in obtenidos)
+        if alternativas is not None:
+            ok &= [x["id"] for x in r.get("alternativas", [])] == alternativas
+        print(f"{'OK   ' if ok else 'FALLO'} {nombre}")
+        if not ok:
+            fallos += 1
+            print(f"      obtenido: {r}")
+    return fallos
+
+
 def main():
     fallos = 0
     for nombre, args, esp_rec, esp_desc in CASOS:
@@ -143,7 +174,8 @@ def main():
         fallos += 1
     fallos += test_fotos()
     fallos += test_media()
-    total = len(CASOS) + 2 + len(CASOS_FOTO) + len(CASOS_MEDIA)
+    fallos += test_validar()
+    total = len(CASOS) + 2 + len(CASOS_FOTO) + len(CASOS_MEDIA) + len(CASOS_VALIDAR)
     print(f"\n{total - fallos}/{total} casos correctos")
     sys.exit(1 if fallos else 0)
 

@@ -18,6 +18,12 @@ Salida (JSON):
 
 Media aprobada de un espacio (skill media-espacios §3), sin rutas:
   python3 scripts/recomendar.py --media sp-jardi-gracia --tipo foto
+
+Validar el espacio que ha elegido el cliente (skill router-intenciones §3):
+  python3 scripts/recomendar.py --validar sp-mirador-montjuic --asistentes 300 \
+      --disposicion cocktail --dias 127
+  Devuelve si encaja y, si no, TODOS los motivos (aforo, antelacion, horario)
+  con el dato que falla, más las alternativas de la recomendación normal.
   descartados:  [{id, nombre, motivo, detalle}]    (solo por antelación u horario)
 
 Solo lee data/espacios.json. No da precios ni disponibilidad.
@@ -183,6 +189,47 @@ def recomendar(asistentes, disposicion, dias=None, hora_fin=None, espacios=None)
     return {"recomendados": recomendados, "descartados": descartados}
 
 
+def validar_espacio(espacio_id, asistentes, disposicion, dias=None, hora_fin=None, espacios=None):
+    """Comprueba el espacio elegido con las reglas 1-3 de la recomendación (aforo de la
+    disposición, antelación y horario). Devuelve todos los motivos que fallan, no solo el
+    primero, y las alternativas que daría la recomendación normal si no encaja."""
+    if espacios is None:
+        espacios = cargar_espacios()
+    esp = next((e for e in espacios if e["id"] == espacio_id), None)
+    if esp is None:
+        raise ValueError(f"el espacio {espacio_id!r} no existe")
+    # Misma validación de entrada que recomendar()
+    if not isinstance(asistentes, int) or asistentes <= 0:
+        raise ValueError("asistentes debe ser un entero mayor que 0")
+    if disposicion not in DISPOSICIONES:
+        raise ValueError(f"disposición {disposicion!r} no es una de {DISPOSICIONES}")
+    fin = minutos(hora_fin) if hora_fin is not None else None
+
+    aforo = esp["capacities"][disposicion]
+    reglas = esp["chatbot_guardrails"]
+    motivos = []
+    if aforo < asistentes:
+        motivos.append({"motivo": "aforo", "disposicion": disposicion, "aforo": aforo,
+                        "asistentes": asistentes,
+                        "detalle": f"en {disposicion} caben {aforo}; se piden {asistentes}"})
+    if dias is not None and dias < reglas["min_lead_time_days"]:
+        motivos.append({"motivo": "antelacion", "necesita_dias": reglas["min_lead_time_days"],
+                        "faltan_dias": dias,
+                        "detalle": f"necesita {reglas['min_lead_time_days']} días; faltan {dias}"})
+    if fin is not None and minutos(reglas["max_end_time"]) < fin:
+        motivos.append({"motivo": "horario", "acaba": reglas["max_end_time"], "hora_fin": hora_fin,
+                        "detalle": f"acaba a las {reglas['max_end_time']}; se pide hasta las {hora_fin}"})
+
+    encaja = not motivos
+    resultado = {"espacio": esp["id"], "nombre": esp["name"], "encaja": encaja, "motivos": motivos}
+    if encaja:
+        resultado["ocupacion"] = round(asistentes / aforo * 100)
+        resultado["grupo"] = grupo(Fraction(asistentes, aforo))
+    else:
+        resultado["alternativas"] = recomendar(asistentes, disposicion, dias, hora_fin, espacios)["recomendados"]
+    return resultado
+
+
 def main():
     p = argparse.ArgumentParser(description="Recomendador de espacios por reglas fijas")
     p.add_argument("--asistentes", type=int)
@@ -191,9 +238,14 @@ def main():
     p.add_argument("--hora-fin", help="hora de fin HH:MM (antes de 08:00 = madrugada)")
     p.add_argument("--media", metavar="ID_ESPACIO", help="devuelve la media aprobada de este espacio")
     p.add_argument("--tipo", choices=TIPOS_MEDIA, help="tipo de media con --media")
+    p.add_argument("--validar", metavar="ID_ESPACIO", help="valida el espacio elegido por el cliente")
     a = p.parse_args()
     try:
-        if a.media:
+        if a.validar:
+            if a.asistentes is None or a.disposicion is None:
+                raise ValueError("--validar necesita --asistentes y --disposicion")
+            resultado = validar_espacio(a.validar, a.asistentes, a.disposicion, a.dias, a.hora_fin)
+        elif a.media:
             if not a.tipo:
                 raise ValueError("--media necesita --tipo")
             resultado = media_aprobada(a.media, a.tipo)
