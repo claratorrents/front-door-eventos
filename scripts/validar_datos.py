@@ -7,6 +7,7 @@ Solo lee los archivos: nunca los modifica.
 """
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -26,6 +27,8 @@ PALABRAS_PROHIBIDAS = ["ficticio", "ficticia"]
 CAMPOS_MEDIA = ["id", "type", "url", "description", "approved"]
 TIPOS_MEDIA = {"foto", "plano", "tour360", "video"}
 CAMPOS_ITEM = ["id", "name", "stock", "usable_in"]
+# Hora de fin HH:MM (00:00 a 23:59). Antes de las 08:00 = madrugada del día siguiente.
+FORMATO_HORA = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
 
 errores = []
 
@@ -100,6 +103,13 @@ def validar_espacios(datos):
                 error(f"{eid}: aforos no cumplen cocktail > theater > banquet > classroom ({detalle})")
             if cap.get("absolute_max") != max(valores):
                 error(f"{eid}: absolute_max {cap.get('absolute_max')} distinto del aforo mayor {max(valores)}")
+
+        # Hora máxima de fin
+        hora = esp.get("chatbot_guardrails", {}).get("max_end_time")
+        if hora is None:
+            error(f"{eid}: falta chatbot_guardrails.max_end_time")
+        elif not isinstance(hora, str) or not FORMATO_HORA.match(hora):
+            error(f"{eid}: max_end_time {hora!r} no tiene formato HH:MM")
 
         # Textos que ve el cliente
         revisar_texto_cliente(esp.get("tagline"), f"{eid}.tagline")

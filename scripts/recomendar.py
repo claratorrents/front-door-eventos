@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""Recomienda espacios aplicando las reglas de la sección 2 de
+.claude/skills/recomendador-espacios/SKILL.md.
+
+Uso:
+  python3 scripts/recomendar.py --asistentes 120 --disposicion banquet
+  python3 scripts/recomendar.py --asistentes 100 --disposicion cocktail --hora-fin 03:00
+  python3 scripts/recomendar.py --asistentes 180 --disposicion theater --dias 5
+
+Salida (JSON):
+  recomendados: [{id, nombre, ocupacion, grupo}]   (máximo 3, ya ordenados)
+  descartados:  [{id, nombre, motivo, detalle}]    (solo por antelación u horario)
+
+Solo lee data/espacios.json. No da precios ni disponibilidad.
+"""
+
+import argparse
+import json
+import re
+import sys
+from fractions import Fraction
+from pathlib import Path
+
+RAIZ = Path(__file__).resolve().parent.parent
+ESPACIOS = RAIZ / "data" / "espacios.json"
+
+DISPOSICIONES = ("cocktail", "theater", "banquet", "classroom")
+MAX_RECOMENDADOS = 3
+# Fracciones exactas: con decimales, 70 % y 90 % no saldrían a la misma distancia del 80 %.
+OBJETIVO = Fraction(80, 100)       # dentro de cada grupo, la ocupación más cercana al 80 %
+LIMITE_COMODO = Fraction(90, 100)  # más del 90 % → al_limite
+MINIMO_COMODO = Fraction(60, 100)  # menos del 60 % → bajo_60
+HORA_MADRUGADA = 8       # antes de las 08:00 cuenta como día siguiente
+ORDEN_GRUPOS = {"comodo": 0, "al_limite": 1, "bajo_60": 2}
+FORMATO_HORA = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
+
+
+def minutos(hora):
+    """'02:00' → minutos desde las 00:00 del día del evento (madrugada = +24 h)."""
+    m = FORMATO_HORA.match(hora)
+    if not m:
+        raise ValueError(f"hora {hora!r} no tiene formato HH:MM")
+    h, mi = int(m.group(1)), int(m.group(2))
+    if h < HORA_MADRUGADA:
+        h += 24
+    return h * 60 + mi
+
+
+def grupo(ocupacion):
+    if ocupacion > LIMITE_COMODO:
+        return "al_limite"
+    if ocupacion >= MINIMO_COMODO:
+        return "comodo"
+    return "bajo_60"
+
+
+def cargar_espacios():
+    with open(ESPACIOS, encoding="utf-8") as f:
+        return json.load(f)["venues"]
+
+
+def recomendar(asistentes, disposicion, dias=None, hora_fin=None, espacios=None):
+    if not isinstance(asistentes, int) or asistentes <= 0:
+        raise ValueError("asistentes debe ser un entero mayor que 0")
+    if disposicion not in DISPOSICIONES:
+        raise ValueError(f"disposición {disposicion!r} no es una de {DISPOSICIONES}")
+    if dias is not None and (not isinstance(dias, int) or dias < 0):
+        raise ValueError("dias debe ser un entero de 0 o más")
+    fin = minutos(hora_fin) if hora_fin is not None else None
+    if espacios is None:
+        espacios = cargar_espacios()
+
+    candidatos, descartados = [], []
+    for esp in espacios:
+        aforo = esp["capacities"][disposicion]
+        reglas = esp["chatbot_guardrails"]
+
+        # 1. Aforo de la disposición pedida (nunca absolute_max)
+        if aforo < asistentes:
+            continue
+
+        # 2. Antelación
+        if dias is not None and dias < reglas["min_lead_time_days"]:
+            descartados.append({
+                "id": esp["id"], "nombre": esp["name"], "motivo": "antelacion",
+                "detalle": f"necesita {reglas['min_lead_time_days']} días; faltan {dias}",
+            })
+            continue
+
+        # 3. Horario
+        if fin is not None and minutos(reglas["max_end_time"]) < fin:
+            descartados.append({
+                "id": esp["id"], "nombre": esp["name"], "motivo": "horario",
+                "detalle": f"acaba a las {reglas['max_end_time']}; se pide hasta las {hora_fin}",
+            })
+            continue
+
+        # 4. Ocupación
+        ocupacion = Fraction(asistentes, aforo)
+        candidatos.append({
+            "id": esp["id"], "nombre": esp["name"], "aforo": aforo,
+            "ocupacion_exacta": ocupacion, "grupo": grupo(ocupacion),
+        })
+
+    # bajo_60 solo si no queda ningún comodo ni al_limite
+    if any(c["grupo"] != "bajo_60" for c in candidatos):
+        candidatos = [c for c in candidatos if c["grupo"] != "bajo_60"]
+
+    # 5. Orden: grupo; dentro del grupo, cercanía al 80 %; empate: menos aforo primero
+    candidatos.sort(key=lambda c: (ORDEN_GRUPOS[c["grupo"]],
+                                   abs(c["ocupacion_exacta"] - OBJETIVO),
+                                   c["aforo"]))
+
+    # 6. Máximo 3
+    recomendados = [
+        {"id": c["id"], "nombre": c["nombre"],
+         "ocupacion": round(float(c["ocupacion_exacta"]) * 100), "grupo": c["grupo"]}
+        for c in candidatos[:MAX_RECOMENDADOS]
+    ]
+
+    # 7. Descartados por antelación u horario
+    return {"recomendados": recomendados, "descartados": descartados}
+
+
+def main():
+    p = argparse.ArgumentParser(description="Recomendador de espacios por reglas fijas")
+    p.add_argument("--asistentes", type=int, required=True)
+    p.add_argument("--disposicion", required=True, choices=DISPOSICIONES)
+    p.add_argument("--dias", type=int, help="días que faltan hasta el evento")
+    p.add_argument("--hora-fin", help="hora de fin HH:MM (antes de 08:00 = madrugada)")
+    a = p.parse_args()
+    try:
+        resultado = recomendar(a.asistentes, a.disposicion, a.dias, a.hora_fin)
+    except ValueError as e:
+        print(json.dumps({"error": str(e)}, ensure_ascii=False))
+        sys.exit(2)
+    print(json.dumps(resultado, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()

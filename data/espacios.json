@@ -51,6 +51,7 @@
         "min_lead_time_days": 7,
         "catering_policy": "Catering externo permitido con registro previo",
         "noise_curfew": "Música permitida hasta las 02:00 h en interior",
+        "max_end_time": "02:00",
         "parking": "Carga y descarga en puerta; parking público a 150m"
       },
       "media": [
@@ -124,6 +125,7 @@
         "min_lead_time_days": 3,
         "catering_policy": "Libre elección de catering u opción de coffee break interno",
         "noise_curfew": "Zona residencial: música en exterior hasta las 22:30 h",
+        "max_end_time": "22:30",
         "parking": "Sin aparcamiento propio; zona peatonal"
       },
       "media": [
@@ -198,6 +200,7 @@
         "min_lead_time_days": 10,
         "catering_policy": "Requiere catering homologado o suplemento de cocina",
         "noise_curfew": "Terraza hasta las 23:30 h; salón interior hasta las 03:00 h",
+        "max_end_time": "03:00",
         "parking": "Parking propio gratuito para 40 vehículos"
       },
       "media": [
@@ -271,6 +274,7 @@
         "min_lead_time_days": 2,
         "catering_policy": "Permite traer comida propia o contratar catering libre",
         "noise_curfew": "Actividades formativas y acústicas moderadas; cierre a las 21:00 h",
+        "max_end_time": "21:00",
         "parking": "Parking subterráneo a 80m"
       },
       "media": [
@@ -345,6 +349,7 @@
         "min_lead_time_days": 5,
         "catering_policy": "Servicio de catering propio disponible en zona foyer anexa",
         "noise_curfew": "Horario comercial y de eventos hasta las 22:00 h",
+        "max_end_time": "22:00",
         "parking": "Convenio con parking edificio contiguo"
       },
       "media": [
@@ -419,6 +424,7 @@
         "min_lead_time_days": 14,
         "catering_policy": "Requiere plan de producción y catering homologado",
         "noise_curfew": "Aislamiento acústico completo; eventos autorizados hasta las 05:00 h",
+        "max_end_time": "05:00",
         "parking": "Zona de carga/descarga propia y campa para camiones"
       },
       "media": [
