@@ -2,7 +2,7 @@
 
 Conocimiento acumulado del proyecto: enunciado, decisiones del grupo, cómo trabajar con Codex y lecciones de la prueba. Sirve a la vez de memoria para el equipo y de contexto para cualquier agente (Codex o Claude) que trabaje en el proyecto.
 
-Última actualización: 4 de noviembre de 2026 · Clara Torrents
+Última actualización: 5 de noviembre de 2026 · Clara Torrents
 
 ---
 
@@ -59,20 +59,20 @@ Chatbot para una **empresa que alquila espacios para eventos**. Atiende a quien 
 | # | Skill | Bloque | Qué hace | Comprobación clave |
 |---|---|---|---|---|
 | 1 | router-intenciones | Atender | Clasifica: información, lead, reserva, cambio, incidencia | Si duda, pregunta |
-| 2 | recomendador-espacios | Atender | 1 a 3 espacios según evento, asistentes, disposición y presupuesto | Solo catálogo; nunca aforo menor del pedido |
-| 3 | media-espacios | Atender | Fotos, vídeos, planos, tours 360° | Solo material aprobado; si no hay, lo dice |
+| 2 | recomendador-espacios | Atender | 1 a 3 espacios según tipo de evento, asistentes y disposición (sin precio) | Solo catálogo; nunca aforo menor del pedido; regla del 90 % (ver §3.1) |
+| 3 | media-espacios | Atender | Fotos, planos, tours 360° | Solo material con `approved: true`; si no hay (p. ej. vídeo), lo dice y ofrece lo que hay |
 | 4 | cualificador-leads | Vender | Empresa, tipo, fecha, asistentes, presupuesto, urgencia; puntúa | Puntuación con **script** de pesos fijos |
-| 5 | disponibilidad-inventario | Vender | Espacio y material para la fecha; alternativas | Nunca confirma sin dato real de n8n |
-| 6 | gestor-reservas | Vender | Prerreserva con condiciones (señal, plazo, cancelación) | Confirmación expresa del cliente |
+| 5 | disponibilidad-inventario | Vender | Disponibilidad del espacio para la fecha; anota los extras que pide el cliente | Nunca confirma sin dato real de n8n; extras sin precio ni promesa de stock |
+| 6 | gestor-reservas | Vender | Prerreserva = bloqueo provisional gratuito de 72 h (ver §3.1) | Confirmación expresa del cliente; nunca confirma la reserva final |
 | 7 | consentimiento | Reglas | Aviso de IA, permiso antes de guardar, datos mínimos, publicidad aparte | Registro con fecha/hora real, finalidad e id_conversacion |
-| 8 | guardrails | Reglas | Tema, tono, escalado a persona | Nunca inventa precios ni disponibilidad; nunca descuentos; quejas y legal a persona |
+| 8 | guardrails | Reglas | Tema, tono, escalado a persona | **Nunca da precios ni presupuestos**; nunca confirma disponibilidad sin n8n; nunca descuentos; quejas y legal a persona |
 
 **Orden:** 8 → 7 → 2 → 4. Las skills 5 y 6 dependen de tener n8n conectado.
 
 Además existe la skill **buying-committee-simulator** (ya probada, con corrección registrada): simula el comité de compra del cliente y sirve para revisar propuestas de eventos corporativos grandes.
 
 ### Conversación de referencia
-"Queremos una cena de empresa para 120 personas en marzo" → aviso de IA y consentimiento → nuevo lead → cualificación → recomienda un salón de 150 en banquete con fotos y plano → n8n confirma fecha y mesas → prerreserva pendiente de confirmar. Si pide un 20 % de descuento: no se concede y pasa a comercial.
+"Queremos una cena de empresa para 120 personas en marzo" → aviso de IA y consentimiento → nuevo lead → cualificación → recomienda Llum del Poblenou (150 en banquete) con fotos y plano, y Mirador de Montjuïc como opción "al límite" (120) → n8n confirma la fecha → bloqueo provisional de 72 h → propuesta del comercial. Si pide un 20 % de descuento: no se concede y pasa a comercial. Si pregunta el precio: lo prepara el comercial en una propuesta a medida.
 
 ### Conceptos de la asignatura que hay que mostrar
 
@@ -96,13 +96,69 @@ Además existe la skill **buying-committee-simulator** (ya probada, con correcci
 | Decisión | Detalle | Motivo |
 |---|---|---|
 | Carpeta del proyecto | `/Users/claratorrents/Desktop/CODEX/Proyectos/front-door-eventos` | Fuera de OneDrive, que choca con git |
-| Herramienta de construcción | **Pendiente de confirmar.** Recomendado: Codex construye y Claude guía | La asignatura usa Codex |
+| Herramienta de construcción | **Claude Code** construye y ejecuta; Claude en el chat guía. El contenido lo escribe el equipo. | El profesor lo ha permitido |
+| Escritura humana | Reglas de escritura en español en `AGENTS.md`. **humanizer-zh descartada** | Está pensada para chino |
 | App ↔ n8n | **Webhook** en ambos sentidos | n8n puede responder dentro de la conversación (disponibilidad, prerreserva) |
 | Registro de conversaciones | n8n añade una fila por conversación en **Google Sheets** | Base del paso 7 y del dashboard |
 | Escritura directa de la app en Drive | **Descartada** | Exige credenciales de Google en la app, solo funciona de ida y la revisión periódica tiene límites |
 | Puntuación de leads | Script con pesos fijos, nunca el LLM | En la prueba, el LLM dio 60, 20 y 40 con los mismos datos |
 | Chat web del prototipo | Por reglas, sin API externa, en local | Fiable, gratis y siempre igual para la demo |
 | Compartir con el grupo | GitHub (nadie tiene cuenta todavía) | Una sola versión para todos |
+
+### 3.1 Decisiones de catálogo y negocio (5 de noviembre)
+Datos en `data/espacios.json` (6 espacios) y `data/inventario.json` (10 extras). Validador: `scripts/validar_datos.py`. Revisión documentada en `pruebas/correccion-01-datos.md`.
+
+**Precios**
+- El chatbot **nunca da precios ni presupuestos** de nada: ni alquiler ni extras. Si el cliente pregunta: "El precio depende de la fecha, el montaje y los servicios. Te lo prepara el equipo comercial en una propuesta a medida."
+- El chatbot **sí pregunta el presupuesto del cliente**, solo para cualificar. No lo compara en voz alta con nada.
+- Los precios de los JSON son **uso interno** del comercial: orientativos, IVA no incluido.
+
+**Inventario de extras**
+- **Almacén compartido** entre los 6 espacios: el stock es para todos a la vez.
+- El chatbot solo usa los nombres para reconocer lo que pide el cliente y lo **anota para el comercial**. Nunca da precio ni confirma stock; el stock lo comprueba n8n (mientras tanto, SIMULADO).
+- `usable_in` limita en qué espacios tiene sentido cada extra.
+- **Catering fuera del inventario**: el chatbot informa de la política del espacio (`catering_policy`) y lo pasa al comercial.
+
+**Recomendador: regla del 90 %**
+- Se usa el aforo de la **disposición pedida** (banquet, theater, cocktail, classroom), no el máximo absoluto.
+- Si los asistentes superan el **90 %** de ese aforo, el espacio se marca **"al límite"**: se puede recomendar, pero después de las opciones cómodas y avisando al cliente.
+- Ejemplo: cena para 120 en banquete → 1.º Llum del Poblenou (150, 80 %), Mirador de Montjuïc "al límite" (120, 100 %). La Nau (220, 55 %) se vería medio vacía.
+- Por debajo del 60 % de ocupación no se recomienda, salvo que no haya otra opción. Ejemplo: para 120 en banquete la Nau (55 %) queda fuera.
+
+**Prerreserva (bloqueo provisional)**
+| Regla | Decisión |
+|---|---|
+| Quién | Solo leads con **más de 70 puntos**. Con 70 o menos, pasa al comercial sin bloquear fecha |
+| Duración | **72 h laborables**, gratuito y sin compromiso; se libera sola si no hay respuesta |
+| Fecha ya bloqueada | Proponer otra fecha cercana u otro espacio que encaje; nunca quitársela a otro |
+| Evento muy pronto | Respetar `min_lead_time_days` de cada espacio (2 a 14 días); si no llega, pasa al comercial |
+| Requisitos | "Sí" explícito del cliente y consentimiento para guardar su contacto |
+| Reserva confirmada | Nunca la confirma el chatbot: solo cuando el cliente acepta la propuesta del comercial |
+| Señal, cancelación | Fuera del chatbot; las pone el comercial en la propuesta |
+
+Los pesos del cualificador se deciden al escribir su skill; hasta entonces no se hacen bloqueos.
+
+Ruta estrella de la demo: **consulta → cualificación → recomendación → bloqueo provisional → propuesta del comercial**.
+
+**Reparto de leads**
+- Cada espacio tiene `n8n_routing.sales_rep`: Marta Soler (Llum, Mirador), Oriol Puig (Jardí, Atelier), David Ramos (Fòrum, Nau).
+- El lead va al **comercial del primer espacio recomendado**.
+- Si no se recomienda ningún espacio: un lead va a David Ramos (espacios grandes); una incidencia o un cambio de reserva no va a comercial, se abre un ticket para el equipo de atención.
+- Se eliminó `default_lead_tier`: la prioridad sale solo de la puntuación del script.
+
+**Media**
+- Cada archivo tiene ficha: `type` (foto, plano, tour360, video), `description` (qué muestra) y `approved`.
+- Solo se enseña lo aprobado. Se elige la foto según el evento (cena → foto de banquete).
+- A propósito para la demo: la foto 2 del Jardí de Gràcia (patio antes de la reforma) está **no aprobada**, y **no hay vídeos** (el chatbot debe decirlo y ofrecer el tour 360°).
+- Al cliente nunca se le enseña la ruta del archivo: el chat web muestra imagen o enlace.
+
+**Textos de cada espacio**
+- `tagline`: frase corta de la tarjeta de recomendación.
+- `full_profile`: solo si el cliente pide más detalles.
+- `best_for`: lo usa el recomendador para encajar el tipo de evento.
+- Se eliminaron `description` (repetía y decía "ficticia") y `max_capacity_alert` (igual que `absolute_max`).
+
+**Pendiente:** nombre de la empresa (cambiar también el campo `project`).
 
 ### Resumen estructurado de cada conversación (contrato app → n8n → Sheets)
 Fijar estos campos desde el principio. Cambiarlos a mitad es el fallo más habitual.
@@ -218,12 +274,13 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 ### Hecho
 - [x] Prueba completa en `reservas-eventos` (contexto, 5 skills, correcciones, plugin, chat web).
 - [x] Guía `Guia_rapida_Codex.docx`.
-- [x] Paso 1: carpeta `front-door-eventos` creada.
+- [x] Paso 1: carpeta `front-door-eventos` creada y abierta en Codex.
+- [x] Paso 2: `AGENTS.md` (commit `4b17310`; regla 2 actualizada a "nunca dar precios" en `7a5ebe4`).
+- [x] Paso 3: catálogo, inventario y validador (commits `7a5ebe4` y `121a83b`), con corrección 01 documentada.
 
 ### Pendiente inmediato
-- [ ] Confirmar herramienta de construcción (recomendado: Codex) y abrir la carpeta en ella.
 - [ ] Decidir el nombre de la empresa.
-- [ ] Paso 2: `AGENTS.md` del proyecto real (con mapa, 8 skills, reparto, webhook, contrato de campos y reglas de escritura).
+- [ ] Paso 4: skills de guardrails y consentimiento, escritas por el equipo regla a regla.
 
 ### Plan
 1. Carpeta y proyecto en Codex.

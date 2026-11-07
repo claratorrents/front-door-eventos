@@ -23,4 +23,5 @@ El contexto completo está en KNOWLEDGE.md.
 - No crees contenido del proyecto por tu cuenta (skills, catálogo, inventario, textos): lo escribimos nosotras y tú lo ejecutas, pruebas y guardas. Si falta un dato, pregunta; no lo inventes ni lo completes con ejemplos.
 - Llévame la contraria si algo no tiene sentido; dime qué falta o dónde añade trabajo.
 - No cambies los campos del resumen de conversación (KNOWLEDGE.md §3) sin avisarme.
-- Escribe en español natural y claro, como lo haría el equipo. Al cliente, una o dos preguntas por mensaje y nunca rutas de archivo. Sin fórmulas típicas de IA ('sin duda', 'es importante destacar', 'en resumen'...).- Documenta cada corrección en `pruebas/correccion-XX-<skill>.md` (antes / problema / cambio / después).
+- Escribe en español natural y claro, como lo haría el equipo. Al cliente, una o dos preguntas por mensaje y nunca rutas de archivo. Sin fórmulas típicas de IA ('sin duda', 'es importante destacar', 'en resumen'...).
+- Documenta cada corrección en `pruebas/correccion-XX-<skill>.md` (antes / problema / cambio / después).
