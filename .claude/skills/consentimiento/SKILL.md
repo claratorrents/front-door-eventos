@@ -42,7 +42,7 @@ Se aplica junto con guardrails. Contexto completo en `KNOWLEDGE.md`.
 Cada respuesta explícita (permiso, negativa, retirada o petición de borrado) se apunta con:
 - `id_conversacion`
 - `fecha_hora`: la real del sistema, ISO 8601 con zona horaria. Nunca inventada.
-- `finalidad`: "responder a la consulta" o "comunicaciones comerciales".
+- `finalidad`: "responder a la consulta", "comunicaciones comerciales" o "gestionar una petición de privacidad".
 - `datos`: qué datos cubre (nombre, email, teléfono, empresa).
 - `estado`: `otorgado` / `denegado` / `retirado` / `borrado_solicitado`.
 
@@ -60,7 +60,7 @@ En el resumen de la conversación (contrato de KNOWLEDGE.md §3): `consentimient
   "Hecho: no guardamos tu email." Desde ese momento no se guarda nada más de esta conversación. Apunte con `estado: retirado`.
 - **Pide ver o borrar datos de antes** (de otra conversación o reserva): se le pide el email o teléfono que usó, **solo para localizar sus datos**, y pasa al equipo.
   "Para encontrar tus datos necesito el email o teléfono que usaste; lo usamos solo para esto. El equipo de atención te lo confirma en 24 h laborables."
-  → `decision: escalar_humano`, `motivo_escalado: privacidad`, apunte con `estado: borrado_solicitado` (o la petición de ver datos).
+  → `decision: escalar_humano`, `motivo_escalado: privacidad`, apunte con `finalidad: gestionar una petición de privacidad` y `estado: borrado_solicitado` (o la petición de ver datos).
 - Si no quiere dar ese dato: se le dan los datos del equipo (atencion@empresa-eventos.example · +34 930 000 000).
 
 ## 9. Ejemplos
@@ -71,7 +71,7 @@ En el resumen de la conversación (contrato de KNOWLEDGE.md §3): `consentimient
 - Cliente: "Mi email es ana@ejemplo.example, ¿cuánto cuesta el Llum?" (nos da el contacto sin pedirlo)
   Bien: "Antes de guardar tu email, ¿me das permiso para usarlo solo para responder a esta consulta? El precio depende de la fecha y el montaje; te lo prepara Marta Soler en una propuesta a medida."
 - Cliente: "Prefiero no dar mi email."
-  Bien: "Sin problema. ¿Prefieres dejarme un teléfono?" Si tampoco: "Sin problema, seguimos igual. Si quieres, puedes escribir al equipo en atencion@empresa-eventos.example."
+  Bien: "Sin problema. ¿Prefieres dejarme un teléfono?" Si tampoco: "Sin problema, seguimos igual. Si quieres, puedes escribir al equipo en atencion@empresa-eventos.example · +34 930 000 000."
 - Cliente: "Ya no quiero que guardéis mi email."
   Bien: "Hecho: no guardamos tu email." → apunte `retirado`
 - Cliente: "Borrad mis datos."

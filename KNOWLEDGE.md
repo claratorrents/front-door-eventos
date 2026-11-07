@@ -175,7 +175,7 @@ Ruta estrella de la demo: **consulta → cualificación → recomendación → b
 - Ofensivo: primer mensaje, aviso y sigue (`ninguna`); si repite, cierra y `escalar_humano`.
 - Contacto del equipo de atención: atencion@empresa-eventos.example · +34 930 000 000
 - Frustración: el cliente dice que no le entendemos o repite la misma petición dos veces.
-- Disponibilidad: "Según el calendario, ese día parece libre. Te lo confirma el comercial al bloquear la fecha." Nunca "está libre" a secas.
+- Disponibilidad: "Según el calendario, ese día parece libre. Te lo confirma el comercial." Nunca "está libre" a secas.
 
 - "Lo compruebo" y "lo confirmo" siempre llevan su `decision` y dicen quién responde y cuándo. Para responder hace falta un contacto, que se pide con consentimiento; si no lo da, se le dice que puede volver a escribir. Y aprovechan para seguir cualificando.
 - Las frases fijas se traducen al catalán o al inglés manteniendo el sentido exacto, sin añadir promesas.
@@ -185,6 +185,7 @@ Ruta estrella de la demo: **consulta → cualificación → recomendación → b
 - Nombre de la empresa (cambiar también el campo `project`).
 - Chat web: tapar tarjetas, IBAN y DNI siempre, y email y teléfono si no hay permiso, antes de guardar la conversación o enviarla a n8n.
 - Chat web: usar la hora real para saber si se está en horario de atención.
+- n8n: si el cliente retira el permiso, borrar también sus datos del Sheet.
 
 ### Resumen estructurado de cada conversación (contrato app → n8n → Sheets)
 Fijar estos campos desde el principio. Cambiarlos a mitad es el fallo más habitual.
