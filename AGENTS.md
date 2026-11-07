@@ -2,7 +2,7 @@
 
 Construimos un chatbot "front door" para una empresa que alquila espacios para eventos ([EMPRESA]): atiende al visitante de la web, entiende qué quiere y lo resuelve o lo pasa a la persona adecuada. Es un prototipo para el máster (La Salle) con revisión humana al final.
 
-Codex construye lo que ve el usuario (chat y dashboard). n8n hace el proceso por detrás (calendario, reservas, avisos, registro) y se comunica con la app por webhook. Mientras n8n no esté conectado, simúlalo con datos locales. Todo dato simulado se marca como SIMULADO en los datos internos, y al cliente nunca se le presenta como confirmado.
+Claude Code construye lo que ve el usuario (chat y dashboard). n8n hace el proceso por detrás (calendario, reservas, avisos, registro) y se comunica con la app por webhook. Mientras n8n no esté conectado, simúlalo con datos locales. Todo dato simulado se marca como SIMULADO en los datos internos, y al cliente nunca se le presenta como confirmado.
 
 El contexto completo está en KNOWLEDGE.md.
 

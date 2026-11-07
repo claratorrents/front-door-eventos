@@ -39,18 +39,18 @@ Chatbot para una **empresa que alquila espacios para eventos**. Atiende a quien 
 | Paso | Qué pasa | Quién |
 |---|---|---|
 | 1 | El visitante abre el chat | Usuario |
-| 2 | Aviso de IA y consentimiento antes de guardar datos | Codex |
-| 3 | El router clasifica la consulta | Codex |
-| 3a | Información: responde desde la base de conocimiento | Codex |
-| 3b | Lead o reserva: cualifica, recomienda, comprueba disponibilidad, prerreserva | Codex + n8n |
+| 2 | Aviso de IA y consentimiento antes de guardar datos | Claude Code |
+| 3 | El router clasifica la consulta | Claude Code |
+| 3a | Información: responde desde la base de conocimiento | Claude Code |
+| 3b | Lead o reserva: cualifica, recomienda, comprueba disponibilidad, prerreserva | Claude Code + n8n |
 | 3c | Incidencia o cambio: abre ticket | n8n |
 | 4 | Valida, enriquece y puntúa el lead | n8n |
 | 5 | Reserva hueco en calendario y avisa al equipo | n8n |
 | 6 | Reunión comercial o seguimiento | Persona |
 | 7 | Sentimiento y registro de cada conversación | n8n |
-| 8 | Dashboard de métricas | Codex |
+| 8 | Dashboard de métricas | Claude Code |
 
-**Reparto técnico:** Codex construye lo que ve el usuario (chat, dashboard). n8n ejecuta el proceso por detrás (calendario, reservas, avisos, tickets, registro). Los flujos de n8n se construyen desde cero.
+**Reparto técnico:** Claude Code construye lo que ve el usuario (chat, dashboard). n8n ejecuta el proceso por detrás (calendario, reservas, avisos, tickets, registro). Los flujos de n8n se construyen desde cero.
 
 **Riesgos:** los chatbots están muy vistos, así que la diferencia debe venir del enrutado, la cualificación y la integración. Hay muchas rutas, así que la demo se centra en **tres**. Necesita una base de conocimiento para no inventar.
 
@@ -191,15 +191,23 @@ Reglas: sin consentimiento no se envían nombre, email ni teléfono (registro an
 
 ---
 
-## 4. Cómo funciona Codex
+## 4. Cómo funciona Claude Code
+
+La prueba inicial se hizo con Codex (proyecto reservas-eventos); el profesor permitió pasar a Claude Code.
 
 ### Las 4 capas
 | Capa | Qué es |
 |---|---|
 | Prompt | Lo que se pide en cada momento |
-| `AGENTS.md` | Contexto permanente; Codex lo lee en cada tarea |
-| Skills | `.agents/skills/<nombre>/SKILL.md`; Codex solo ve nombre y descripción y carga el resto cuando la necesita |
-| Plugin | Paquete instalable con varias skills; sirve para compartir |
+| `CLAUDE.md` | Contexto permanente; Claude Code lo carga al empezar cada sesión. Aquí solo contiene `@AGENTS.md`, que importa ese archivo |
+| Skills | `.claude/skills/<nombre>/SKILL.md`; Claude Code solo ve nombre y descripción y carga el resto cuando la necesita |
+| Plugin | Paquete instalable con skills (y otros componentes); sirve para compartir |
+
+### Skills
+- **Del proyecto:** `.claude/skills/<nombre>/SKILL.md`. Van en el repo y las usa cualquiera que abra el proyecto.
+- **Personales:** `~/.claude/skills/<nombre>/SKILL.md`. Solo en tu ordenador, para todos tus proyectos.
+- La carpeta de la skill puede llevar más archivos (scripts, ejemplos, plantillas) junto a `SKILL.md`; la skill los cita y Claude los abre cuando hacen falta.
+- Se activa sola cuando la descripción encaja con la tarea, o a mano escribiendo `/<nombre>`.
 
 ### Formato de una skill
 ```markdown
@@ -210,26 +218,36 @@ description: Cuándo SÍ se usa y cuándo NO. Es lo que decide si se activa.
 Instrucciones como comprobaciones concretas.
 Ejemplos de respuesta buena y mala.
 ```
+Es el mismo formato `SKILL.md` que en Codex: las skills de la prueba se pueden reutilizar copiando su carpeta a `.claude/skills/`.
 
 ### Plugin
 ```
 plugins/eventos-front-door/
-├── .codex-plugin/plugin.json   ← solo este archivo dentro de .codex-plugin
+├── .claude-plugin/plugin.json   ← solo este archivo dentro de .claude-plugin
 └── skills/<nombre>/SKILL.md
 ```
-- Crear: pedir a Codex `@plugin-creator`.
-- Marketplace del repo: `.agents/plugins/marketplace.json`.
-- Instalar: escribir `/plugins` en Codex → instalar desde el marketplace local → abrir un **chat nuevo**.
-- Las skills ya funcionan dentro del proyecto sin instalar el plugin; el plugin sirve para compartir.
+- `plugin.json` lleva al menos `name`; también puede llevar `description`, `version` y `author`.
+- Además de `skills/`, un plugin puede llevar `commands/`, `agents/`, `hooks/` y servidores MCP. Para este proyecto basta con `skills/`.
+- Las skills de un plugin instalado se llaman con el nombre del plugin delante: `eventos-front-door:<skill>`.
+- Probar sin instalar: `claude --plugin-dir ./plugins/eventos-front-door`.
+- Las skills ya funcionan dentro del proyecto desde `.claude/skills/` sin instalar el plugin; el plugin sirve para compartir.
 
-### Codex vs. Claude (mismos conceptos, otros nombres)
-| | Codex | Claude |
+### Marketplace (equivalente a `.agents/plugins/marketplace.json`)
+- Archivo en la raíz del repo: `.claude-plugin/marketplace.json`, con `name`, `owner` y la lista `plugins` (cada uno con `name` y `source`, por ejemplo `"./plugins/eventos-front-door"`).
+- Añadir el marketplace: `/plugin marketplace add ./` (carpeta local) o `/plugin marketplace add usuario/repo` (GitHub).
+- Instalar: `/plugin install eventos-front-door@<nombre-del-marketplace>`, o desde el menú de `/plugin`.
+- **Por comprobar:** si hay que reiniciar Claude Code o abrir una sesión nueva después de instalar para que carguen las skills.
+- **Por comprobar:** si `/plugin` funciona dentro de la app de escritorio de Claude o hay que usarlo desde `claude` en el terminal.
+
+### Codex vs. Claude Code (mismos conceptos, otros nombres)
+| | Codex | Claude Code |
 |---|---|---|
-| Contexto | `AGENTS.md` | `CLAUDE.md` |
+| Contexto | `AGENTS.md` | `CLAUDE.md` (aquí importa `AGENTS.md`) |
 | Skills | `.agents/skills/` | `.claude/skills/` |
 | Formato de skill | `SKILL.md` (estándar abierto) | `SKILL.md` (mismo estándar) |
-
-Truco: si se usan los dos, `CLAUDE.md` puede limitarse a decir "Lee AGENTS.md".
+| Manifiesto del plugin | `.codex-plugin/plugin.json` | `.claude-plugin/plugin.json` |
+| Marketplace | `.agents/plugins/marketplace.json` | `.claude-plugin/marketplace.json` |
+| Instalar | `/plugins` | `/plugin` |
 
 ---
 
@@ -289,7 +307,7 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 4. Skills 8 y 7 (guardrails, consentimiento) + humanizer-zh.
 5. Skills 1, 2, 3 y 4 (router, recomendador, media, cualificador con script).
 6. Pruebas y correcciones documentadas.
-7. Plugin `eventos-front-door`.
+7. Plugin `eventos-front-door` de Claude Code: `plugins/eventos-front-door/` con `.claude-plugin/plugin.json` y las skills, más `.claude-plugin/marketplace.json` en la raíz para instalarlo desde el repo (ver §4).
 8. Chat web + resumen estructurado por conversación (en local).
 9. n8n: webhook, prueba mínima con una fila en Google Sheets; después skills 5 y 6.
 10. Dashboard de métricas.
