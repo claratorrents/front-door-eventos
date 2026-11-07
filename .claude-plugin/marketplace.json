@@ -1,0 +1,14 @@
+{
+  "name": "front-door-eventos",
+  "owner": {
+    "name": "Equipo front door eventos (La Salle)"
+  },
+  "description": "Marketplace del proyecto front-door-eventos: instala el plugin desde este repositorio.",
+  "plugins": [
+    {
+      "name": "eventos-front-door",
+      "source": "./plugins/eventos-front-door",
+      "description": "Chatbot front door para una empresa de alquiler de espacios para eventos: router, guardrails, consentimiento, recomendador, cualificador y media, con scripts de reglas fijas y datos sintéticos."
+    }
+  ]
+}

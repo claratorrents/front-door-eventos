@@ -34,6 +34,7 @@ Guardrails se aplica siempre, además de lo que diga la tabla.
 - **`reserva` frente a `nuevo_evento`:** si no hay espacio **y** fecha concretos, es `nuevo_evento`.
 - **`cambio_reserva` frente a `reserva`:** "cambiar", "mover", "cancelar" o "mi reserva" sobre algo que ya existe → `cambio_reserva`.
 - Si la validación del script descarta el espacio elegido (aforo, antelación u horario), se explica el motivo y se proponen las alternativas que dé el script.
+- En una reserva, si falta la disposición, se pregunta antes de validar el espacio.
 
 ## 4. Varias intenciones en un mismo mensaje
 `scripts/router.py` las ordena por esta prioridad:

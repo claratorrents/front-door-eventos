@@ -1,0 +1,154 @@
+{
+  "metadata": {
+    "synthetic_data": true,
+    "shared_warehouse": true,
+    "internal_only": "El chatbot solo usa los nombres para reconocer lo que pide el cliente y anotarlo para el comercial. Nunca da precios ni confirma stock: el stock lo comprueba n8n (mientras tanto, SIMULADO).",
+    "pricing_note": "Precio por unidad y día, IVA no incluido. Uso interno del comercial.",
+    "catering": "Fuera del inventario. El chatbot informa de la política de catering del espacio y lo pasa al comercial."
+  },
+  "items": [
+    {
+      "id": "silla-extra",
+      "name": "Silla acolchada",
+      "stock": 300,
+      "unit_price_day_eur": 3,
+      "usable_in": [
+        "sp-llum-poblenou",
+        "sp-jardi-gracia",
+        "sp-mirador-montjuic",
+        "sp-atelier-sant-antoni",
+        "sp-forum-les-corts",
+        "sp-nau-besos"
+      ],
+      "notes": "Nunca superar el aforo máximo del espacio"
+    },
+    {
+      "id": "mesa-redonda-10",
+      "name": "Mesa redonda 10 personas con mantel",
+      "stock": 30,
+      "unit_price_day_eur": 18,
+      "usable_in": [
+        "sp-llum-poblenou",
+        "sp-jardi-gracia",
+        "sp-mirador-montjuic",
+        "sp-forum-les-corts",
+        "sp-nau-besos"
+      ],
+      "notes": "Cálculo: asistentes / 10, redondeando hacia arriba. El Atelier no la necesita: sus mesas configurables sirven para banquete."
+    },
+    {
+      "id": "mesa-coctel",
+      "name": "Mesa alta de cóctel",
+      "stock": 40,
+      "unit_price_day_eur": 12,
+      "usable_in": [
+        "sp-llum-poblenou",
+        "sp-jardi-gracia",
+        "sp-mirador-montjuic",
+        "sp-atelier-sant-antoni",
+        "sp-forum-les-corts",
+        "sp-nau-besos"
+      ],
+      "notes": "Orientativo: 1 cada 8-10 invitados"
+    },
+    {
+      "id": "proyector-extra",
+      "name": "Proyector HD con pantalla",
+      "stock": 3,
+      "unit_price_day_eur": 150,
+      "usable_in": [
+        "sp-llum-poblenou",
+        "sp-jardi-gracia",
+        "sp-mirador-montjuic",
+        "sp-atelier-sant-antoni",
+        "sp-forum-les-corts",
+        "sp-nau-besos"
+      ],
+      "notes": "Para segunda sala o segunda pantalla"
+    },
+    {
+      "id": "microfono",
+      "name": "Micrófono inalámbrico",
+      "stock": 10,
+      "unit_price_day_eur": 25,
+      "usable_in": [
+        "sp-llum-poblenou",
+        "sp-jardi-gracia",
+        "sp-mirador-montjuic",
+        "sp-atelier-sant-antoni",
+        "sp-forum-les-corts",
+        "sp-nau-besos"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "calefactor",
+      "name": "Calefactor de exterior",
+      "stock": 12,
+      "unit_price_day_eur": 30,
+      "usable_in": [
+        "sp-jardi-gracia",
+        "sp-mirador-montjuic"
+      ],
+      "notes": "Solo patio o terraza; de octubre a abril. Unidades adicionales a las que ya tiene la terraza del Mirador."
+    },
+    {
+      "id": "tarima",
+      "name": "Módulo de tarima 2x1 m",
+      "stock": 8,
+      "unit_price_day_eur": 40,
+      "usable_in": [
+        "sp-llum-poblenou",
+        "sp-jardi-gracia",
+        "sp-mirador-montjuic",
+        "sp-atelier-sant-antoni",
+        "sp-forum-les-corts"
+      ],
+      "notes": "La Nau del Besòs ya tiene escenario propio"
+    },
+    {
+      "id": "iluminacion",
+      "name": "Pack de iluminación ambiente",
+      "stock": 4,
+      "unit_price_day_eur": 90,
+      "usable_in": [
+        "sp-llum-poblenou",
+        "sp-jardi-gracia",
+        "sp-mirador-montjuic",
+        "sp-atelier-sant-antoni",
+        "sp-forum-les-corts",
+        "sp-nau-besos"
+      ],
+      "notes": "Recomendado en cenas y celebraciones"
+    },
+    {
+      "id": "photocall",
+      "name": "Photocall con fondo personalizable",
+      "stock": 2,
+      "unit_price_day_eur": 180,
+      "usable_in": [
+        "sp-llum-poblenou",
+        "sp-jardi-gracia",
+        "sp-mirador-montjuic",
+        "sp-atelier-sant-antoni",
+        "sp-forum-les-corts",
+        "sp-nau-besos"
+      ],
+      "notes": "La impresión del logo la gestiona el comercial"
+    },
+    {
+      "id": "guardarropa",
+      "name": "Guardarropa móvil (percheros y 100 perchas)",
+      "stock": 3,
+      "unit_price_day_eur": 60,
+      "usable_in": [
+        "sp-llum-poblenou",
+        "sp-jardi-gracia",
+        "sp-mirador-montjuic",
+        "sp-forum-les-corts",
+        "sp-nau-besos"
+      ],
+      "notes": "Recomendado a partir de 80 invitados en invierno"
+    }
+  ]
+}
