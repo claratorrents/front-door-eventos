@@ -63,7 +63,7 @@ El script devuelve la puntuación, el desglose, la decisión, el motivo y las co
 Si no lo tiene, pasa al comercial.
 
 **Ofrecer el bloqueo** (necesita un "sí" explícito y el contacto con permiso; skill consentimiento):
-"Puedo bloquear el [espacio] para el [día] de forma provisional y sin compromiso durante 72 h laborables. En ese plazo, [comercial] te envía la propuesta con precio y condiciones. ¿Lo bloqueo?"
+"Puedo bloquear el [espacio] para el [día] de forma provisional y sin compromiso durante 72 h laborables. [Comercial] te enviará la propuesta con precio y condiciones en 24 h laborables. ¿Lo bloqueo?"
 
 **Después del "sí":**
 - Mientras n8n no confirme de verdad (SIMULADO): "He pedido el bloqueo provisional del [espacio] para el [día]. [Comercial] te lo confirma y te envía la propuesta en 24 h laborables. Si no te encaja, la fecha se libera sola a las 72 h."
