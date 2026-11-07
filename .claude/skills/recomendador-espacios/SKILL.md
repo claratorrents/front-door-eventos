@@ -43,7 +43,10 @@ El LLM nunca cambia el orden ni añade espacios que el script no devuelve. **El 
 - La frase de 'por qué encaja' usa el tipo de evento de event_types, nunca copia literalmente best_for.
 - Usa el artículo correcto con cada nombre (el Jardí, la Nau).
 - **Una foto aprobada** (`approved: true`) que encaje con el evento (cena → foto de banquete); si no hay una que encaje, la primera foto aprobada. Nunca la ruta del archivo.
-- **Horarios por zona:** si el espacio tiene horarios distintos por zona (`noise_curfew`) y el evento pasa del más temprano, la tarjeta lo dice. Ejemplo, Mirador: "El salón hasta las 03:00; la terraza cierra a las 23:30."
+- Horarios por zona: si el script devuelve avisos_zona para un
+  espacio, la tarjeta lo dice siempre. Ejemplo, Mirador: 'El salón
+  hasta las 03:00; la terraza cierra a las 23:30.' El LLM no deduce
+  horarios por zona por su cuenta: solo redacta lo que da el script.
 - Si es `al_limite`:
   - con otra opción delante: "Cabe justo; si podéis ser alguno más, mejor [primera opción]."
   - si es la única opción y el script da una alternativa: 'Cabe justo. Si preferís más margen, el [alternativa] tiene sitio para [N]; os quedaría holgado.'
