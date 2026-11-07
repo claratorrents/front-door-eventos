@@ -24,7 +24,7 @@ CAMPOS_ESPACIO = [
 ORDEN_AFOROS = ["cocktail", "theater", "banquet", "classroom"]
 CAMPOS_PROHIBIDOS = {"description", "max_capacity_alert", "default_lead_tier"}
 PALABRAS_PROHIBIDAS = ["ficticio", "ficticia"]
-CAMPOS_MEDIA = ["id", "type", "url", "description", "approved"]
+CAMPOS_MEDIA = ["id", "type", "url", "description", "approved", "illustrative"]
 TIPOS_MEDIA = {"foto", "plano", "tour360", "video"}
 CAMPOS_ITEM = ["id", "name", "stock", "usable_in"]
 # Hora de fin HH:MM (00:00 a 23:59). Antes de las 08:00 = madrugada del día siguiente.
@@ -152,6 +152,19 @@ def validar_espacios(datos):
                 error(f"{eid}/{mid}: approved debe ser true o false (es {aprobada!r})")
             if aprobada is False:
                 no_aprobada.append((eid, mid, desc))
+            if "illustrative" in m and not isinstance(m["illustrative"], bool):
+                error(f"{eid}/{mid}: illustrative debe ser true o false (es {m['illustrative']!r})")
+            if "zone" in m and (not isinstance(m["zone"], str) or not m["zone"].strip()):
+                error(f"{eid}/{mid}: zone debe ser un texto no vacío")
+            # disposition: obligatoria en fotos aprobadas; solo las fotos la llevan
+            if m.get("type") == "foto":
+                disp = m.get("disposition")
+                if aprobada is True and disp not in ORDEN_AFOROS:
+                    error(f"{eid}/{mid}: foto aprobada sin disposition válida ({disp!r}); debe ser una de {ORDEN_AFOROS}")
+                elif disp is not None and disp not in ORDEN_AFOROS:
+                    error(f"{eid}/{mid}: disposition {disp!r} no es una de {ORDEN_AFOROS}")
+            elif "disposition" in m:
+                error(f"{eid}/{mid}: solo las fotos llevan disposition")
             if m.get("type") == "foto" and aprobada is True:
                 tiene_foto_aprobada = True
             if m.get("type") == "plano" and aprobada is True:

@@ -64,15 +64,19 @@
         {
           "id": "llum-poblenou-foto-01",
           "type": "foto",
+          "disposition": "banquet",
           "url": "/media/placeholders/llum-poblenou/foto-01.jpg",
           "description": "Nave industrial montada para cena de gala, con luz cenital",
+          "illustrative": true,
           "approved": true
         },
         {
           "id": "llum-poblenou-foto-02",
           "type": "foto",
+          "disposition": "theater",
           "url": "/media/placeholders/llum-poblenou/foto-02.jpg",
           "description": "Montaje de teatro frente a la pantalla de 4x3 m",
+          "illustrative": true,
           "approved": true
         },
         {
@@ -80,6 +84,7 @@
           "type": "plano",
           "url": "/media/placeholders/llum-poblenou/plano.pdf",
           "description": "Plano de planta con accesos, salidas y zona de carga",
+          "illustrative": true,
           "approved": true
         },
         {
@@ -87,6 +92,7 @@
           "type": "tour360",
           "url": "/media/placeholders/llum-poblenou/tour-360.html",
           "description": "Recorrido virtual por la nave",
+          "illustrative": true,
           "approved": true
         }
       ],
@@ -144,15 +150,19 @@
         {
           "id": "jardi-gracia-foto-01",
           "type": "foto",
+          "disposition": "cocktail",
           "url": "/media/placeholders/jardi-gracia/foto-01.jpg",
           "description": "Patio ajardinado con olivos y guirnaldas encendidas",
+          "illustrative": true,
           "approved": true
         },
         {
           "id": "jardi-gracia-foto-02",
           "type": "foto",
+          "disposition": null,
           "url": "/media/placeholders/jardi-gracia/foto-02.jpg",
           "description": "Patio antes de la reforma (foto desactualizada)",
+          "illustrative": true,
           "approved": false
         },
         {
@@ -160,6 +170,7 @@
           "type": "plano",
           "url": "/media/placeholders/jardi-gracia/plano.pdf",
           "description": "Plano de la casa y del patio con accesos",
+          "illustrative": true,
           "approved": true
         },
         {
@@ -167,6 +178,7 @@
           "type": "tour360",
           "url": "/media/placeholders/jardi-gracia/tour-360.html",
           "description": "Recorrido virtual por la casa y el patio",
+          "illustrative": true,
           "approved": true
         }
       ],
@@ -228,15 +240,20 @@
         {
           "id": "mirador-montjuic-foto-01",
           "type": "foto",
+          "disposition": "cocktail",
+          "zone": "terraza",
           "url": "/media/placeholders/mirador-montjuic/foto-01.jpg",
           "description": "Terraza mirador con vistas al puerto al atardecer",
+          "illustrative": true,
           "approved": true
         },
         {
           "id": "mirador-montjuic-foto-02",
           "type": "foto",
+          "disposition": "banquet",
           "url": "/media/placeholders/mirador-montjuic/foto-02.jpg",
           "description": "Salón acristalado en montaje banquete",
+          "illustrative": true,
           "approved": true
         },
         {
@@ -244,6 +261,7 @@
           "type": "plano",
           "url": "/media/placeholders/mirador-montjuic/plano.pdf",
           "description": "Plano del pabellón, la terraza y el parking",
+          "illustrative": true,
           "approved": true
         },
         {
@@ -251,6 +269,7 @@
           "type": "tour360",
           "url": "/media/placeholders/mirador-montjuic/tour-360.html",
           "description": "Recorrido virtual por el salón y la terraza",
+          "illustrative": true,
           "approved": true
         }
       ],
@@ -307,15 +326,19 @@
         {
           "id": "atelier-sant-antoni-foto-01",
           "type": "foto",
+          "disposition": "classroom",
           "url": "/media/placeholders/atelier-sant-antoni/foto-01.jpg",
           "description": "Estudio luminoso con mesas configurables y pizarras",
+          "illustrative": true,
           "approved": true
         },
         {
           "id": "atelier-sant-antoni-foto-02",
           "type": "foto",
+          "disposition": "classroom",
           "url": "/media/placeholders/atelier-sant-antoni/foto-02.jpg",
           "description": "Montaje de reunión en U frente al monitor táctil",
+          "illustrative": true,
           "approved": true
         },
         {
@@ -323,6 +346,7 @@
           "type": "plano",
           "url": "/media/placeholders/atelier-sant-antoni/plano.pdf",
           "description": "Plano del estudio con el rincón de café",
+          "illustrative": true,
           "approved": true
         },
         {
@@ -330,6 +354,7 @@
           "type": "tour360",
           "url": "/media/placeholders/atelier-sant-antoni/tour-360.html",
           "description": "Recorrido virtual por el estudio",
+          "illustrative": true,
           "approved": true
         }
       ],
@@ -387,15 +412,19 @@
         {
           "id": "forum-les-corts-foto-01",
           "type": "foto",
+          "disposition": "theater",
           "url": "/media/placeholders/forum-les-corts/foto-01.jpg",
           "description": "Sala en montaje de teatro con atril y doble pantalla",
+          "illustrative": true,
           "approved": true
         },
         {
           "id": "forum-les-corts-foto-02",
           "type": "foto",
+          "disposition": "classroom",
           "url": "/media/placeholders/forum-les-corts/foto-02.jpg",
           "description": "Sala dividida en dos subsalas de formación",
+          "illustrative": true,
           "approved": true
         },
         {
@@ -403,6 +432,7 @@
           "type": "plano",
           "url": "/media/placeholders/forum-les-corts/plano.pdf",
           "description": "Plano con paneles divisorios, cabina técnica y foyer",
+          "illustrative": true,
           "approved": true
         },
         {
@@ -410,6 +440,7 @@
           "type": "tour360",
           "url": "/media/placeholders/forum-les-corts/tour-360.html",
           "description": "Recorrido virtual por la sala y el foyer",
+          "illustrative": true,
           "approved": true
         }
       ],
@@ -468,15 +499,19 @@
         {
           "id": "nau-besos-foto-01",
           "type": "foto",
+          "disposition": "theater",
           "url": "/media/placeholders/nau-besos/foto-01.jpg",
           "description": "Nave con escenario modular e iluminación en truss",
+          "illustrative": true,
           "approved": true
         },
         {
           "id": "nau-besos-foto-02",
           "type": "foto",
+          "disposition": "banquet",
           "url": "/media/placeholders/nau-besos/foto-02.jpg",
           "description": "Montaje de cena masiva con mesas redondas",
+          "illustrative": true,
           "approved": true
         },
         {
@@ -484,6 +519,7 @@
           "type": "plano",
           "url": "/media/placeholders/nau-besos/plano.pdf",
           "description": "Plano de la nave con acceso de camiones y cuadro eléctrico",
+          "illustrative": true,
           "approved": true
         },
         {
@@ -491,6 +527,7 @@
           "type": "tour360",
           "url": "/media/placeholders/nau-besos/tour-360.html",
           "description": "Recorrido virtual por la nave",
+          "illustrative": true,
           "approved": true
         }
       ],

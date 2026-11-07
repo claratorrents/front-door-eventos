@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from recomendar import recomendar  # noqa: E402
+from recomendar import media_aprobada, recomendar  # noqa: E402
 
 # (descripción, argumentos, recomendados esperados [(id, %, grupo)], descartados esperados [(id, motivo)])
 CASOS = [
@@ -72,6 +72,56 @@ def test_aviso_zona():
     return ok
 
 
+# Foto de la tarjeta (skill media-espacios §2): (descripción, argumentos, {id espacio: id foto})
+CASOS_FOTO = [
+    ("foto: cena 120 → Llum foto-01", dict(asistentes=120, disposicion="banquet"),
+     {"sp-llum-poblenou": "llum-poblenou-foto-01"}),
+    ("foto: conferencia 150 → Llum foto-02", dict(asistentes=150, disposicion="theater"),
+     {"sp-llum-poblenou": "llum-poblenou-foto-02"}),
+    ("foto: comida 33 → Atelier foto-01 y Jardí foto-01", dict(asistentes=33, disposicion="banquet"),
+     {"sp-atelier-sant-antoni": "atelier-sant-antoni-foto-01", "sp-jardi-gracia": "jardi-gracia-foto-01"}),
+    ("foto: fiesta 100 hasta las 03:00 → Mirador foto-02 (la terraza cierra antes)",
+     dict(asistentes=100, disposicion="cocktail", hora_fin="03:00"),
+     {"sp-mirador-montjuic": "mirador-montjuic-foto-02"}),
+    ("foto: conferencia 150 → Mirador foto-02 (interior antes que terraza)",
+     dict(asistentes=150, disposicion="theater"),
+     {"sp-mirador-montjuic": "mirador-montjuic-foto-02"}),
+]
+
+# Media aprobada por tipo (skill media-espacios §3): (descripción, espacio, tipo, ids esperados)
+CASOS_MEDIA = [
+    ("media: fotos del Jardí → solo foto-01 (la 02 no está aprobada)", "sp-jardi-gracia", "foto",
+     ["jardi-gracia-foto-01"]),
+    ("media: plano del Mirador", "sp-mirador-montjuic", "plano", ["mirador-montjuic-plano"]),
+    ("media: tour de la Nau", "sp-nau-besos", "tour360", ["nau-besos-tour360"]),
+    ("media: vídeo de la Nau → ninguno", "sp-nau-besos", "video", []),
+]
+
+
+def test_media():
+    fallos = 0
+    for nombre, espacio, tipo, esperado in CASOS_MEDIA:
+        r = media_aprobada(espacio, tipo)
+        ok = [x["id"] for x in r] == esperado and all("url" not in x for x in r)
+        print(f"{'OK   ' if ok else 'FALLO'} {nombre}")
+        if not ok:
+            fallos += 1
+            print(f"      esperado: {esperado}\n      obtenido: {r}")
+    return fallos
+
+
+def test_fotos():
+    fallos = 0
+    for nombre, args, esperado in CASOS_FOTO:
+        fotos = {x["id"]: (x["foto"] or {}).get("id") for x in recomendar(**args)["recomendados"]}
+        ok = all(fotos.get(e) == f for e, f in esperado.items())
+        print(f"{'OK   ' if ok else 'FALLO'} {nombre}")
+        if not ok:
+            fallos += 1
+            print(f"      esperado: {esperado}\n      obtenido: {fotos}")
+    return fallos
+
+
 def main():
     fallos = 0
     for nombre, args, esp_rec, esp_desc in CASOS:
@@ -88,7 +138,9 @@ def main():
         fallos += 1
     if not test_aviso_zona():
         fallos += 1
-    total = len(CASOS) + 2
+    fallos += test_fotos()
+    fallos += test_media()
+    total = len(CASOS) + 2 + len(CASOS_FOTO) + len(CASOS_MEDIA)
     print(f"\n{total - fallos}/{total} casos correctos")
     sys.exit(1 if fallos else 0)
 

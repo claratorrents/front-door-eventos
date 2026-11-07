@@ -11,6 +11,13 @@ Salida (JSON):
   recomendados: [{id, nombre, ocupacion, grupo, alternativa, avisos_zona}]   (máximo 3, ya ordenados)
                 avisos_zona: zonas que cierran antes de la hora de fin pedida, p. ej.
                 [{"zona": "terraza", "hasta": "23:30"}]
+                foto: foto de la tarjeta {id, description, illustrative} (skill media-espacios §2):
+                nunca una no aprobada ni de una zona con aviso de cierre; la de la misma
+                disposition; si no hay, mejor una de interior (sin zone) que una de zona.
+                Sin la ruta: el chat la muestra por id.
+
+Media aprobada de un espacio (skill media-espacios §3), sin rutas:
+  python3 scripts/recomendar.py --media sp-jardi-gracia --tipo foto
   descartados:  [{id, nombre, motivo, detalle}]    (solo por antelación u horario)
 
 Solo lee data/espacios.json. No da precios ni disponibilidad.
@@ -54,6 +61,41 @@ def grupo(ocupacion):
     if ocupacion >= MINIMO_COMODO:
         return "comodo"
     return "bajo_60"
+
+
+TIPOS_MEDIA = ("foto", "plano", "tour360", "video")
+
+
+def ficha_media(m):
+    """Lo que se puede enseñar de un elemento de media: nunca la url."""
+    return {"id": m["id"], "type": m["type"], "description": m["description"],
+            "illustrative": m.get("illustrative", False)}
+
+
+def foto_tarjeta(esp, disposicion, zonas_con_aviso=()):
+    """Foto de la tarjeta:
+    - solo fotos aprobadas y nunca de una zona que cierra antes del fin del evento;
+    - la de la misma disposition;
+    - si no hay, mejor una de interior (sin zone) que una de zona; dentro, la primera."""
+    fotos = [m for m in esp.get("media", [])
+             if m.get("type") == "foto" and m.get("approved") is True
+             and m.get("zone") not in zonas_con_aviso]
+    misma = [m for m in fotos if m.get("disposition") == disposicion]
+    interior = [m for m in fotos if not m.get("zone")]
+    elegida = (misma or interior or fotos or [None])[0]
+    return ficha_media(elegida) if elegida else None
+
+
+def media_aprobada(espacio_id, tipo, espacios=None):
+    """Media aprobada de un espacio por tipo (foto, plano, tour360, video), sin rutas."""
+    if tipo not in TIPOS_MEDIA:
+        raise ValueError(f"tipo {tipo!r} no es uno de {TIPOS_MEDIA}")
+    espacios = espacios if espacios is not None else cargar_espacios()
+    esp = next((e for e in espacios if e["id"] == espacio_id), None)
+    if esp is None:
+        raise ValueError(f"el espacio {espacio_id!r} no existe")
+    return [ficha_media(m) for m in esp.get("media", [])
+            if m.get("type") == tipo and m.get("approved") is True]
 
 
 def cargar_espacios():
@@ -108,6 +150,7 @@ def recomendar(asistentes, disposicion, dias=None, hora_fin=None, espacios=None)
 
         candidatos.append({
             "id": esp["id"], "nombre": esp["name"], "aforo": aforo, "avisos_zona": avisos_zona,
+            "foto": foto_tarjeta(esp, disposicion, {a["zona"] for a in avisos_zona}),
             "ocupacion_exacta": ocupacion, "grupo": grupo(ocupacion),
         })
 
@@ -132,7 +175,7 @@ def recomendar(asistentes, disposicion, dias=None, hora_fin=None, espacios=None)
     recomendados = [
         {"id": c["id"], "nombre": c["nombre"],
          "ocupacion": round(float(c["ocupacion_exacta"]) * 100), "grupo": c["grupo"],
-         "alternativa": c["alternativa"], "avisos_zona": c["avisos_zona"]}
+         "alternativa": c["alternativa"], "avisos_zona": c["avisos_zona"], "foto": c["foto"]}
         for c in candidatos[:MAX_RECOMENDADOS]
     ]
 
@@ -142,13 +185,22 @@ def recomendar(asistentes, disposicion, dias=None, hora_fin=None, espacios=None)
 
 def main():
     p = argparse.ArgumentParser(description="Recomendador de espacios por reglas fijas")
-    p.add_argument("--asistentes", type=int, required=True)
-    p.add_argument("--disposicion", required=True, choices=DISPOSICIONES)
+    p.add_argument("--asistentes", type=int)
+    p.add_argument("--disposicion", choices=DISPOSICIONES)
     p.add_argument("--dias", type=int, help="días que faltan hasta el evento")
     p.add_argument("--hora-fin", help="hora de fin HH:MM (antes de 08:00 = madrugada)")
+    p.add_argument("--media", metavar="ID_ESPACIO", help="devuelve la media aprobada de este espacio")
+    p.add_argument("--tipo", choices=TIPOS_MEDIA, help="tipo de media con --media")
     a = p.parse_args()
     try:
-        resultado = recomendar(a.asistentes, a.disposicion, a.dias, a.hora_fin)
+        if a.media:
+            if not a.tipo:
+                raise ValueError("--media necesita --tipo")
+            resultado = media_aprobada(a.media, a.tipo)
+        else:
+            if a.asistentes is None or a.disposicion is None:
+                raise ValueError("faltan --asistentes y --disposicion")
+            resultado = recomendar(a.asistentes, a.disposicion, a.dias, a.hora_fin)
     except ValueError as e:
         print(json.dumps({"error": str(e)}, ensure_ascii=False))
         sys.exit(2)
