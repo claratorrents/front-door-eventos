@@ -51,7 +51,7 @@ Se aplican a cada respuesta antes de enviarla. Si una respuesta incumple una reg
 | `escalar_humano` | Quejas, legal, cambios de reserva, ofensivo repetido | Equipo de atención al cliente | 24 h laborables |
 | `escalar_humano` | Pide persona o frustración | Equipo de atención al cliente | En horario: menos de 2 h. Fuera de horario: el siguiente día laborable. Si quedan menos de 2 h para el cierre, se dice 'el siguiente día laborable a primera hora'. |
 
-`motivo_escalado`: `descuento` / `catering` / `extras` / `excepcion` / `permisos` / `queja` / `legal` / `cambio_reserva` / `peticion_humano` / `frustracion` / `ofensivo` / `sin_dato` / `—`.
+`motivo_escalado`: `descuento` / `catering` / `extras` / `excepcion` / `permisos` / `queja` / `legal` / `cambio_reserva` / `peticion_humano` / `frustracion` / `ofensivo` / `sin_dato` / `lead` / `privacidad` / `—`.
 
 **Horario de atención: lunes a sábado, de 9 a 18 h.** '24 h laborables' significa: como máximo, el siguiente día laborable a la misma hora.
 

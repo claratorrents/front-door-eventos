@@ -183,7 +183,7 @@ Ruta estrella de la demo: **consulta → cualificación → recomendación → b
 
 **Pendiente:**
 - Nombre de la empresa (cambiar también el campo `project`).
-- Chat web: tapar tarjetas, IBAN y DNI que escriba el cliente (por ejemplo, "[TARJETA ELIMINADA]") antes de guardar la conversación o enviarla a n8n.
+- Chat web: tapar tarjetas, IBAN y DNI siempre, y email y teléfono si no hay permiso, antes de guardar la conversación o enviarla a n8n.
 - Chat web: usar la hora real para saber si se está en horario de atención.
 
 ### Resumen estructurado de cada conversación (contrato app → n8n → Sheets)
@@ -201,13 +201,15 @@ Fijar estos campos desde el principio. Cambiarlos a mitad es el fallo más habit
 | espacios_recomendados | Llum del Poblenou |
 | puntuacion_lead | 40 |
 | decision | ninguna / consulta_disponibilidad / pendiente_confirmar / prerreserva / escalar_comercial / escalar_humano |
-| motivo_escalado | descuento / catering / extras / excepcion / permisos / queja / legal / cambio_reserva / peticion_humano / frustracion / ofensivo / sin_dato / — |
+| motivo_escalado | descuento / catering / extras / excepcion / permisos / queja / legal / cambio_reserva / peticion_humano / frustracion / ofensivo / sin_dato / lead / privacidad / — |
 | consentimiento_datos | si / no |
 | consentimiento_publicidad | si / no |
 | sentimiento | positivo / neutro / negativo |
 | resuelto_sin_humano | si / no |
 
 Reglas: sin consentimiento no se envían nombre, email ni teléfono (registro anónimo). Solo datos sintéticos en pruebas. Hasta que n8n esté listo, la app guarda estos resúmenes en un archivo local con los mismos campos.
+
+Registro de consentimientos (registros/consentimientos.jsonl; con n8n, pestaña 'Consentimientos' del Sheet): id_conversacion, fecha_hora (real, ISO 8601), finalidad, datos, estado (otorgado / denegado / retirado / borrado_solicitado). Solo respuestas explícitas.
 
 ### Riesgos de la integración con n8n
 1. **n8n Cloud o local:** en Cloud, conectar Google es iniciar sesión. En local, Google exige credenciales en Google Cloud Console.
