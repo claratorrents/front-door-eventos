@@ -124,6 +124,7 @@ Datos en `data/espacios.json` (6 espacios) y `data/inventario.json` (10 extras).
 - Si los asistentes superan el **90 %** de ese aforo, el espacio se marca **"al límite"**: se puede recomendar, pero después de las opciones cómodas y avisando al cliente.
 - Ejemplo: cena para 120 en banquete → 1.º Llum del Poblenou (150, 80 %), Mirador de Montjuïc "al límite" (120, 100 %). La Nau (220, 55 %) se vería medio vacía.
 - Por debajo del 60 % de ocupación no se recomienda, salvo que no haya otra opción. Ejemplo: para 120 en banquete la Nau (55 %) queda fuera.
+- Si el cliente no indica disposición, se deduce del tipo de evento y se confirma en la misma frase ("Para una conferencia lo normal es formato teatro; ¿os encaja?"): conferencia o presentación → theater; cena o comida → banquet; networking o cóctel → cocktail; formación o taller → classroom.
 
 **Prerreserva (bloqueo provisional)**
 | Regla | Decisión |
@@ -158,7 +159,32 @@ Ruta estrella de la demo: **consulta → cualificación → recomendación → b
 - `best_for`: lo usa el recomendador para encajar el tipo de evento.
 - Se eliminaron `description` (repetía y decía "ficticia") y `max_capacity_alert` (igual que `absolute_max`).
 
-**Pendiente:** nombre de la empresa (cambiar también el campo `project`).
+**Decisiones y escalados (guardrails, 7 de noviembre)**
+
+| decision | Cuándo | Quién lo recibe | Plazo |
+|---|---|---|---|
+| `ninguna` | Respuesta normal, sin escalar | — | — |
+| `consulta_disponibilidad` | Pregunta por una fecha | n8n (mientras tanto, SIMULADO) | Inmediato |
+| `pendiente_confirmar` | Pregunta sin dato en el catálogo (accesibilidad, horario interior…) | Equipo de atención | 24 h laborables |
+| `prerreserva` | Lead de más de 70 que acepta el bloqueo | Comercial del espacio | 72 h |
+| `escalar_comercial` | Descuentos, catering, extras, excepciones, permisos | Comercial del espacio (o David Ramos si no hay espacio) | 24 h laborables |
+| `escalar_humano` | Quejas, legal, cambios de reserva, mensajes ofensivos repetidos | Equipo de atención al cliente | 24 h laborables |
+| `escalar_humano` | Pide persona o frustración | Equipo de atención al cliente | En horario: menos de 2 h. Fuera de horario: siguiente día laborable. Si quedan menos de 2 h para el cierre, se dice 'el siguiente día laborable a primera hora'. |
+
+- **Horario de atención: lunes a sábado, de 9 a 18 h.** '24 h laborables' significa: como máximo, el siguiente día laborable a la misma hora.
+- Ofensivo: primer mensaje, aviso y sigue (`ninguna`); si repite, cierra y `escalar_humano`.
+- Contacto del equipo de atención: atencion@empresa-eventos.example · +34 930 000 000
+- Frustración: el cliente dice que no le entendemos o repite la misma petición dos veces.
+- Disponibilidad: "Según el calendario, ese día parece libre. Te lo confirma el comercial al bloquear la fecha." Nunca "está libre" a secas.
+
+- "Lo compruebo" y "lo confirmo" siempre llevan su `decision` y dicen quién responde y cuándo. Para responder hace falta un contacto, que se pide con consentimiento; si no lo da, se le dice que puede volver a escribir. Y aprovechan para seguir cualificando.
+- Las frases fijas se traducen al catalán o al inglés manteniendo el sentido exacto, sin añadir promesas.
+- Pruebas: `pruebas/prueba-guardrails-01.md`, `pruebas/prueba-guardrails-02.md` y `pruebas/prueba-guardrails-03.md`. Corrección: `pruebas/correccion-02-guardrails.md`.
+
+**Pendiente:**
+- Nombre de la empresa (cambiar también el campo `project`).
+- Chat web: tapar tarjetas, IBAN y DNI que escriba el cliente (por ejemplo, "[TARJETA ELIMINADA]") antes de guardar la conversación o enviarla a n8n.
+- Chat web: usar la hora real para saber si se está en horario de atención.
 
 ### Resumen estructurado de cada conversación (contrato app → n8n → Sheets)
 Fijar estos campos desde el principio. Cambiarlos a mitad es el fallo más habitual.
@@ -174,8 +200,8 @@ Fijar estos campos desde el principio. Cambiarlos a mitad es el fallo más habit
 | presupuesto | 6000 |
 | espacios_recomendados | Llum del Poblenou |
 | puntuacion_lead | 40 |
-| decision | prerreserva / escalar_comercial / escalar_humano |
-| motivo_escalado | descuento / queja / legal / — |
+| decision | ninguna / consulta_disponibilidad / pendiente_confirmar / prerreserva / escalar_comercial / escalar_humano |
+| motivo_escalado | descuento / catering / extras / excepcion / permisos / queja / legal / cambio_reserva / peticion_humano / frustracion / ofensivo / sin_dato / — |
 | consentimiento_datos | si / no |
 | consentimiento_publicidad | si / no |
 | sentimiento | positivo / neutro / negativo |
