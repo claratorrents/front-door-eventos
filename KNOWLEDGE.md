@@ -177,7 +177,7 @@ Ruta estrella de la demo: **consulta → cualificación → recomendación → b
 - Frustración: el cliente dice que no le entendemos o repite la misma petición dos veces.
 - Disponibilidad: "Según el calendario, ese día parece libre. Te lo confirma el comercial." Nunca "está libre" a secas.
 
-- "Lo compruebo" y "lo confirmo" siempre llevan su `decision` y dicen quién responde y cuándo. Para responder hace falta un contacto, que se pide con consentimiento; si no lo da, se le dice que puede volver a escribir. Y aprovechan para seguir cualificando.
+- "Lo compruebo" y "lo confirmo" siempre llevan su `decision` y dicen quién responde y cuándo. Para responder hace falta un contacto, que se pide con consentimiento. Si el cliente no da contacto, se sigue la skill de consentimiento (§4): se ofrece una sola vez la alternativa (teléfono o email) y, si tampoco, se le dan los datos del equipo: atencion@empresa-eventos.example · +34 930 000 000. Y aprovechan para seguir cualificando.
 - Las frases fijas se traducen al catalán o al inglés manteniendo el sentido exacto, sin añadir promesas.
 - Pruebas: `pruebas/prueba-guardrails-01.md`, `pruebas/prueba-guardrails-02.md` y `pruebas/prueba-guardrails-03.md`. Corrección: `pruebas/correccion-02-guardrails.md`.
 

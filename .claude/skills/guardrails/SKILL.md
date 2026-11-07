@@ -58,7 +58,7 @@ Se aplican a cada respuesta antes de enviarla. Si una respuesta incumple una reg
 ### Siempre que el chatbot no resuelve en el momento
 - Cada "lo compruebo" o "lo confirmo" lleva su `decision`: nadie se queda sin respuesta.
 - Dice **quién** responde y **cuándo** ("Te responde el equipo de atención en 24 h laborables"). Se puede dar el nombre del comercial ("Te contactará Marta Soler").
-- Para responder hace falta un contacto: se pide con consentimiento (skill consentimiento). Si no lo da: "Sin problema; puedes volver a escribirnos cuando quieras."
+- Para responder hace falta un contacto: se pide con consentimiento (skill consentimiento). Si el cliente no da contacto, se sigue la skill de consentimiento (§4): se ofrece una sola vez la alternativa (teléfono o email) y, si tampoco, se le dan los datos del equipo: atencion@empresa-eventos.example · +34 930 000 000.
 - Aprovecha para seguir cualificando con una pregunta ("¿Cuántos asistentes seríais?").
 
 La decisión sigue estas reglas; no la decide el LLM por intuición.
