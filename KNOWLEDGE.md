@@ -292,7 +292,7 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 ### Hecho
 - [x] Prueba completa en `reservas-eventos` (contexto, 5 skills, correcciones, plugin, chat web).
 - [x] Guía `Guia_rapida_Codex.docx`.
-- [x] Paso 1: carpeta `front-door-eventos` creada y abierta en Codex.
+- [x] Paso 1: carpeta `front-door-eventos` creada y abierta en Claude Code.
 - [x] Paso 2: `AGENTS.md` (commit `4b17310`; regla 2 actualizada a "nunca dar precios" en `7a5ebe4`).
 - [x] Paso 3: catálogo, inventario y validador (commits `7a5ebe4` y `121a83b`), con corrección 01 documentada.
 
@@ -301,10 +301,10 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 - [ ] Paso 4: skills de guardrails y consentimiento, escritas por el equipo regla a regla.
 
 ### Plan
-1. Carpeta y proyecto en Codex.
+1. Carpeta y proyecto en Claude Code.
 2. `AGENTS.md` + estructura + `.gitignore`.
 3. Catálogo de espacios e inventario sintéticos (con validador).
-4. Skills 8 y 7 (guardrails, consentimiento) + humanizer-zh.
+4. Skills 8 y 7 (guardrails, consentimiento).
 5. Skills 1, 2, 3 y 4 (router, recomendador, media, cualificador con script).
 6. Pruebas y correcciones documentadas.
 7. Plugin `eventos-front-door` de Claude Code: `plugins/eventos-front-door/` con `.claude-plugin/plugin.json` y las skills, más `.claude-plugin/marketplace.json` en la raíz para instalarlo desde el repo (ver §4).
