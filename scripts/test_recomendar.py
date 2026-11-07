@@ -20,7 +20,7 @@ CASOS = [
     ("75 banquet", dict(asistentes=75, disposicion="banquet"),
      [("sp-forum-les-corts", 83, "comodo"), ("sp-mirador-montjuic", 62, "comodo")], []),
     ("33 banquet", dict(asistentes=33, disposicion="banquet"),
-     [("sp-atelier-sant-antoni", 94, "al_limite")], []),
+     [("sp-atelier-sant-antoni", 94, "al_limite"), ("sp-jardi-gracia", 55, "bajo_60")], []),
     ("150 theater", dict(asistentes=150, disposicion="theater"),
      [("sp-llum-poblenou", 75, "comodo"), ("sp-mirador-montjuic", 94, "al_limite")], []),
     ("100 cocktail, fin 03:00", dict(asistentes=100, disposicion="cocktail", hora_fin="03:00"),
@@ -29,6 +29,9 @@ CASOS = [
     ("180 theater, 5 días", dict(asistentes=180, disposicion="theater", dias=5),
      [], [("sp-llum-poblenou", "antelacion"), ("sp-nau-besos", "antelacion")]),
     ("500 cocktail", dict(asistentes=500, disposicion="cocktail"), [], []),
+    ("100 cocktail, fin 21:00 (al_limite único + alternativa)",
+     dict(asistentes=100, disposicion="cocktail", hora_fin="21:00"),
+     [("sp-jardi-gracia", 91, "al_limite"), ("sp-forum-les-corts", 59, "bajo_60")], []),
 ]
 
 

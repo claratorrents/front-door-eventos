@@ -27,6 +27,12 @@
         "Cenas de gala",
         "Hackathons"
       ],
+      "event_types": [
+        "presentacion",
+        "conferencia",
+        "cena",
+        "hackathon"
+      ],
       "pricing": {
         "day_rate_eur": 2400,
         "half_day_rate_eur": 1400,
@@ -102,6 +108,12 @@
         "Presentaciones de marca",
         "Workshops creativos"
       ],
+      "event_types": [
+        "reunion",
+        "networking",
+        "presentacion",
+        "taller"
+      ],
       "pricing": {
         "day_rate_eur": 1100,
         "half_day_rate_eur": 650,
@@ -175,6 +187,12 @@
         "Entrega de premios",
         "Eventos C-Level",
         "Recepciones nocturnas"
+      ],
+      "event_types": [
+        "cena",
+        "gala",
+        "reunion",
+        "networking"
       ],
       "pricing": {
         "day_rate_eur": 2100,
@@ -251,6 +269,11 @@
         "Formaciones reducidas",
         "Reuniones de consejo"
       ],
+      "event_types": [
+        "taller",
+        "reunion",
+        "formacion"
+      ],
       "pricing": {
         "day_rate_eur": 650,
         "half_day_rate_eur": 400,
@@ -324,6 +347,11 @@
         "Asambleas generales",
         "Simposios técnicos",
         "Jornadas corporativas"
+      ],
+      "event_types": [
+        "formacion",
+        "conferencia",
+        "asamblea"
       ],
       "pricing": {
         "day_rate_eur": 1500,
@@ -399,6 +427,12 @@
         "Ferias comerciales",
         "Producciones audiovisuales",
         "Cenas de empresa masivas"
+      ],
+      "event_types": [
+        "conferencia",
+        "feria",
+        "rodaje",
+        "cena"
       ],
       "pricing": {
         "day_rate_eur": 3200,

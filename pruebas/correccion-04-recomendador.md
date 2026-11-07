@@ -45,3 +45,30 @@ Primera versión de la skill, escrita por el equipo, con la decisión en `script
   - Una cena en el Atelier puede pasar de su cierre a las 21:00 sin que se pregunte la hora.
   - Con un único espacio `al_limite`, los `bajo_60` cercanos al 60 % no se ofrecen como alternativa.
   - No está definido qué horas son ambiguas.
+
+---
+
+## Ronda 3: event_types y alternativa
+
+### Problema (puntos abiertos tras la prueba 02)
+- Qué cuenta como "el tipo de evento aparece en `best_for`" lo decidía el LLM.
+- Una cena podía pasar del cierre de un espacio (Atelier, 21:00) sin que se preguntara la hora.
+- Con un único espacio `al_limite`, no se ofrecía ninguna alternativa (fiesta de 100 hasta las 21:00 → solo el Jardí).
+- No estaba definido qué horas son ambiguas.
+
+### Cambio (decidido por el equipo)
+- Nuevo campo `event_types` en cada espacio (Llum: presentacion, conferencia, cena, hackathon · Jardí: reunion, networking, presentacion, taller · Mirador: cena, gala, reunion, networking · Atelier: taller, reunion, formacion · Fòrum: formacion, conferencia, asamblea · Nau: conferencia, feria, rodaje, cena). El validador lo exige. "Por qué encaja" solo si el tipo de evento está en `event_types`.
+- "Cena" pasa a la lista de eventos que suelen acabar tarde: se pregunta la hora antes de recomendar.
+- Horas ambiguas: de 1 a 7 sin más contexto, madrugada; de 8 a 12 sin "de la mañana" o "de la noche", se pregunta.
+- Regla 4: si la única opción es `al_limite`, se añade como alternativa el primer `bajo_60`. El script lo aplica y marca `alternativa: true`.
+- Frases de §3: única opción con alternativa ("Cabe justo. Si preferís más margen, el [alternativa] tiene sitio para [N]; os quedaría holgado.") y sin alternativa ("Cabe justo; si al final sois alguno más, avísanos y buscamos otra opción.").
+- Ejemplos de §7: la cena de 120 pregunta la hora antes de recomendar; "Cena para 33" pasa a "Comida para 33" con el Jardí como alternativa.
+- Test: el caso de 33 en banquete pasa a esperar Atelier + Jardí (decidido por el equipo), y hay un caso nuevo para la fiesta de 100 hasta las 21:00 (Jardí + Fòrum).
+
+### Después
+- `scripts/test_recomendar.py`: 10/10. Validador: todo correcto.
+- Prueba 03 (`pruebas/prueba-recomendador-03.md`): las 4 frases cumplen.
+- Al redactar la prueba 03 se me olvidó primero el horario por zonas del Mirador en la cena de 120 hasta las 00:00. Lo corregí al revisar: el script no avisa de los horarios por zona, así que depende de la redacción.
+- Quedan abiertos, sin hacer fallar la prueba:
+  - Cuando un espacio es `bajo_60`, `best_for` puede sonar raro ("Cenas de empresa masivas" para 33 personas).
+  - El artículo de "el [alternativa]".

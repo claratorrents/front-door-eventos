@@ -8,7 +8,7 @@ Uso:
   python3 scripts/recomendar.py --asistentes 180 --disposicion theater --dias 5
 
 Salida (JSON):
-  recomendados: [{id, nombre, ocupacion, grupo}]   (máximo 3, ya ordenados)
+  recomendados: [{id, nombre, ocupacion, grupo, alternativa}]   (máximo 3, ya ordenados)
   descartados:  [{id, nombre, motivo, detalle}]    (solo por antelación u horario)
 
 Solo lee data/espacios.json. No da precios ni disponibilidad.
@@ -102,19 +102,28 @@ def recomendar(asistentes, disposicion, dias=None, hora_fin=None, espacios=None)
             "ocupacion_exacta": ocupacion, "grupo": grupo(ocupacion),
         })
 
-    # bajo_60 solo si no queda ningún comodo ni al_limite
-    if any(c["grupo"] != "bajo_60" for c in candidatos):
-        candidatos = [c for c in candidatos if c["grupo"] != "bajo_60"]
-
     # 5. Orden: grupo; dentro del grupo, cercanía al 80 %; empate: menos aforo primero
     candidatos.sort(key=lambda c: (ORDEN_GRUPOS[c["grupo"]],
                                    abs(c["ocupacion_exacta"] - OBJETIVO),
                                    c["aforo"]))
 
+    # 4. bajo_60 solo si no queda ningún comodo ni al_limite.
+    #    Si la única opción es al_limite, se añade como alternativa el primer bajo_60.
+    for c in candidatos:
+        c["alternativa"] = False
+    principales = [c for c in candidatos if c["grupo"] != "bajo_60"]
+    bajos = [c for c in candidatos if c["grupo"] == "bajo_60"]
+    if principales:
+        candidatos = principales
+        if len(principales) == 1 and principales[0]["grupo"] == "al_limite" and bajos:
+            bajos[0]["alternativa"] = True
+            candidatos = principales + bajos[:1]
+
     # 6. Máximo 3
     recomendados = [
         {"id": c["id"], "nombre": c["nombre"],
-         "ocupacion": round(float(c["ocupacion_exacta"]) * 100), "grupo": c["grupo"]}
+         "ocupacion": round(float(c["ocupacion_exacta"]) * 100), "grupo": c["grupo"],
+         "alternativa": c["alternativa"]}
         for c in candidatos[:MAX_RECOMENDADOS]
     ]
 

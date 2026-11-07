@@ -18,7 +18,7 @@ INVENTARIO = RAIZ / "data" / "inventario.json"
 NUM_ESPACIOS = 6
 CAMPOS_ESPACIO = [
     "id", "name", "city", "neighborhood", "tagline", "full_profile",
-    "best_for", "pricing", "capacities", "amenities_included",
+    "best_for", "event_types", "pricing", "capacities", "amenities_included",
     "chatbot_guardrails", "media", "n8n_routing",
 ]
 ORDEN_AFOROS = ["cocktail", "theater", "banquet", "classroom"]
@@ -103,6 +103,11 @@ def validar_espacios(datos):
                 error(f"{eid}: aforos no cumplen cocktail > theater > banquet > classroom ({detalle})")
             if cap.get("absolute_max") != max(valores):
                 error(f"{eid}: absolute_max {cap.get('absolute_max')} distinto del aforo mayor {max(valores)}")
+
+        # Tipos de evento: lista de textos no vacíos
+        tipos = esp.get("event_types")
+        if isinstance(tipos, list) and not all(isinstance(t, str) and t.strip() for t in tipos):
+            error(f"{eid}: event_types debe ser una lista de textos no vacíos")
 
         # Hora máxima de fin
         hora = esp.get("chatbot_guardrails", {}).get("max_end_time")
