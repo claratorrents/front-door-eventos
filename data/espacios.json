@@ -151,6 +151,7 @@
           "id": "jardi-gracia-foto-01",
           "type": "foto",
           "disposition": "cocktail",
+          "zone": "patio",
           "url": "/media/placeholders/jardi-gracia/foto-01.jpg",
           "description": "Patio ajardinado con olivos y guirnaldas encendidas",
           "illustrative": true,
@@ -253,6 +254,15 @@
           "disposition": "banquet",
           "url": "/media/placeholders/mirador-montjuic/foto-02.jpg",
           "description": "Salón acristalado en montaje banquete",
+          "illustrative": true,
+          "approved": true
+        },
+        {
+          "id": "mirador-montjuic-foto-03",
+          "type": "foto",
+          "disposition": "theater",
+          "url": "/media/placeholders/mirador-montjuic/foto-03.jpg",
+          "description": "Salón acristalado en montaje de teatro frente a la pantalla motorizada",
           "illustrative": true,
           "approved": true
         },

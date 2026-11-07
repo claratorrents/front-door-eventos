@@ -83,8 +83,11 @@ CASOS_FOTO = [
     ("foto: fiesta 100 hasta las 03:00 → Mirador foto-02 (la terraza cierra antes)",
      dict(asistentes=100, disposicion="cocktail", hora_fin="03:00"),
      {"sp-mirador-montjuic": "mirador-montjuic-foto-02"}),
-    ("foto: conferencia 150 → Mirador foto-02 (interior antes que terraza)",
+    ("foto: conferencia 150 → Mirador foto-03 (foto de teatro)",
      dict(asistentes=150, disposicion="theater"),
+     {"sp-mirador-montjuic": "mirador-montjuic-foto-03"}),
+    ("foto: formación 60 en aula → Mirador foto-02 (sin foto de aula: interior antes que terraza)",
+     dict(asistentes=60, disposicion="classroom"),
      {"sp-mirador-montjuic": "mirador-montjuic-foto-02"}),
 ]
 
