@@ -137,7 +137,7 @@ Datos en `data/espacios.json` (6 espacios) y `data/inventario.json` (10 extras).
 | Reserva confirmada | Nunca la confirma el chatbot: solo cuando el cliente acepta la propuesta del comercial |
 | Señal, cancelación | Fuera del chatbot; las pone el comercial en la propuesta |
 
-Los pesos del cualificador se deciden al escribir su skill; hasta entonces no se hacen bloqueos.
+Pesos y niveles del cualificador: ver la skill cualificador-leads. Bloqueo solo con más de 70 puntos, día exacto, espacio elegido y antelación cumplida.
 
 Ruta estrella de la demo: **consulta → cualificación → recomendación → bloqueo provisional → propuesta del comercial**.
 
@@ -297,7 +297,7 @@ plugins/eventos-front-door/
 13. **AGENTS.md funciona:** Codex pidió aprobación del plan antes de crear el chat web, tal como estaba escrito (human-in-the-loop).
 14. **Nunca pegar claves de API en el chat.**
 
-Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asistentes 20 · presupuesto 20 · tipo de evento 15 · empresa 10 · urgencia 10. Más de 70 → prerreserva; 70 o menos → comercial. **El grupo debe decidirlos y justificarlos.**
+Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asistentes 20 · presupuesto 20 · tipo de evento 15 · empresa 10 · urgencia 10. Más de 70 → prerreserva; 70 o menos → comercial. **Decididos el 7 de noviembre (mismos pesos): niveles y condiciones en la skill cualificador-leads.**
 
 ---
 

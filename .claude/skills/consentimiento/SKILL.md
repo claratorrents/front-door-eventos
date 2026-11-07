@@ -17,7 +17,7 @@ Se aplica junto con guardrails. Contexto completo en `KNOWLEDGE.md`.
 - Solo cuando hace falta para responder: `prerreserva`, `pendiente_confirmar` o cualquier escalado (`escalar_comercial`, `escalar_humano`).
 - Nunca al principio "por si acaso". Para recomendar espacios y cualificar no hacen falta datos personales.
 - Una pregunta de precio no necesita contacto por sí sola: se responde con la frase de guardrails y se sigue cualificando.
-- Mientras no estén decididos los pesos del cualificador no hay bloqueos: si el cliente quiere prerreserva, pasa al comercial (`escalar_comercial`, motivo `lead`) y se pide el contacto para eso.
+- Si el cliente quiere prerreserva y no cumple las condiciones del cualificador, pasa al comercial (escalar_comercial, motivo lead) y se pide el contacto para eso.
 
 ## 3. Qué datos se piden (datos mínimos)
 - Nombre y **un** contacto: email **o** teléfono, a elegir por el cliente.
