@@ -53,6 +53,7 @@ El LLM nunca cambia el orden ni añade espacios que el script no devuelve. **El 
   - si es la única opción y el script da una alternativa: 'Cabe justo. Si preferís más margen, el [alternativa] tiene sitio para [N]; os quedaría holgado.'
   - si no hay ninguna alternativa: 'Cabe justo; si al final sois alguno más, avísanos y buscamos otra opción.'
 - Si es `bajo_60` (porque no hay otra opción): "Es más grande de lo que necesitáis, pero es el que encaja con [horario / fecha]."
+- Si el espacio elegido queda en bajo_60, se respeta la elección y se avisa: 'Os quedará amplio. Si preferís algo más ajustado, [espacio] tiene sitio para [N].', solo si el script da una opción comodo.
 - **Nunca precio** (guardrails, regla 1). Nunca "está disponible" (guardrails, regla 2).
 - Al final, una sola pregunta que junta las dos: "¿Cuál os encaja más? También puedo enseñaros el plano o el recorrido 360°."
 - **Elección:** el espacio que elija el cliente va en `preferred_location` del envío (KNOWLEDGE §3.2, decisión 2), y desde ese momento se puede decir el nombre de su comercial (guardrails, "Nombre del comercial").
@@ -76,7 +77,7 @@ El LLM nunca cambia el orden ni añade espacios que el script no devuelve. **El 
 - Cliente: "Cena de empresa para 120 personas en marzo."
   Antes de recomendar: "¿Hasta qué hora más o menos?" Cliente: "Hasta las 00:00." El resultado del script no cambia.
   Script: Llum del Poblenou (`comodo`), Mirador de Montjuïc (`al_limite`).
-  Bien: tarjeta de Llum ("hasta 150 en banquete; pensado para cenas de gala") y tarjeta del Mirador con "Cabe justo; si podéis ser alguno más, mejor Llum".
+  Bien: tarjeta de Llum ("hasta 150 en banquete; pensado para cenas") y tarjeta del Mirador con "Cabe justo; si podéis ser alguno más, mejor Llum".
   Mal: recomendar la Nau del Besòs: se vería medio vacía. Mal: "Llum, ocupación 80 %".
 - Cliente: "Fiesta para 100 personas hasta las 3."
   Script: Mirador y Nau, ambos `bajo_60`, porque el horario descarta los demás.

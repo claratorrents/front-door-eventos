@@ -24,7 +24,7 @@ Validar el espacio que ha elegido el cliente (skill router-intenciones §3):
       --disposicion cocktail --dias 127
   Devuelve si encaja y, si no, TODOS los motivos (aforo, antelacion, horario)
   con el dato que falla, más las alternativas de la recomendación normal.
-  También avisos_zona, igual que la recomendación normal.
+  También avisos_zona y la foto de la tarjeta (foto_tarjeta), igual que la recomendación normal.
   descartados:  [{id, nombre, motivo, detalle}]    (solo por antelación u horario)
 
 Solo lee data/espacios.json. No da precios ni disponibilidad.
@@ -226,8 +226,10 @@ def validar_espacio(espacio_id, asistentes, disposicion, dias=None, hora_fin=Non
                         "detalle": f"acaba a las {reglas['max_end_time']}; se pide hasta las {hora_fin}"})
 
     encaja = not motivos
+    avisos_zona = avisos_de_zona(reglas, fin)
     resultado = {"espacio": esp["id"], "nombre": esp["name"], "encaja": encaja, "motivos": motivos,
-                 "avisos_zona": avisos_de_zona(reglas, fin)}
+                 "avisos_zona": avisos_zona,
+                 "foto": foto_tarjeta(esp, disposicion, {a["zona"] for a in avisos_zona})}
     if encaja:
         resultado["ocupacion"] = round(asistentes / aforo * 100)
         resultado["grupo"] = grupo(Fraction(asistentes, aforo))

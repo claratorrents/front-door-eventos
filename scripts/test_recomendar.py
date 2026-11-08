@@ -146,6 +146,16 @@ CASOS_VALIDAR_ZONA = [
      True, [{"zona": "terraza", "hasta": "23:30"}]),
 ]
 
+# Validar devuelve la foto de la tarjeta (foto_tarjeta): nunca de una zona con aviso
+CASOS_VALIDAR_FOTO = [
+    ("validar: Mirador, 100 cocktail, hasta las 01:00 → foto del salón (foto-02), no la de la terraza",
+     dict(espacio_id="sp-mirador-montjuic", asistentes=100, disposicion="cocktail", hora_fin="01:00"),
+     "mirador-montjuic-foto-02"),
+    ("validar: Llum, 120 banquet → foto de banquete (foto-01)",
+     dict(espacio_id="sp-llum-poblenou", asistentes=120, disposicion="banquet"),
+     "llum-poblenou-foto-01"),
+]
+
 
 def test_validar():
     fallos = 0
@@ -160,6 +170,13 @@ def test_validar():
         if not ok:
             fallos += 1
             print(f"      obtenido: {r}")
+    for nombre, args, foto in CASOS_VALIDAR_FOTO:
+        r = validar_espacio(**args)
+        ok = (r.get("foto") or {}).get("id") == foto
+        print(f"{'OK   ' if ok else 'FALLO'} {nombre}")
+        if not ok:
+            fallos += 1
+            print(f"      obtenido: {r.get('foto')}")
     for nombre, args, encaja, avisos in CASOS_VALIDAR_ZONA:
         r = validar_espacio(**args)
         ok = r["encaja"] == encaja and r.get("avisos_zona") == avisos
@@ -189,7 +206,7 @@ def main():
     fallos += test_fotos()
     fallos += test_media()
     fallos += test_validar()
-    total = len(CASOS) + 2 + len(CASOS_FOTO) + len(CASOS_MEDIA) + len(CASOS_VALIDAR) + len(CASOS_VALIDAR_ZONA)
+    total = len(CASOS) + 2 + len(CASOS_FOTO) + len(CASOS_MEDIA) + len(CASOS_VALIDAR) + len(CASOS_VALIDAR_ZONA) + len(CASOS_VALIDAR_FOTO)
     print(f"\n{total - fallos}/{total} casos correctos")
     sys.exit(1 if fallos else 0)
 
