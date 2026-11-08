@@ -64,4 +64,4 @@ Se aplica junto con guardrails y la skill de envío a n8n. Contexto en `KNOWLEDG
 - Cliente: "No, prefiero no dar mis datos." (a la pregunta de privacidad)
   Bien: "Sin problema, no guardamos tus datos. Gracias por tu consulta; si quieres que te respondamos, escríbenos a atencion@empresa-eventos.example." → `gdpr_consent: no`; la consulta se envía sin datos personales.
 - Cliente: "Borrad mis datos."
-  Bien: "Para eso escribe al equipo en atencion@empresa-eventos.example o llama al +34 930 000 000 (de lunes a sábado, de 9 a 18 h). Ellos lo gestionan."
+  Bien: "Para eso escribe al equipo en atencion@empresa-eventos.example o llama al +34 930 000 000 (de lunes a sábado, de 9 a 18 h). Ellos lo gestionan." → `escalar_humano`, `privacidad`
