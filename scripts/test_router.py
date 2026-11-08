@@ -11,25 +11,33 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from router import enrutar  # noqa: E402
 
-# (descripción, intenciones, opciones, comprobaciones)
+# (descripción, intenciones, opciones, comprobaciones). Esperados del equipo
+# (versión adaptada a n8n, KNOWLEDGE.md §3.2).
 CASOS = [
-    ("nuevo_evento → ruta lead, recomendador + cualificador", ["nuevo_evento"], {},
-     {"ruta": "lead", "skills_incluye": ["recomendador-espacios", "cualificador-leads"]}),
-    ("reserva → ruta reserva", ["reserva"], {}, {"ruta": "reserva"}),
-    ("cambio_reserva → escalar_humano, cambio_reserva, ruta cambio", ["cambio_reserva"], {},
-     {"decision": "escalar_humano", "motivo_escalado": "cambio_reserva", "ruta": "cambio"}),
-    ("queja + nuevo_evento → [queja, nuevo_evento], ruta incidencia", ["queja", "nuevo_evento"], {},
-     {"intenciones": ["queja", "nuevo_evento"], "ruta": "incidencia"}),
-    ("informacion + privacidad → [privacidad, informacion], ruta privacidad", ["informacion", "privacidad"], {},
-     {"intenciones": ["privacidad", "informacion"], "ruta": "privacidad"}),
-    ("persona sin tema → ruta incidencia", ["persona"], {}, {"ruta": "incidencia"}),
-    ("persona con tema lead → ruta lead", ["persona"], {"ruta_tema": "lead"}, {"ruta": "lead"}),
-    ("fuera_tema → ruta fuera_tema", ["fuera_tema"], {}, {"ruta": "fuera_tema"}),
-    # Ronda 2
-    ("queja + nuevo_evento → ruta incidencia, rutas_adicionales [lead]", ["queja", "nuevo_evento"], {},
-     {"ruta": "incidencia", "rutas_adicionales": ["lead"]}),
+    ("nuevo_evento → ruta lead, guardrails + recomendador + cualificador, si toca media + consentimiento, a_n8n true",
+     ["nuevo_evento"], {},
+     {"ruta": "lead", "skills": ["guardrails", "recomendador-espacios", "cualificador-leads"],
+      "skills_si_toca": ["media-espacios", "consentimiento"], "a_n8n": True}),
+    ("cambio_reserva → escalar_humano, cambio_reserva, ruta cambio, solo guardrails, a_n8n false",
+     ["cambio_reserva"], {},
+     {"decision": "escalar_humano", "motivo_escalado": "cambio_reserva", "ruta": "cambio",
+      "skills": ["guardrails"], "skills_si_toca": [], "a_n8n": False}),
+    ("queja + nuevo_evento → [queja, nuevo_evento], ruta incidencia, rutas_adicionales [lead], a_n8n true",
+     ["queja", "nuevo_evento"], {},
+     {"intenciones": ["queja", "nuevo_evento"], "ruta": "incidencia", "rutas_adicionales": ["lead"], "a_n8n": True}),
+    ("persona sin tema → ruta incidencia, accion contacto_equipo, a_n8n false", ["persona"], {},
+     {"ruta": "incidencia", "accion": "contacto_equipo", "a_n8n": False}),
     ("persona + nuevo_evento → ruta lead", ["persona", "nuevo_evento"], {}, {"ruta": "lead"}),
-    ("reserva → incluye recomendador", ["reserva"], {}, {"skills_incluye": ["recomendador-espacios"]}),
+    ("persona --consulta-en-marcha → accion ofrecer_envio, a_n8n true", ["persona"], {"consulta_en_marcha": True},
+     {"accion": "ofrecer_envio", "a_n8n": True}),
+    ("privacidad + informacion → [privacidad, informacion], ruta privacidad, incluye consentimiento",
+     ["privacidad", "informacion"], {},
+     {"intenciones": ["privacidad", "informacion"], "ruta": "privacidad", "skills_incluye": ["consentimiento"]}),
+    ("fuera_tema → ruta fuera_tema, a_n8n false", ["fuera_tema"], {}, {"ruta": "fuera_tema", "a_n8n": False}),
+]
+ERRORES = [
+    ("reserva → error (ya no es una intención)", ["reserva"]),
+    ("intención fuera de la lista → error", ["comprar_entradas"]),
 ]
 
 
@@ -48,16 +56,17 @@ def main():
             fallos += 1
             print(f"      esperado: {esperado}\n      obtenido: {r}")
 
-    # Intención fuera de la lista → error
-    try:
-        enrutar(["comprar_entradas"])
-        ok = False
-    except ValueError:
-        ok = True
-    print(f"{'OK   ' if ok else 'FALLO'} intención fuera de la lista → error")
-    fallos += 0 if ok else 1
+    # Intenciones fuera de la lista → error
+    for nombre, intenciones in ERRORES:
+        try:
+            enrutar(intenciones)
+            ok = False
+        except ValueError:
+            ok = True
+        print(f"{'OK   ' if ok else 'FALLO'} {nombre}")
+        fallos += 0 if ok else 1
 
-    total = len(CASOS) + 1
+    total = len(CASOS) + len(ERRORES)
     print(f"\n{total - fallos}/{total} casos correctos")
     sys.exit(1 if fallos else 0)
 

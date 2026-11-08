@@ -255,7 +255,7 @@ Fijar estos campos desde el principio. Cambiarlos a mitad es el fallo más habit
 |---|---|
 | id_conversacion | conv-0012 |
 | fecha_hora | 2026-11-04T21:30:00+01:00 |
-| ruta | informacion / lead / reserva / cambio / incidencia / privacidad / fuera_tema |
+| ruta | informacion / lead / cambio / incidencia / privacidad / fuera_tema (`reserva` se quitó: se junta con `lead`, §3.2 decisión 8) |
 | rutas_adicionales | lista con las rutas de las demás intenciones del mensaje; el dashboard cuenta un lead si lead aparece en ruta o en rutas_adicionales |
 | tipo_evento | cena de empresa |
 | asistentes | 120 |
@@ -411,7 +411,7 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 ### Pendiente inmediato
 - [ ] Decidir el nombre de la empresa.
 - [ ] Paso 2 de la integración con n8n (adaptar el proyecto a la §3.2), en 8 puntos: 1. `AGENTS.md` y `KNOWLEDGE.md` · 2. consentimiento · 3. cualificador · 4. router · 5. guardrails · 6. recomendador · 7. skill nueva de envío a n8n · 8. regenerar el plugin y prueba completa.
-  - Hecho: 1 (`747b8ab`, `af71d87`); 2, consentimiento versión 3 (`f80294f`, `0405c3e`); 3, cualificador con `scripts/datos_consulta.py`, que ya no puntúa (corrección 09).
+  - Hecho: 1 (`747b8ab`, `af71d87`); 2, consentimiento versión 3 (`f80294f`, `0405c3e`); 3, cualificador con `scripts/datos_consulta.py`, que ya no puntúa (`8d1ce27`, corrección 09); 4, router sin la intención `reserva`, con `a_n8n` y `--consulta-en-marcha` (corrección 10).
   - **Pendiente del punto 7 (skill de envío a n8n), decidido el 8 de noviembre** (sale de la prueba 03 de consentimiento):
     - Sin "sí" a la privacidad: `marketing_consent: no`.
     - Si el cliente no contesta a la publicidad o cierra el chat: se envía con `marketing_consent: no`.
