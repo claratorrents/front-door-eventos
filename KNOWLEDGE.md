@@ -30,7 +30,7 @@ Conocimiento acumulado del proyecto: enunciado, decisiones del grupo, cómo trab
 
 Chatbot para una **empresa que alquila espacios para eventos**. Atiende a quien entra en la web, entiende qué quiere y lo resuelve o lo pasa a la persona adecuada.
 
-- **Controla:** espacios, inventario (sillas, mesas, audiovisuales, catering), media (fotos, vídeos, planos, tours 360°), consentimiento y guardrails. Recoge cada consulta y la envía a n8n al final; la reserva la cierra el comercial en la llamada (§3.2).
+- **Controla:** espacios, inventario (sillas, mesas, audiovisuales, catering), media (fotos, vídeos, planos, tours 360°), consentimiento y guardrails. Recoge cada consulta y la envía a n8n al final; la reserva la cierra el comercial (§3.2).
 - **Nombre de la empresa:** pendiente (se usará `[EMPRESA]` hasta decidirlo).
 - **Datos:** solo sintéticos (RGPD).
 
@@ -160,8 +160,8 @@ Ruta estrella de la demo: **consulta → recomendación con fotos → elige espa
 | decision | Cuándo | Quién lo recibe | Plazo |
 |---|---|---|---|
 | `ninguna` | Respuesta normal, sin escalar | — | — |
-| ~~`consulta_disponibilidad`~~ | **Sustituido por §3.2:** no se comprueba disponibilidad. Si preguntan: "lo confirma el comercial en la llamada" | — | — |
-| `pendiente_confirmar` | Pregunta sin dato en el catálogo (accesibilidad, horario interior…) | Dentro de una consulta: va al `message` del envío. Fuera: el chatbot da el contacto del equipo | Dentro: "Lo confirmará el comercial en la llamada." Fuera: sin plazos. Antes: equipo de atención en 24 h laborables (sustituido por §3.2) |
+| ~~`consulta_disponibilidad`~~ | **Sustituido por §3.2:** no se comprueba disponibilidad. Si preguntan: "lo confirma el comercial cuando te contacte" | — | — |
+| `pendiente_confirmar` | Pregunta sin dato en el catálogo (accesibilidad, horario interior…) | Dentro de una consulta: va al `message` del envío. Fuera: el chatbot da el contacto del equipo | Dentro: "Lo confirmará el comercial cuando te contacte." Fuera: sin plazos. Antes: equipo de atención en 24 h laborables (sustituido por §3.2) |
 | ~~`prerreserva`~~ | **Sustituido por §3.2:** no hay bloqueos | — | — |
 | `escalar_comercial` | Descuentos, catering, extras, excepciones, permisos | Dentro de una consulta: va resumido en el `message` del envío y el comercial lo ve en su resumen de n8n (§3.2, decisión 6). Antes: comercial del espacio o David Ramos | Sin plazo en horas: "Lo verás con el comercial cuando te contacte." Antes: 24 h laborables (sustituido por §3.2) |
 | `escalar_humano` | Quejas, legal, cambios de reserva, mensajes ofensivos repetidos | Fuera de una consulta: el chatbot da el contacto del equipo; no va a n8n (§3.2, decisión 7) | **Sin plazos** (decisión 7). Antes: 24 h laborables |
@@ -171,7 +171,7 @@ Ruta estrella de la demo: **consulta → recomendación con fotos → elige espa
 - Ofensivo: primer mensaje, aviso y sigue (`ninguna`); si repite, cierra y `escalar_humano`.
 - Contacto del equipo de atención: atencion@empresa-eventos.example · +34 930 000 000 (lunes a sábado, de 9 a 18 h)
 - Frustración: el cliente dice que no le entendemos o repite la misma petición dos veces.
-- Disponibilidad: nunca se comprueba. Si preguntan: "lo confirma el comercial en la llamada" (§3.2, decisión 4). Antes: "Según el calendario, ese día parece libre…" con dato de n8n (sustituido por §3.2).
+- Disponibilidad: nunca se comprueba. Si preguntan: "lo confirma el comercial cuando te contacte" (§3.2, decisión 4). Antes: "Según el calendario, ese día parece libre…" con dato de n8n (sustituido por §3.2).
 
 - "Lo compruebo" y "lo confirmo" siempre llevan su `decision` y dicen quién responde, sin plazos en horas. Dentro de una consulta: "Lo verás con el comercial cuando te contacte."; fuera, el contacto del equipo (§3.2, decisión 7).
 - Para enviar la consulta, el **email es obligatorio**; el teléfono es opcional (§3.2, decisión 5). Se pide con consentimiento. Si el cliente no da email, se le dan los datos del equipo: atencion@empresa-eventos.example · +34 930 000 000. Antes: se ofrecía una vez la alternativa entre teléfono y email (sustituido por §3.2). Y se aprovecha para seguir cualificando.
@@ -199,7 +199,7 @@ Documentos de Ale en `n8n/`: contrato del webhook, explicación del flujo, JSON 
 1. **Un solo catálogo:** los 6 espacios de `data/espacios.json`. Ale los copia a su hoja "IE007 – Database" (pestañas Spaces y Reps).
 2. **El chat recomienda y enseña los espacios con fotos.** Si el cliente elige uno, su nombre va en `preferred_location`, para que n8n asigne ese mismo espacio.
 3. **La puntuación oficial es la de n8n** (es la que decide el email al cliente). El cualificador del chat solo decide qué preguntar; su puntuación no se envía ni decide nada.
-4. **Fuera el bloqueo de 72 h y las skills 5 y 6.** El siguiente paso es la llamada por Calendly. El chatbot nunca comprueba disponibilidad: si preguntan, "lo confirma el comercial en la llamada".
+4. **Fuera el bloqueo de 72 h y las skills 5 y 6.** El siguiente paso es la llamada por Calendly. El chatbot nunca comprueba disponibilidad: si preguntan, "lo confirma el comercial cuando te contacte".
 5. **Email obligatorio** para enviar la consulta. Quejas, cambios de reserva, privacidad y fuera de tema **no van a n8n**: el chatbot da el contacto del equipo (skills guardrails y consentimiento).
 
 **Más decisiones (8 de noviembre)**
