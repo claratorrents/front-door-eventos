@@ -82,7 +82,7 @@
         {
           "id": "llum-poblenou-plano",
           "type": "plano",
-          "url": "/media/placeholders/llum-poblenou/plano.pdf",
+          "url": "/media/placeholders/llum-poblenou/plano.svg",
           "description": "Plano de planta con accesos, salidas y zona de carga",
           "illustrative": true,
           "approved": true
@@ -169,7 +169,7 @@
         {
           "id": "jardi-gracia-plano",
           "type": "plano",
-          "url": "/media/placeholders/jardi-gracia/plano.pdf",
+          "url": "/media/placeholders/jardi-gracia/plano.svg",
           "description": "Plano de la casa y del patio con accesos",
           "illustrative": true,
           "approved": true
@@ -269,7 +269,7 @@
         {
           "id": "mirador-montjuic-plano",
           "type": "plano",
-          "url": "/media/placeholders/mirador-montjuic/plano.pdf",
+          "url": "/media/placeholders/mirador-montjuic/plano.svg",
           "description": "Plano del pabellón, la terraza y el parking",
           "illustrative": true,
           "approved": true
@@ -354,7 +354,7 @@
         {
           "id": "atelier-sant-antoni-plano",
           "type": "plano",
-          "url": "/media/placeholders/atelier-sant-antoni/plano.pdf",
+          "url": "/media/placeholders/atelier-sant-antoni/plano.svg",
           "description": "Plano del estudio con el rincón de café",
           "illustrative": true,
           "approved": true
@@ -440,7 +440,7 @@
         {
           "id": "forum-les-corts-plano",
           "type": "plano",
-          "url": "/media/placeholders/forum-les-corts/plano.pdf",
+          "url": "/media/placeholders/forum-les-corts/plano.svg",
           "description": "Plano con paneles divisorios, cabina técnica y foyer",
           "illustrative": true,
           "approved": true
@@ -527,7 +527,7 @@
         {
           "id": "nau-besos-plano",
           "type": "plano",
-          "url": "/media/placeholders/nau-besos/plano.pdf",
+          "url": "/media/placeholders/nau-besos/plano.svg",
           "description": "Plano de la nave con acceso de camiones y cuadro eléctrico",
           "illustrative": true,
           "approved": true
