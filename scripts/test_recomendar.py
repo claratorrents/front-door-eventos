@@ -139,6 +139,13 @@ CASOS_VALIDAR = [
      False, {"antelacion": ("necesita_dias", 14)}, None),
 ]
 
+# Validar con horario por zona (adaptación a n8n): --validar devuelve avisos_zona
+CASOS_VALIDAR_ZONA = [
+    ("validar: Mirador, 100 banquet, hasta las 01:00 → encaja, con aviso de la terraza (23:30)",
+     dict(espacio_id="sp-mirador-montjuic", asistentes=100, disposicion="banquet", hora_fin="01:00"),
+     True, [{"zona": "terraza", "hasta": "23:30"}]),
+]
+
 
 def test_validar():
     fallos = 0
@@ -149,6 +156,13 @@ def test_validar():
         ok &= all(obtenidos[m][campo] == valor for m, (campo, valor) in motivos.items() if m in obtenidos)
         if alternativas is not None:
             ok &= [x["id"] for x in r.get("alternativas", [])] == alternativas
+        print(f"{'OK   ' if ok else 'FALLO'} {nombre}")
+        if not ok:
+            fallos += 1
+            print(f"      obtenido: {r}")
+    for nombre, args, encaja, avisos in CASOS_VALIDAR_ZONA:
+        r = validar_espacio(**args)
+        ok = r["encaja"] == encaja and r.get("avisos_zona") == avisos
         print(f"{'OK   ' if ok else 'FALLO'} {nombre}")
         if not ok:
             fallos += 1
@@ -175,7 +189,7 @@ def main():
     fallos += test_fotos()
     fallos += test_media()
     fallos += test_validar()
-    total = len(CASOS) + 2 + len(CASOS_FOTO) + len(CASOS_MEDIA) + len(CASOS_VALIDAR)
+    total = len(CASOS) + 2 + len(CASOS_FOTO) + len(CASOS_MEDIA) + len(CASOS_VALIDAR) + len(CASOS_VALIDAR_ZONA)
     print(f"\n{total - fallos}/{total} casos correctos")
     sys.exit(1 if fallos else 0)
 
