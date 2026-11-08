@@ -2,3 +2,6 @@
 .env
 .env.*
 __pycache__/
+
+# Documentos de n8n con credenciales: nunca al repositorio
+n8n/*setup guide*

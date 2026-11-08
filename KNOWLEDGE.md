@@ -188,7 +188,62 @@ Ruta estrella de la demo: **consulta → cualificación → recomendación → b
 - n8n: si el cliente retira el permiso, borrar también sus datos del Sheet.
 - Media: las 12 fotos están en media/placeholders/ (ilustrativas, generadas con IA). Faltan los planos (SVG) y la página del tour 360°, que se hacen con el chat web.
 
-### Resumen estructurado de cada conversación (contrato app → n8n → Sheets)
+### 3.2 Integración con el flujo de n8n de Ale (8 de noviembre)
+Documentos de Ale en `n8n/`: contrato del webhook, explicación del flujo, JSON del flujo (v1) y diagrama. La guía de Amit lleva credenciales y está en `.gitignore`: nunca se sube.
+
+**Qué hace cada parte**
+| Parte | Hace | No hace |
+|---|---|---|
+| Chatbot (Claude Code) | Atiende, recomienda espacios con fotos, recoge los datos, pide consentimiento y, al final, envía la consulta a n8n | Puntuación oficial, bloqueos, disponibilidad, emails |
+| n8n (Ale) | Guarda, valida, completa datos con IA, asigna espacio y comercial, puntúa, envía al cliente un email con enlace de Calendly, avisa al comercial y lo registra todo en Google Sheets (pestañas Enquiries, Processing log y Sentiment log) | — |
+| Comercial | Llamada con el cliente (Calendly) y cierre de la reserva | — |
+
+**Las 5 decisiones del equipo**
+1. **Un solo catálogo:** los 6 espacios de `data/espacios.json`. Ale los copia a su hoja "IE007 – Database" (pestañas Spaces y Reps).
+2. **El chat recomienda y enseña los espacios con fotos.** Si el cliente elige uno, su nombre va en `preferred_location`, para que n8n asigne ese mismo espacio.
+3. **La puntuación oficial es la de n8n** (es la que decide el email al cliente). El cualificador del chat solo decide qué preguntar; su puntuación no se envía ni decide nada.
+4. **Fuera el bloqueo de 72 h y las skills 5 y 6.** El siguiente paso es la llamada por Calendly. El chatbot nunca comprueba disponibilidad: si preguntan, "lo confirma el comercial en la llamada".
+5. **Email obligatorio** para enviar la consulta. Quejas, cambios de reserva, privacidad y fuera de tema **no van a n8n**: el chatbot da el contacto del equipo (skills guardrails y consentimiento).
+
+**Cuándo se envía**
+- Una sola vez por consulta, al final de una ruta `lead` o `reserva`, cuando el cliente ha dado nombre y email y ha respondido a la pregunta de privacidad.
+- Si se envía dos veces, el cliente recibe dos emails: nunca se reenvía, salvo un único reintento si no hubo respuesta (mismo `lead_id`).
+
+**Contrato del webhook (sustituye al contrato anterior)**
+POST a `N8N_WEBHOOK_URL` con las cabeceras `Content-Type: application/json` y `X-API-Key: N8N_API_KEY`. Los 15 campos van siempre, como texto; si no se conoce un dato, `""`.
+
+| Campo | Qué envía el chatbot |
+|---|---|
+| `lead_id` | `CB-` + AAAAMMDD-HHMMSS + 4 caracteres aleatorios. Único, nunca se reutiliza |
+| `timestamp` | Fecha y hora real, ISO 8601 en UTC |
+| `name` | Nombre y apellidos (obligatorio) |
+| `email` | Email del cliente (obligatorio) |
+| `company` | Empresa, si es corporativo |
+| `phone` | Teléfono con prefijo, si lo da |
+| `preferred_location` | El espacio elegido (p. ej. "Llum del Poblenou"); si no eligió, la zona que dijo; si no, `""` |
+| `event_type` | Tipo de evento, en palabras del cliente |
+| `event_date` | AAAA-MM-DD solo si hay día exacto; si solo dijo el mes, `""` (n8n lo lee de la conversación) |
+| `guests` | Asistentes, como los dijo (número o rango) |
+| `budget_eur` | Presupuesto, como lo dijo (número o rango) |
+| `message` | Lo que pide, en sus palabras (extras, necesidades) |
+| `conversation` | Transcripción completa, una línea por turno empezando por `Bot:` o `Client:`, separadas por `\n`, con tarjetas, IBAN y DNI tapados |
+| `gdpr_consent` | `yes` / `no` |
+| `marketing_consent` | `yes` / `no` |
+
+**Respuestas de n8n**
+| Respuesta | Qué hace el chatbot |
+|---|---|
+| 202 | "Gracias. El equipo te escribirá por email en breve." (en el idioma del cliente) |
+| 403 / 404 | No reintenta. "El equipo contactará contigo igualmente." Se registra el error en el log del servidor |
+| Sin respuesta en 10 s | Un único reintento con el mismo `lead_id` |
+
+**Reglas que no se saltan**
+- La URL y la clave solo en variables de entorno (`N8N_WEBHOOK_URL`, `N8N_API_KEY`), en el servidor. Nunca en el navegador, el código, el repositorio ni el chat.
+- Mientras Amit no pase la URL y la clave, el envío se **simula** (respuesta 202 SIMULADA) con el mismo formato.
+- En pruebas reales, solo emails de prueba de Ale (`alejandro+ie007-xxx@alelabs.es`), nunca datos reales.
+- **Por confirmar con Ale:** si el cliente dice "no" a la privacidad, proponemos enviar la consulta **sin** nombre, email, teléfono ni empresa (con `gdpr_consent: no`), para que quede contada sin guardar datos personales.
+
+### Resumen estructurado de cada conversación (ANTERIOR: sustituido por el contrato de la §3.2; se conserva como referencia de los datos internos del chat)
 Fijar estos campos desde el principio. Cambiarlos a mitad es el fallo más habitual.
 
 | Campo | Ejemplo |
