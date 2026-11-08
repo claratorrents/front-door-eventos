@@ -415,7 +415,7 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
   - **Pendiente del punto 7 (skill de envío a n8n), decidido el 8 de noviembre** (sale de la prueba 03 de consentimiento):
     - Sin "sí" a la privacidad: `marketing_consent: no`.
     - Si el cliente no contesta a la publicidad o cierra el chat: se envía con `marketing_consent: no`.
-    - Tras un "no" a la privacidad, la frase es: "Gracias por tu consulta. Si quieres que te respondamos, escríbenos a atencion@empresa-eventos.example".
+    - Tras un "no" a la privacidad, un solo mensaje: "Sin problema, no guardamos tus datos. Gracias por tu consulta; si quieres que te respondamos, escríbenos a atencion@empresa-eventos.example." (consentimiento §4).
     - Sin consentimiento, en `conversation` se tapan nombre, email, teléfono y empresa.
     - Solo teléfono (acepta pero no da email): se envía sin datos personales, como un "no", y se le da el teléfono del equipo.
     - Campos del registro anónimo (`registros/conversaciones.jsonl`, decisión 11): se fijan en el punto 7.

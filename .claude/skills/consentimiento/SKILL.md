@@ -29,8 +29,8 @@ Se aplica junto con guardrails y la skill de envío a n8n. Contexto en `KNOWLEDG
   "Para que el equipo te envíe la propuesta necesito tu nombre y tu email. ¿Aceptas que los usemos solo para gestionar tu consulta, según nuestra política de privacidad?"
 - Solo cuenta un "sí" claro → `gdpr_consent: yes`. Silencio, "vale, ¿y el precio?" o cambiar de tema no son un sí.
 - **Si el cliente da su email antes de que se lo pidamos:** no se usa hasta que responda a la pregunta de privacidad.
-- **Si dice que no** → `gdpr_consent: no`: "Sin problema. Si cambias de idea, me lo dices; también puedes escribir al equipo en atencion@empresa-eventos.example." La consulta se envía **sin** nombre, email, teléfono ni empresa (por confirmar con Ale; KNOWLEDGE §3.2).
-- **Si acepta pero no quiere dar el email** (solo teléfono): sin email no se puede enviar. "Sin email el equipo no puede enviarte la propuesta. Si prefieres, llámanos al +34 930 000 000." No se envía nada.
+- Si dice que no → gdpr_consent: no. Un solo mensaje: 'Sin problema, no guardamos tus datos. Gracias por tu consulta; si quieres que te respondamos, escríbenos a atencion@empresa-eventos.example.' La consulta se envía sin nombre, email, teléfono ni empresa, y esos datos se tapan en la conversación (por confirmar con Ale; KNOWLEDGE §3.2).
+- Si acepta pero no quiere dar el email (solo teléfono): 'Sin email el equipo no puede enviarte la propuesta. Si prefieres, llámanos al +34 930 000 000.' La consulta se envía como un 'no' (sin datos personales), para que quede contada.
 
 ## 5. Publicidad (aparte y opcional)
 - Se pregunta **una sola vez**, justo después del "sí" a la privacidad y antes del envío:
@@ -59,6 +59,8 @@ Se aplica junto con guardrails y la skill de envío a n8n. Contexto en `KNOWLEDG
 - Cliente: "Mi email es ana@ejemplo.example, ¿cuánto cuesta el Llum?" (antes de la pregunta de privacidad)
   Bien: "El precio te lo prepara el comercial en una propuesta a medida. Antes de usar tu email te preguntaré si aceptas nuestra política de privacidad. ¿Cuántos asistentes seríais?"
 - Cliente: "Prefiero no dar mi email, llamadme al 600 000 099."
-  Bien: "Sin email el equipo no puede enviarte la propuesta. Si prefieres, llámanos al +34 930 000 000."
+  Bien: "Sin email el equipo no puede enviarte la propuesta. Si prefieres, llámanos al +34 930 000 000." → la consulta se envía como un 'no' (sin datos personales).
+- Cliente: "No, prefiero no dar mis datos." (a la pregunta de privacidad)
+  Bien: "Sin problema, no guardamos tus datos. Gracias por tu consulta; si quieres que te respondamos, escríbenos a atencion@empresa-eventos.example." → `gdpr_consent: no`; la consulta se envía sin datos personales.
 - Cliente: "Borrad mis datos."
   Bien: "Para eso escribe al equipo en atencion@empresa-eventos.example o llama al +34 930 000 000 (de lunes a sábado, de 9 a 18 h). Ellos lo gestionan."
