@@ -202,7 +202,7 @@ Documentos de Ale en `n8n/`: contrato del webhook, explicación del flujo, JSON 
 4. **Fuera el bloqueo de 72 h y las skills 5 y 6.** El siguiente paso es la llamada por Calendly. El chatbot nunca comprueba disponibilidad: si preguntan, "lo confirma el comercial en la llamada".
 5. **Email obligatorio** para enviar la consulta. Quejas, cambios de reserva, privacidad y fuera de tema **no van a n8n**: el chatbot da el contacto del equipo (skills guardrails y consentimiento).
 
-**Cuatro decisiones más (8 de noviembre)**
+**Más decisiones (8 de noviembre)**
 6. **Escalados dentro de una consulta** (descuento, catering, extras a medida, excepciones, permisos): no se escalan aparte. Se resumen en el campo `message` del envío y el comercial los ve en su resumen de n8n.
 7. **Escalados fuera de una consulta** (queja, cambio de reserva, privacidad, petición de hablar con una persona sin consulta en marcha): el chatbot da el contacto del equipo (atencion@empresa-eventos.example · +34 930 000 000) y **no promete plazos**, porque ningún canal lleva el caso.
 8. **La intención `reserva` se junta con `nuevo_evento`:** no hay bloqueos, y el espacio elegido viaja en `preferred_location`.
