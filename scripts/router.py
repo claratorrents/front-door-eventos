@@ -46,7 +46,8 @@ TABLA = {
               "decision": "escalar_humano", "motivo": "queja",
               "accion": "contacto_equipo", "a_n8n": False, "ruta": "incidencia"},
     "privacidad": {"skills": ["consentimiento"], "skills_si_toca": [],
-                   "decision": None, "motivo": None, "accion": None, "a_n8n": False, "ruta": "privacidad"},
+                   "decision": "escalar_humano", "motivo": "privacidad",
+                   "accion": None, "a_n8n": False, "ruta": "privacidad"},
     # persona: accion y a_n8n dependen de si hay una consulta en marcha (ver enrutar)
     "persona": {"skills": [], "skills_si_toca": [],
                 "decision": "escalar_humano", "motivo": "peticion_humano",

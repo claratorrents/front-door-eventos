@@ -55,7 +55,7 @@ Se aplica antes que las demás skills, en cada mensaje del cliente. Contexto en 
 - Se responde primero a la más prioritaria y se retoma lo demás en el mismo mensaje.
 - La `ruta` registrada es la de la más prioritaria; las demás van en `rutas_adicionales`.
 - Si `persona` va con otra intención, la ruta del tema es la de esa otra intención.
-- **Queja y evento nuevo:** la queja no va a n8n; la consulta nueva sigue su camino normal. "Siento que la última cena no saliera bien. Para la reclamación, escribe al equipo en atencion@empresa-eventos.example o llama al +34 930 000 000. Y sobre la nueva cena, ¿para cuántas personas sería?"
+- **Queja y evento nuevo:** la queja no va a n8n; la consulta nueva sigue su camino normal. "Siento que la última cena no saliera bien. Para la reclamación, escribe al equipo en atencion@empresa-eventos.example o llama al +34 930 000 000 (de lunes a sábado, de 9 a 18 h). Y sobre la nueva cena, ¿para cuántas personas sería?"
 
 ## 6. Si duda
 - Si el mensaje encaja en dos intenciones que llevan a **acciones distintas**, se pregunta en vez de suponer, con opciones concretas: "¿Quieres organizar un evento nuevo o es sobre una reserva que ya tienes?"

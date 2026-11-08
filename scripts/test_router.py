@@ -35,6 +35,8 @@ CASOS = [
     ("privacidad + informacion → [privacidad, informacion], ruta privacidad, incluye consentimiento",
      ["privacidad", "informacion"], {},
      {"intenciones": ["privacidad", "informacion"], "ruta": "privacidad", "skills_incluye": ["consentimiento"]}),
+    ("privacidad → escalar_humano, motivo privacidad", ["privacidad"], {},
+     {"decision": "escalar_humano", "motivo_escalado": "privacidad", "ruta": "privacidad"}),
     ("fuera_tema → ruta fuera_tema, a_n8n false", ["fuera_tema"], {}, {"ruta": "fuera_tema", "a_n8n": False}),
 ]
 ERRORES = [

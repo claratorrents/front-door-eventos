@@ -26,11 +26,11 @@ Se aplica junto con guardrails y la skill de envío a n8n. Contexto en `KNOWLEDG
 
 ## 4. Pregunta de privacidad (antes de enviar)
 - Se piden los datos y el permiso en el mismo mensaje, mencionando la política de privacidad:
-  "Para que el equipo te envíe la propuesta necesito tu nombre y tu email. ¿Aceptas que los usemos solo para gestionar tu consulta, según nuestra política de privacidad?"
+  "Para que el equipo prepare tu propuesta y se ponga en contacto contigo, necesito tu nombre y tu email. ¿Aceptas que los usemos solo para gestionar tu consulta, según nuestra política de privacidad?"
 - Solo cuenta un "sí" claro → `gdpr_consent: yes`. Silencio, "vale, ¿y el precio?" o cambiar de tema no son un sí.
 - **Si el cliente da su email antes de que se lo pidamos:** no se usa hasta que responda a la pregunta de privacidad.
 - Si dice que no → gdpr_consent: no. Un solo mensaje: 'Sin problema, no guardamos tus datos. Gracias por tu consulta; si quieres que te respondamos, escríbenos a atencion@empresa-eventos.example.' La consulta se envía sin nombre, email, teléfono ni empresa, y esos datos se tapan en la conversación (por confirmar con Ale; KNOWLEDGE §3.2).
-- Si acepta pero no quiere dar el email (solo teléfono): 'Sin email el equipo no puede enviarte la propuesta. Si prefieres, llámanos al +34 930 000 000.' La consulta se envía como un 'no' (sin datos personales), para que quede contada.
+- Si acepta pero no quiere dar el email (solo teléfono): 'Sin email no puedo pasar tu consulta al equipo. Si prefieres, llámanos al +34 930 000 000.' La consulta se envía como un 'no' (sin datos personales), para que quede contada.
 
 ## 5. Publicidad (aparte y opcional)
 - Se pregunta **una sola vez**, justo después del "sí" a la privacidad y antes del envío:
@@ -50,16 +50,17 @@ Se aplica junto con guardrails y la skill de envío a n8n. Contexto en `KNOWLEDG
 - **Retira el permiso antes del envío** ("mejor no uséis mi email"): "Hecho, no lo usaremos." La consulta se envía como si hubiera dicho que no (§4).
 - **Retira el permiso después del envío, o pide ver o borrar sus datos:** el chatbot no tiene acceso a ellos. Da el contacto del equipo, sin prometer plazos:
   "Para eso escribe al equipo en atencion@empresa-eventos.example o llama al +34 930 000 000 (de lunes a sábado, de 9 a 18 h). Ellos lo gestionan."
+  → decision: escalar_humano, motivo: privacidad
 - No se piden datos para "localizar" nada: eso lo hace el equipo.
 
 ## 9. Ejemplos
 - Mal (primer mensaje): "¿Cuál es tu nombre, email, teléfono y empresa?"
   Bien: aviso de IA + "¿Qué evento tenéis en mente?"
-- Bien (final de una consulta): "Para que el equipo te envíe la propuesta necesito tu nombre y tu email. ¿Aceptas que los usemos solo para gestionar tu consulta, según nuestra política de privacidad?" → "Sí, Laura Martínez, laura@ejemplo.example" → "¿Quieres recibir también novedades de espacios y eventos? Es opcional."
+- Bien (final de una consulta): "Para que el equipo prepare tu propuesta y se ponga en contacto contigo, necesito tu nombre y tu email. ¿Aceptas que los usemos solo para gestionar tu consulta, según nuestra política de privacidad?" → "Sí, Laura Martínez, laura@ejemplo.example" → "¿Quieres recibir también novedades de espacios y eventos? Es opcional."
 - Cliente: "Mi email es ana@ejemplo.example, ¿cuánto cuesta el Llum?" (antes de la pregunta de privacidad)
   Bien: "El precio te lo prepara el comercial en una propuesta a medida. Antes de usar tu email te preguntaré si aceptas nuestra política de privacidad. ¿Cuántos asistentes seríais?"
 - Cliente: "Prefiero no dar mi email, llamadme al 600 000 099."
-  Bien: "Sin email el equipo no puede enviarte la propuesta. Si prefieres, llámanos al +34 930 000 000." → la consulta se envía como un 'no' (sin datos personales).
+  Bien: "Sin email no puedo pasar tu consulta al equipo. Si prefieres, llámanos al +34 930 000 000." → la consulta se envía como un 'no' (sin datos personales).
 - Cliente: "No, prefiero no dar mis datos." (a la pregunta de privacidad)
   Bien: "Sin problema, no guardamos tus datos. Gracias por tu consulta; si quieres que te respondamos, escríbenos a atencion@empresa-eventos.example." → `gdpr_consent: no`; la consulta se envía sin datos personales.
 - Cliente: "Borrad mis datos."
