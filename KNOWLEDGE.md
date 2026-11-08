@@ -186,7 +186,7 @@ Ruta estrella de la demo: **consulta → cualificación → recomendación → b
 - Chat web: tapar tarjetas, IBAN y DNI siempre, y email y teléfono si no hay permiso, antes de guardar la conversación o enviarla a n8n.
 - Chat web: usar la hora real para saber si se está en horario de atención.
 - n8n: si el cliente retira el permiso, borrar también sus datos del Sheet.
-- Media: generar las fotos como imágenes ilustrativas con IA, y que Claude Code cree los planos (SVG) y una página sencilla para el tour 360°. Se hace con el chat web.
+- Media: las 12 fotos están en media/placeholders/ (ilustrativas, generadas con IA). Faltan los planos (SVG) y la página del tour 360°, que se hacen con el chat web.
 
 ### Resumen estructurado de cada conversación (contrato app → n8n → Sheets)
 Fijar estos campos desde el principio. Cambiarlos a mitad es el fallo más habitual.

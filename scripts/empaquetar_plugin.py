@@ -12,6 +12,7 @@ Qué genera:
     skills/<skill>/SKILL.md       las skills de .claude/skills/, con las rutas adaptadas
     scripts/*.py                  los scripts del proyecto, sin los tests
     data/*.json                   los datos de data/
+    media/                        las fotos (validar_datos.py comprueba que existen)
     KNOWLEDGE.md, AGENTS.md       el contexto del proyecto
     README.md
   .claude-plugin/marketplace.json marketplace del repositorio (en la raíz)
@@ -43,6 +44,7 @@ MARCA = DESTINO / ".generado-por-empaquetar"  # solo se borra una carpeta que ha
 ORIGEN_SKILLS = RAIZ / ".claude" / "skills"
 ORIGEN_SCRIPTS = RAIZ / "scripts"
 ORIGEN_DATOS = RAIZ / "data"
+ORIGEN_MEDIA = RAIZ / "media"
 EXCLUIR_SCRIPTS = {"empaquetar_plugin.py"}  # más todos los test_*.py
 DOCUMENTOS = ["KNOWLEDGE.md", "AGENTS.md"]
 
@@ -59,6 +61,7 @@ Plugin de Claude Code con las skills del chatbot "front door" de una empresa que
 - **Skills:** router-intenciones, guardrails, consentimiento, recomendador-espacios, cualificador-leads y media-espacios.
 - **Scripts de reglas fijas** (Python 3, sin dependencias): `recomendar.py` (recomendación, validación del espacio elegido y media aprobada), `puntuar_lead.py` (puntuación del lead), `router.py` (qué se hace con cada intención) y `validar_datos.py`.
 - **Datos:** `data/espacios.json` (6 espacios) y `data/inventario.json`.
+- **Media:** `media/placeholders/`, las fotos ilustrativas de los espacios (generadas con IA). `validar_datos.py` comprueba que cada foto aprobada tiene su archivo.
 - **Contexto:** `KNOWLEDGE.md` (decisiones del equipo, que las skills citan) y `AGENTS.md` (las reglas del chatbot).
 
 Las decisiones las toman los scripts; el LLM clasifica y redacta.
@@ -129,6 +132,13 @@ def copiar_datos():
     return copiados
 
 
+def copiar_media():
+    """Copia media/ tal cual (sin archivos del sistema como .DS_Store)."""
+    shutil.copytree(ORIGEN_MEDIA, DESTINO / "media", ignore=shutil.ignore_patterns(".DS_Store"))
+    destino = DESTINO / "media"
+    return sorted(str(f.relative_to(destino)) for f in destino.rglob("*") if f.is_file())
+
+
 def copiar_documentos():
     for nombre in DOCUMENTOS:
         shutil.copy2(RAIZ / nombre, DESTINO / nombre)
@@ -145,6 +155,7 @@ def main():
     skills = copiar_skills()
     scripts = copiar_scripts()
     datos = copiar_datos()
+    media = copiar_media()
     documentos = copiar_documentos()
     escribir_json(DESTINO / ".claude-plugin" / "plugin.json",
                   {"name": NOMBRE, "version": VERSION, "description": DESCRIPCION,
@@ -162,6 +173,7 @@ def main():
         print(f"  skill  {nombre}: {n} ruta(s) adaptada(s)")
     print(f"  scripts: {', '.join(scripts)}")
     print(f"  datos:   {', '.join(datos)}")
+    print(f"  media:   {len(media)} archivo(s)")
     print(f"  documentos: {', '.join(documentos)}")
     print(f"Marketplace: .claude-plugin/marketplace.json ({MARKETPLACE})")
 

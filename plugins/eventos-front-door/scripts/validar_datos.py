@@ -2,8 +2,12 @@
 """Valida data/espacios.json y data/inventario.json.
 
 Uso:  python3 scripts/validar_datos.py
-Sale con código 0 si todo está bien y 1 si hay errores.
+Sale con código 0 si todo está bien y 1 si hay errores (los avisos no cuentan).
 Solo lee los archivos: nunca los modifica.
+
+Archivos de media: cada foto aprobada tiene que existir en la ruta de su url
+(relativa a la raíz del proyecto). Los planos y los tours que faltan salen como
+aviso, porque todavía no están hechos.
 """
 
 import json
@@ -30,11 +34,35 @@ CAMPOS_ITEM = ["id", "name", "stock", "usable_in"]
 # Hora de fin HH:MM (00:00 a 23:59). Antes de las 08:00 = madrugada del día siguiente.
 FORMATO_HORA = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
 
+# Tipos de media cuyo archivo puede faltar todavía: aviso, no error
+TIPOS_PENDIENTES = {"plano", "tour360"}
+
 errores = []
+avisos = []
 
 
 def error(msg):
     errores.append(msg)
+
+
+def aviso(msg):
+    avisos.append(msg)
+
+
+def revisar_archivo(eid, mid, m):
+    """Comprueba que el archivo de la url existe dentro del proyecto."""
+    url = m.get("url")
+    if not isinstance(url, str) or not url.strip():
+        error(f"{eid}/{mid}: url vacía")
+        return
+    ruta = RAIZ / url.lstrip("/")
+    if ruta.is_file():
+        return
+    tipo, aprobada = m.get("type"), m.get("approved")
+    if tipo == "foto" and aprobada is True:
+        error(f"{eid}/{mid}: foto aprobada sin archivo en {url}")
+    elif tipo in TIPOS_PENDIENTES:
+        aviso(f"{eid}/{mid}: todavía no existe el archivo {url}")
 
 
 def cargar(ruta):
@@ -165,6 +193,7 @@ def validar_espacios(datos):
                     error(f"{eid}/{mid}: disposition {disp!r} no es una de {ORDEN_AFOROS}")
             elif "disposition" in m:
                 error(f"{eid}/{mid}: solo las fotos llevan disposition")
+            revisar_archivo(eid, mid, m)
             if m.get("type") == "foto" and aprobada is True:
                 tiene_foto_aprobada = True
             if m.get("type") == "plano" and aprobada is True:
@@ -218,6 +247,12 @@ def main():
     else:
         print("  (ninguna)")
     print()
+
+    if avisos:
+        print(f"Avisos ({len(avisos)}, no cuentan como error):")
+        for a in avisos:
+            print(f"  ! {a}")
+        print()
 
     if errores:
         print(f"RESULTADO: {len(errores)} error(es)")

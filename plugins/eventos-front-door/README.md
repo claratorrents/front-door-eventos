@@ -8,6 +8,7 @@ Plugin de Claude Code con las skills del chatbot "front door" de una empresa que
 - **Skills:** router-intenciones, guardrails, consentimiento, recomendador-espacios, cualificador-leads y media-espacios.
 - **Scripts de reglas fijas** (Python 3, sin dependencias): `recomendar.py` (recomendación, validación del espacio elegido y media aprobada), `puntuar_lead.py` (puntuación del lead), `router.py` (qué se hace con cada intención) y `validar_datos.py`.
 - **Datos:** `data/espacios.json` (6 espacios) y `data/inventario.json`.
+- **Media:** `media/placeholders/`, las fotos ilustrativas de los espacios (generadas con IA). `validar_datos.py` comprueba que cada foto aprobada tiene su archivo.
 - **Contexto:** `KNOWLEDGE.md` (decisiones del equipo, que las skills citan) y `AGENTS.md` (las reglas del chatbot).
 
 Las decisiones las toman los scripts; el LLM clasifica y redacta.
