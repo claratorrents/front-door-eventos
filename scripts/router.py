@@ -96,11 +96,14 @@ def enrutar(intenciones, ruta_tema=None, legal=False, consulta_en_marcha=False):
         if i == "persona" and consulta_en_marcha:
             # se ofrece cerrar y enviar la consulta ya, y además el contacto del equipo
             accion, a_n8n = "ofrecer_envio", True
-        acciones.append({"intencion": i, "skills": fila["skills"], "skills_si_toca": fila["skills_si_toca"],
+        skills_fila, si_toca_fila = fila["skills"], fila["skills_si_toca"]
+        if i == "persona" and consulta_en_marcha:
+            si_toca_fila = ["consentimiento"]   # si acepta el envío: pregunta de privacidad
+        acciones.append({"intencion": i, "skills": skills_fila, "skills_si_toca": si_toca_fila,
                          "decision": fila["decision"], "motivo_escalado": motivo,
                          "accion": accion, "a_n8n": a_n8n, "ruta": ruta})
-        skills += [s for s in fila["skills"] if s not in skills]
-        skills_si_toca += [s for s in fila["skills_si_toca"] if s not in skills and s not in skills_si_toca]
+        skills += [s for s in skills_fila if s not in skills]
+        skills_si_toca += [s for s in si_toca_fila if s not in skills and s not in skills_si_toca]
 
     # Decisión: la de la intención más prioritaria que la fija
     con_decision = next((a for a in acciones if a["decision"]), None)

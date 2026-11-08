@@ -9,7 +9,7 @@ Se aplica antes que las demás skills, en cada mensaje del cliente. Contexto en 
 
 ## 1. Reparto: el LLM clasifica, las reglas deciden
 - El LLM **solo clasifica** el mensaje en una o varias intenciones de la §2. No puede inventar otras.
-- **Lo que se hace con cada intención** (skills, decisión, ruta, envío a n8n y orden) lo devuelve `scripts/router.py` con la tabla de la §2 y la prioridad de la §4. El LLM no lo cambia.
+- **Lo que se hace con cada intención** (skills, decisión, ruta, envío a n8n y orden) lo devuelve `scripts/router.py` con la tabla de la §2 y la prioridad de la §5. El LLM no lo cambia.
 - La intención es un dato interno: nunca se dice al cliente.
 
 ## 2. Intenciones y qué pasa con cada una
@@ -21,7 +21,7 @@ Se aplica antes que las demás skills, en cada mensaje del cliente. Contexto en 
 | `cambio_reserva` | Habla de una reserva que ya tiene ("Necesito cambiar la fecha de mi reserva", "Quiero cancelar") | Contacto del equipo, sin plazos ni datos. `escalar_humano`, motivo `cambio_reserva` | No | `cambio` |
 | `queja` | Reclamación o problema legal ("Quiero poner una reclamación") | Contacto del equipo, sin plazos ni datos. `escalar_humano`, motivo `queja` (o `legal`) | No | `incidencia` |
 | `privacidad` | Ver, borrar o dejar de usar sus datos ("Borrad mis datos") | Consentimiento §8 | No | `privacidad` |
-| `persona` | Pide hablar con alguien ("Quiero hablar con una persona") | Sin consulta en marcha: contacto del equipo. Con consulta en marcha: se ofrece cerrar y enviar la consulta ya, y además el contacto del equipo. `escalar_humano`, motivo `peticion_humano` | Solo si acepta enviar la consulta | la del tema; si no hay, `incidencia` |
+| `persona` | Pide hablar con alguien ("Quiero hablar con una persona") | Sin consulta en marcha: contacto del equipo. Con consulta en marcha: se ofrece cerrar y enviar la consulta ya, y además el contacto del equipo. Si acepta, se envía con lo que haya, sin preguntar más datos (solo la pregunta de privacidad). `escalar_humano`, motivo `peticion_humano` | Solo si acepta enviar la consulta | la del tema; si no hay, `incidencia` |
 | `fuera_tema` | Nada que ver con eventos ni espacios ("¿Qué tiempo hará mañana?") | Guardrails, regla 8 | No | `fuera_tema` |
 
 - Guardrails se aplica siempre, además de lo que diga la tabla.

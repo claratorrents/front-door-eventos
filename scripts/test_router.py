@@ -30,6 +30,8 @@ CASOS = [
     ("persona + nuevo_evento → ruta lead", ["persona", "nuevo_evento"], {}, {"ruta": "lead"}),
     ("persona --consulta-en-marcha → accion ofrecer_envio, a_n8n true", ["persona"], {"consulta_en_marcha": True},
      {"accion": "ofrecer_envio", "a_n8n": True}),
+    ("persona --consulta-en-marcha → consentimiento en skills_si_toca", ["persona"], {"consulta_en_marcha": True},
+     {"skills": ["guardrails"], "skills_si_toca": ["consentimiento"]}),
     ("privacidad + informacion → [privacidad, informacion], ruta privacidad, incluye consentimiento",
      ["privacidad", "informacion"], {},
      {"intenciones": ["privacidad", "informacion"], "ruta": "privacidad", "skills_incluye": ["consentimiento"]}),

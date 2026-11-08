@@ -163,7 +163,7 @@ Ruta estrella de la demo: **consulta → recomendación con fotos → elige espa
 | ~~`consulta_disponibilidad`~~ | **Sustituido por §3.2:** no se comprueba disponibilidad. Si preguntan: "lo confirma el comercial en la llamada" | — | — |
 | `pendiente_confirmar` | Pregunta sin dato en el catálogo (accesibilidad, horario interior…) | Dentro de una consulta: va al `message` del envío. Fuera: el chatbot da el contacto del equipo | Dentro: "Lo confirmará el comercial en la llamada." Fuera: sin plazos. Antes: equipo de atención en 24 h laborables (sustituido por §3.2) |
 | ~~`prerreserva`~~ | **Sustituido por §3.2:** no hay bloqueos | — | — |
-| `escalar_comercial` | Descuentos, catering, extras, excepciones, permisos | Dentro de una consulta: va resumido en el `message` del envío y el comercial lo ve en su resumen de n8n (§3.2, decisión 6). Antes: comercial del espacio o David Ramos | Sin plazo en horas: "Lo verás con el comercial en la llamada; en unos minutos te llegará un email para reservarla." Antes: 24 h laborables (sustituido por §3.2) |
+| `escalar_comercial` | Descuentos, catering, extras, excepciones, permisos | Dentro de una consulta: va resumido en el `message` del envío y el comercial lo ve en su resumen de n8n (§3.2, decisión 6). Antes: comercial del espacio o David Ramos | Sin plazo en horas: "Lo verás con el comercial cuando te contacte." Antes: 24 h laborables (sustituido por §3.2) |
 | `escalar_humano` | Quejas, legal, cambios de reserva, mensajes ofensivos repetidos | Fuera de una consulta: el chatbot da el contacto del equipo; no va a n8n (§3.2, decisión 7) | **Sin plazos** (decisión 7). Antes: 24 h laborables |
 | `escalar_humano` | Pide persona o frustración | Sin consulta en marcha: el chatbot da el contacto del equipo (§3.2, decisión 7). Con una consulta en marcha (persona o frustración): se ofrece cerrar y enviar la consulta ya, y además se da el contacto del equipo | Sin plazos. Antes: en horario, menos de 2 h; fuera de horario, el siguiente día laborable (a primera hora si quedaban menos de 2 h para el cierre) |
 
@@ -173,7 +173,7 @@ Ruta estrella de la demo: **consulta → recomendación con fotos → elige espa
 - Frustración: el cliente dice que no le entendemos o repite la misma petición dos veces.
 - Disponibilidad: nunca se comprueba. Si preguntan: "lo confirma el comercial en la llamada" (§3.2, decisión 4). Antes: "Según el calendario, ese día parece libre…" con dato de n8n (sustituido por §3.2).
 
-- "Lo compruebo" y "lo confirmo" siempre llevan su `decision` y dicen quién responde, sin plazos en horas. Dentro de una consulta: "lo verás con el comercial en la llamada"; fuera, el contacto del equipo (§3.2, decisión 7).
+- "Lo compruebo" y "lo confirmo" siempre llevan su `decision` y dicen quién responde, sin plazos en horas. Dentro de una consulta: "Lo verás con el comercial cuando te contacte."; fuera, el contacto del equipo (§3.2, decisión 7).
 - Para enviar la consulta, el **email es obligatorio**; el teléfono es opcional (§3.2, decisión 5). Se pide con consentimiento. Si el cliente no da email, se le dan los datos del equipo: atencion@empresa-eventos.example · +34 930 000 000. Antes: se ofrecía una vez la alternativa entre teléfono y email (sustituido por §3.2). Y se aprovecha para seguir cualificando.
 - Las frases fijas se traducen al catalán o al inglés manteniendo el sentido exacto, sin añadir promesas.
 - Pruebas: `pruebas/prueba-guardrails-01.md`, `pruebas/prueba-guardrails-02.md` y `pruebas/prueba-guardrails-03.md`. Corrección: `pruebas/correccion-02-guardrails.md`.
@@ -238,7 +238,7 @@ POST a `N8N_WEBHOOK_URL` con las cabeceras `Content-Type: application/json` y `X
 **Respuestas de n8n**
 | Respuesta | Qué hace el chatbot |
 |---|---|
-| 202 | "Gracias. El equipo te escribirá por email en breve." (en el idioma del cliente) |
+| 202 | "Gracias. El equipo se pondrá en contacto contigo en breve." (en el idioma del cliente) |
 | 403 / 404 | No reintenta. "El equipo contactará contigo igualmente." Se registra el error en el log del servidor |
 | Sin respuesta en 10 s | Un único reintento con el mismo `lead_id` |
 

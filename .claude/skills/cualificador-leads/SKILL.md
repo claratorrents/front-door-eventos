@@ -49,7 +49,7 @@ Reglas:
 - Cuando `listo_para_enviar` es verdadero → skill consentimiento (§4, pregunta de privacidad) → skill de envío a n8n.
 
 ## 5. Escalados dentro de una consulta
-Descuentos, catering o extras a medida, excepciones de horario o aforo, permisos: no se escalan aparte. Se apuntan para el campo `message` en una frase ("Pide un 20 % de descuento"; "Quiere música hasta las 4") y se sigue con la consulta (KNOWLEDGE §3.2, decisión 6). Al cliente: "Lo verás con el comercial en la llamada."
+Descuentos, catering o extras a medida, excepciones de horario o aforo, permisos: no se escalan aparte. Se apuntan para el campo `message` en una frase ("Pide un 20 % de descuento"; "Quiere música hasta las 4") y se sigue con la consulta (KNOWLEDGE §3.2, decisión 6). Al cliente: "Lo verás con el comercial cuando te contacte."
 
 ## 6. Ejemplos
 - "Queremos hacer algo para la empresa." → faltan tipo y asistentes → "¿Qué tipo de evento tenéis en mente y para cuántas personas?"
