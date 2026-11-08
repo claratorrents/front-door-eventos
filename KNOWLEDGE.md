@@ -398,7 +398,7 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 - [x] Paso 2: `AGENTS.md` (commit `4b17310`; regla 2 actualizada a "nunca dar precios" en `7a5ebe4`) y `CLAUDE.md` (`5f00b31`).
 - [x] Paso 3: catálogo, inventario y validador (commits `7a5ebe4` y `121a83b`), con corrección 01 documentada.
 - [x] Paso 4: skills de guardrails (`e323834`, `6a11b2c`, `1d8b780`) y consentimiento (`bea7691`), con pruebas y correcciones 02 y 03.
-- [x] Paso 5 (en parte): recomendador-espacios con `scripts/recomendar.py` (`591885a` a `5596168`), cualificador-leads con `scripts/puntuar_lead.py` (`7968a5d`, `2e175ae`) y media-espacios (`434d83a`, `7387f50`), con pruebas y correcciones 04, 05 y 06.
+- [x] Paso 5 (en parte): recomendador-espacios con `scripts/recomendar.py` (`591885a` a `5596168`), cualificador-leads con `scripts/puntuar_lead.py` (`7968a5d`, `2e175ae`; sustituido por `scripts/datos_consulta.py`, §3.2) y media-espacios (`434d83a`, `7387f50`), con pruebas y correcciones 04, 05 y 06.
 - [x] Resumen del trabajo: `RESUMEN.md` (`b368618`) y `SUMMARY.md` en inglés (`6bba9a5`).
 - [x] Paso 5: router-intenciones con `scripts/router.py` y validación del espacio elegido en `scripts/recomendar.py`, con pruebas 01-02 y corrección 07.
 - [x] Paso 7: plugin `eventos-front-door` (`9bdb81c`), instalado y probado en una sesión nueva (`1d6dddf`). Ver §4.
@@ -406,12 +406,12 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 - [x] Planos en SVG: las urls de `data/espacios.json` apuntan a `plano.svg` (`a68026c`). Los archivos todavía no existen.
 - [x] Paso 13: repositorio en GitHub, `github.com/claratorrents/front-door-eventos`.
 - [x] Integración con n8n: decisiones y contrato del webhook de Ale en §3.2 (`f33b7bb`).
-- Tests al 8/11: `test_recomendar.py` 24/24, `test_puntuar_lead.py` 10/10, `test_router.py` 12/12; validador correcto (avisa de los planos y tours que faltan).
+- Tests al 8/11: `test_recomendar.py` 24/24, `test_datos_consulta.py` 10/10, `test_router.py` 12/12; validador correcto (avisa de los planos y tours que faltan).
 
 ### Pendiente inmediato
 - [ ] Decidir el nombre de la empresa.
 - [ ] Paso 2 de la integración con n8n (adaptar el proyecto a la §3.2), en 8 puntos: 1. `AGENTS.md` y `KNOWLEDGE.md` · 2. consentimiento · 3. cualificador · 4. router · 5. guardrails · 6. recomendador · 7. skill nueva de envío a n8n · 8. regenerar el plugin y prueba completa.
-  - Hecho: 1 (`747b8ab`, `af71d87`) y 2, consentimiento versión 3 (`f80294f`).
+  - Hecho: 1 (`747b8ab`, `af71d87`); 2, consentimiento versión 3 (`f80294f`, `0405c3e`); 3, cualificador con `scripts/datos_consulta.py`, que ya no puntúa (corrección 09).
   - **Pendiente del punto 7 (skill de envío a n8n), decidido el 8 de noviembre** (sale de la prueba 03 de consentimiento):
     - Sin "sí" a la privacidad: `marketing_consent: no`.
     - Si el cliente no contesta a la publicidad o cierra el chat: se envía con `marketing_consent: no`.
