@@ -199,7 +199,7 @@ Documentos de Ale en `n8n/`: contrato del webhook, explicación del flujo, JSON 
 1. **Un solo catálogo:** los 6 espacios de `data/espacios.json`. Ale los copia a su hoja "IE007 – Database" (pestañas Spaces y Reps).
 2. **El chat recomienda y enseña los espacios con fotos.** Si el cliente elige uno, su nombre va en `preferred_location`, para que n8n asigne ese mismo espacio.
 3. **La puntuación oficial es la de n8n** (es la que decide el email al cliente). El cualificador del chat solo decide qué preguntar; su puntuación no se envía ni decide nada.
-4. **Fuera el bloqueo de 72 h y las skills 5 y 6.** El siguiente paso es la llamada por Calendly. El chatbot nunca comprueba disponibilidad: si preguntan, "lo confirma el comercial cuando te contacte".
+4. **Fuera el bloqueo de 72 h y las skills 5 y 6.** El siguiente paso lo marca n8n: un email con enlace de Calendly cuando la consulta encaja, o el contacto de una persona del equipo cuando no. El chatbot nunca comprueba disponibilidad: si preguntan, "lo confirma el comercial cuando te contacte".
 5. **Email obligatorio** para enviar la consulta. Quejas, cambios de reserva, privacidad y fuera de tema **no van a n8n**: el chatbot da el contacto del equipo (skills guardrails y consentimiento).
 
 **Más decisiones (8 de noviembre)**
