@@ -418,7 +418,23 @@ comprobar("cuerpo demasiado grande → 413", http("POST", "/api/mensaje", {"sesi
 codigo, _, cuerpo = http("POST", "/api/cerrar", {"sesion": sesion})
 comprobar("POST /api/cerrar → despedida y registro", codigo == 200 and json.loads(cuerpo)["cerrada"]
           and (TMP / "http.jsonl").exists())
+comprobar("sin CHAT_CORS_ORIGIN no hay cabecera CORS",
+          "Access-Control-Allow-Origin" not in http("POST", "/api/nueva", {})[1] and http("OPTIONS", "/api/mensaje")[0] == 405)
 srv.shutdown()
+
+# Con CHAT_CORS_ORIGIN: cabecera con ese origen (nunca "*") y respuesta a la petición previa OPTIONS
+ORIGEN = "http://localhost:5173"
+srv2 = servidor.crear_servidor("127.0.0.1", 0, registro=TMP / "http2.jsonl", hoy=HOY, cors_origin=ORIGEN)
+threading.Thread(target=srv2.serve_forever, daemon=True).start()
+base = "http://127.0.0.1:%d" % srv2.server_address[1]
+codigo, cab, _ = http("POST", "/api/nueva", {})
+comprobar("con CHAT_CORS_ORIGIN, Access-Control-Allow-Origin = ese origen", cab["Access-Control-Allow-Origin"] == ORIGEN)
+codigo, cab, _ = http("OPTIONS", "/api/mensaje")
+comprobar("petición previa OPTIONS → 204 con métodos y cabeceras permitidos",
+          codigo == 204 and cab["Access-Control-Allow-Origin"] == ORIGEN and "POST" in cab["Access-Control-Allow-Methods"]
+          and cab["Access-Control-Allow-Headers"] == "Content-Type")
+comprobar("la media también lleva la cabecera CORS", http("GET", "/media/llum-poblenou-foto-01")[1]["Access-Control-Allow-Origin"] == ORIGEN)
+srv2.shutdown()
 
 print(f"3 rutas con el guion fijo, {n_variantes} variantes de paso y casos de error y de servidor")
 print(f"{sum(resultados)}/{len(resultados)} comprobaciones correctas")
