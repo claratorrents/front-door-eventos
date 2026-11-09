@@ -5,7 +5,7 @@ description: Durante una consulta de evento, decide qué datos faltan y qué pre
 
 # Cualificador de leads
 
-Se aplica junto con guardrails, recomendador-espacios, consentimiento y la skill de envío a n8n. Contexto en `KNOWLEDGE.md` §3.2.
+Se aplica junto con guardrails, recomendador-espacios, consentimiento y `envio-n8n`. Contexto en `KNOWLEDGE.md` §3.2.
 
 ## 1. Para qué sirve
 Que la consulta llegue a n8n con lo que su flujo necesita:
@@ -46,7 +46,7 @@ Se ejecuta `scripts/datos_consulta.py` con lo que se sabe y con lo que ya se ha 
 Reglas:
 - **Cada dato se pregunta una sola vez.** Si el cliente no lo sabe o no contesta, no se insiste: cuenta como preguntado.
 - Una o dos preguntas por mensaje, intercaladas con la conversación. Nunca un cuestionario seguido.
-- Cuando `listo_para_enviar` es verdadero → skill consentimiento (§4, pregunta de privacidad) → skill de envío a n8n.
+- Cuando `listo_para_enviar` es verdadero → skill consentimiento (§4, pregunta de privacidad) → `envio-n8n`.
 
 ## 5. Escalados dentro de una consulta
 Descuentos, catering o extras a medida, excepciones de horario o aforo, permisos: no se escalan aparte. Se apuntan para el campo `message` en una frase ("Pide un 20 % de descuento"; "Quiere música hasta las 4") y se sigue con la consulta (KNOWLEDGE §3.2, decisión 6). Al cliente: "Lo verás con el comercial cuando te contacte."

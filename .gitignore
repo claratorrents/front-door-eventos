@@ -5,3 +5,6 @@ __pycache__/
 
 # Documentos de n8n con credenciales: nunca al repositorio
 n8n/*setup guide*
+
+# Registro anónimo de conversaciones (se genera al usar el chat)
+registros/

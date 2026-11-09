@@ -208,7 +208,7 @@ Documentos de Ale en `n8n/`: contrato del webhook, explicación del flujo, JSON 
 8. **La intención `reserva` se junta con `nuevo_evento`:** no hay bloqueos, y el espacio elegido viaja en `preferred_location`.
 9. **Nombre del comercial:** solo se dice si el cliente ha elegido un espacio (n8n le asignará el comercial de ese espacio, porque el catálogo es el mismo). Si no: "el comercial que lleve tu evento".
 10. **Cualificador:** su script ya no puntúa; devuelve qué datos faltan por preguntar.
-11. **Registro de cada conversación:** el chat guarda un registro anónimo de cada conversación en `registros/conversaciones.jsonl` (intención, ruta, resuelto sí/no, enviado a n8n sí/no, consentimiento sí/no), basado en el contrato anterior. El dashboard junta ese registro con las hojas de Ale.
+11. **Registro de cada conversación:** el chat guarda un registro anónimo de cada conversación en `registros/conversaciones.jsonl` (intención, ruta, resuelto sí/no, enviado a n8n sí/no, consentimiento sí/no), basado en el contrato anterior. El dashboard junta ese registro con las hojas de Ale. Campos: ver [Registro anónimo de conversaciones](#registro-anónimo-de-conversaciones).
 
 **Cuándo se envía**
 - Una sola vez por consulta, al final de una ruta `lead`, cuando el cliente ha dado nombre y email y ha respondido a la pregunta de privacidad.
@@ -248,31 +248,27 @@ POST a `N8N_WEBHOOK_URL` con las cabeceras `Content-Type: application/json` y `X
 - En pruebas reales, solo emails de prueba de Ale (`alejandro+ie007-xxx@alelabs.es`), nunca datos reales.
 - **Por confirmar con Ale:** si el cliente dice "no" a la privacidad, proponemos enviar la consulta **sin** nombre, email, teléfono ni empresa (con `gdpr_consent: no`), para que quede contada sin guardar datos personales.
 
-### Resumen estructurado de cada conversación (ANTERIOR: sustituido por el contrato de la §3.2; se conserva como referencia de los datos internos del chat)
-Fijar estos campos desde el principio. Cambiarlos a mitad es el fallo más habitual.
+#### Registro anónimo de conversaciones
+Una línea por conversación en `registros/conversaciones.jsonl`, vaya o no a n8n (decisión 11). Lo escribe `scripts/enviar_n8n.py` (skill `envio-n8n`).
 
-| Campo | Ejemplo |
+| Campo | Valores |
 |---|---|
-| id_conversacion | conv-0012 |
-| fecha_hora | 2026-11-04T21:30:00+01:00 |
-| ruta | informacion / lead / cambio / incidencia / privacidad / fuera_tema (`reserva` se quitó: se junta con `lead`, §3.2 decisión 8) |
-| rutas_adicionales | lista con las rutas de las demás intenciones del mensaje; el dashboard cuenta un lead si lead aparece en ruta o en rutas_adicionales |
-| tipo_evento | cena de empresa |
-| asistentes | 120 |
-| fecha_evento | 2027-03 |
-| presupuesto | 6000 |
-| espacios_recomendados | Llum del Poblenou |
-| puntuacion_lead | 40 |
-| decision | ninguna / consulta_disponibilidad / pendiente_confirmar / prerreserva / escalar_comercial / escalar_humano |
-| motivo_escalado | descuento / catering / extras / excepcion / permisos / queja / legal / cambio_reserva / peticion_humano / frustracion / ofensivo / sin_dato / lead / privacidad / — |
-| consentimiento_datos | si / no |
-| consentimiento_publicidad | si / no |
-| sentimiento | positivo / neutro / negativo |
-| resuelto_sin_humano | si / no |
+| `id_conversacion` | conv-… |
+| `fecha_hora` | UTC, ISO 8601 |
+| `idioma` | es / ca / en |
+| `ruta` | informacion / lead / cambio / incidencia / privacidad / fuera_tema |
+| `rutas_adicionales` | lista |
+| `decision` | ninguna / pendiente_confirmar / escalar_comercial / escalar_humano |
+| `motivo_escalado` | el de guardrails, o — |
+| `espacio_elegido` | nombre del catálogo o "" (no es dato personal) |
+| `enviado_n8n` | si / no / simulado |
+| `respuesta_n8n` | 202 / 202_simulada / 403 / 404 / sin_respuesta / — |
+| `lead_id` | el enviado, o "" (une con la hoja Enquiries de Ale) |
+| `consentimiento_datos` | si / no |
+| `consentimiento_publicidad` | si / no |
+| `resuelto_sin_humano` | si / no |
 
-Reglas: sin consentimiento no se envían nombre, email ni teléfono (registro anónimo). Solo datos sintéticos en pruebas. Hasta que n8n esté listo, la app guarda estos resúmenes en un archivo local con los mismos campos.
-
-**Sustituido por consentimiento v3 §6:** el consentimiento viaja en el envío a n8n y el registro anónimo de conversaciones guarda solo sí/no. Antes: registro de consentimientos (registros/consentimientos.jsonl; con n8n, pestaña 'Consentimientos' del Sheet, **por confirmar con Ale**: su hoja no tiene esa pestaña): id_conversacion, fecha_hora (real, ISO 8601), finalidad, datos, estado (otorgado / denegado / retirado / borrado_solicitado). Solo respuestas explícitas.
+Nunca: nombre, email, teléfono, empresa, texto de la conversación.
 
 ### Riesgos de la integración con n8n
 1. **n8n Cloud o local:** en Cloud, conectar Google es iniciar sesión. En local, Google exige credenciales en Google Cloud Console.
@@ -406,19 +402,19 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 - [x] Planos en SVG: las urls de `data/espacios.json` apuntan a `plano.svg` (`a68026c`). Los archivos todavía no existen.
 - [x] Paso 13: repositorio en GitHub, `github.com/claratorrents/front-door-eventos`.
 - [x] Integración con n8n: decisiones y contrato del webhook de Ale en §3.2 (`f33b7bb`).
-- Tests al 8/11: `test_recomendar.py` 24/24, `test_datos_consulta.py` 10/10, `test_router.py` 12/12; validador correcto (avisa de los planos y tours que faltan).
+- Tests al 9/11: `test_recomendar.py` 29/29, `test_datos_consulta.py` 10/10, `test_router.py` 12/12, `test_enviar_n8n.py` 15/15; validador correcto (avisa de los planos y tours que faltan).
 
 ### Pendiente inmediato
 - [ ] Decidir el nombre de la empresa.
 - [ ] Paso 2 de la integración con n8n (adaptar el proyecto a la §3.2), en 8 puntos: 1. `AGENTS.md` y `KNOWLEDGE.md` · 2. consentimiento · 3. cualificador · 4. router · 5. guardrails · 6. recomendador · 7. skill nueva de envío a n8n · 8. regenerar el plugin y prueba completa.
-  - Hecho: 1 (`747b8ab`, `af71d87`); 2, consentimiento versión 3 (`f80294f`, `0405c3e`); 3, cualificador con `scripts/datos_consulta.py`, que ya no puntúa (`8d1ce27`, corrección 09); 4, router sin la intención `reserva`, con `a_n8n` y `--consulta-en-marcha` (corrección 10).
-  - **Pendiente del punto 7 (skill de envío a n8n), decidido el 8 de noviembre** (sale de la prueba 03 de consentimiento):
+  - Hecho: 1 (`747b8ab`, `af71d87`); 2, consentimiento versión 3 (`f80294f`, `0405c3e`); 3, cualificador con `scripts/datos_consulta.py`, que ya no puntúa (`8d1ce27`, corrección 09); 4, router sin la intención `reserva`, con `a_n8n` y `--consulta-en-marcha` (`ee2c71f`, `bf737b3`, corrección 10); 5, guardrails (`52b9313`, `b815673`, corrección 11); 6, recomendador (`e641c20`, `0c5cd9a`, `f61f1f4`, corrección 12); 7, skill `envio-n8n` con `scripts/enviar_n8n.py` y el registro anónimo (commit "Envío a n8n: skill, script y registro anónimo").
+  - **Punto 7 (skill `envio-n8n`), decidido el 8 de noviembre** (hecho: lo aplican la skill y `scripts/enviar_n8n.py`) (sale de la prueba 03 de consentimiento):
     - Sin "sí" a la privacidad: `marketing_consent: no`.
     - Si el cliente no contesta a la publicidad o cierra el chat: se envía con `marketing_consent: no`.
     - Tras un "no" a la privacidad, un solo mensaje: "Sin problema, no guardamos tus datos. Gracias por tu consulta; si quieres que te respondamos, escríbenos a atencion@empresa-eventos.example." (consentimiento §4).
     - Sin consentimiento, en `conversation` se tapan nombre, email, teléfono y empresa.
     - Solo teléfono (acepta pero no da email): se envía sin datos personales, como un "no", y se le da el teléfono del equipo.
-    - Campos del registro anónimo (`registros/conversaciones.jsonl`, decisión 11): se fijan en el punto 7.
+    - Campos del registro anónimo (`registros/conversaciones.jsonl`, decisión 11): fijados en la tabla de la §3.2.
 - [ ] Paso 8: chat web con el envío a n8n según el contrato de la §3.2 (simulado hasta tener la URL y la clave), con las tareas de "Pendiente" de §3.1.
 
 ### Plan

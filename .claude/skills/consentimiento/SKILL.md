@@ -5,7 +5,7 @@ description: Aviso de IA al empezar cada conversación y gestión de los datos p
 
 # Consentimiento
 
-Se aplica junto con guardrails y la skill de envío a n8n. Contexto en `KNOWLEDGE.md` §3.2.
+Se aplica junto con guardrails y `envio-n8n`. Contexto en `KNOWLEDGE.md` §3.2.
 
 ## 1. Aviso de IA (primer mensaje)
 - Siempre en el primer mensaje, antes de cualquier otra cosa:
