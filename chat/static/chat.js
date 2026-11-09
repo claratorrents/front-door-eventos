@@ -3,7 +3,7 @@
 "use strict";
 
 const $ = (id) => document.getElementById(id);
-const estado = { sesion: null, ui: {}, cerrada: false };
+const estado = { sesion: null, ui: {}, cerrada: false, idioma: "es" };
 
 async function api(ruta, cuerpo) {
   const r = await fetch(ruta, {
@@ -12,7 +12,11 @@ async function api(ruta, cuerpo) {
     body: JSON.stringify(cuerpo),
   });
   const datos = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(datos.error || estado.ui.error || "Error");
+  if (!r.ok) {
+    const error = new Error(datos.error || estado.ui.error || "Error");
+    error.sesionPerdida = Boolean(datos.sesion_perdida);
+    throw error;
+  }
   return datos;
 }
 
@@ -44,6 +48,7 @@ function imagen(url, alt) {
 function aplicarUI(ui, idioma) {
   if (!ui) return;
   estado.ui = ui;
+  estado.idioma = idioma || estado.idioma;
   document.documentElement.lang = idioma || "es";
   $("cabecera").textContent = ui.cabecera;
   document.title = ui.cabecera;
@@ -64,10 +69,12 @@ function botonesAccion(botones, contenedor, enGrupo) {
   for (const b of botones || []) {
     const boton = el("button", "boton", b.texto);
     boton.type = "button";
-    boton.addEventListener("click", () => {
-      if (enGrupo) contenedor.querySelectorAll("button").forEach((x) => (x.disabled = true));
-      else boton.disabled = true;
-      enviar({ accion: b.accion }, b.texto);
+    boton.addEventListener("click", async () => {
+      // Se desactiva mientras se envía, para no mandar dos veces lo mismo
+      const desactivados = enGrupo ? [...contenedor.querySelectorAll("button")] : [boton];
+      desactivados.forEach((x) => (x.disabled = true));
+      const ok = await enviar({ accion: b.accion }, b.texto);
+      if (!ok) desactivados.forEach((x) => (x.disabled = false));   // si falla, se puede volver a pulsar
     });
     contenedor.appendChild(boton);
   }
@@ -146,13 +153,31 @@ function cerrarUI() {
   $("formulario").hidden = true;
 }
 
+// La conversación ya no existe en el servidor (p. ej. se reinició): se empieza otra, en el mismo idioma
+async function nuevaSesionTrasPerdida() {
+  document.querySelectorAll("#mensajes button").forEach((x) => (x.disabled = true));   // botones de la anterior
+  $("botones").replaceChildren();
+  $("formulario").hidden = true;
+  const r = await api("/api/nueva", { motivo: "sesion_perdida", idioma: estado.idioma });
+  estado.sesion = r.sesion;
+  pintar(r);
+}
+
 async function enviar(cuerpo, textoCliente) {
-  if (estado.cerrada || !estado.sesion) return;
+  if (estado.cerrada || !estado.sesion) return false;
   if (textoCliente) burbuja(textoCliente, "cliente");
   try {
     pintar(await api("/api/mensaje", { sesion: estado.sesion, ...cuerpo }));
+    return true;
   } catch (e) {
+    if (e.sesionPerdida) {
+      try {
+        await nuevaSesionTrasPerdida();
+        return true;
+      } catch (e2) { /* sigue abajo con el error genérico */ }
+    }
     burbuja(estado.ui.error || e.message, "bot error");
+    return false;
   }
 }
 
@@ -178,7 +203,8 @@ $("terminar").addEventListener("click", async () => {
   try {
     pintar(await api("/api/cerrar", { sesion: estado.sesion }));
   } catch (e) {
-    burbuja(estado.ui.error || e.message, "bot error");
+    if (e.sesionPerdida) cerrarUI();   // ya no existe: no hay nada que cerrar
+    else burbuja(estado.ui.error || e.message, "bot error");
   }
 });
 

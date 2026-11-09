@@ -107,13 +107,23 @@ def crear_servidor(host=config.HOST, puerto=config.PUERTO, url=None, clave=None,
                 if ruta == "/api/nueva":
                     sid = "conv-" + secrets.token_hex(8)
                     conv = Conversacion(sid, hoy=hoy, url=url, clave=clave, registro=registro)
+                    salida = {"sesion": sid, "idioma": conv.idioma, "ui": conv.ui(), "mensajes": []}
+                    if cuerpo.get("motivo") == "sesion_perdida":
+                        # La conversación anterior ya no existe (p. ej. se reinició el servidor): se empieza
+                        # otra en el mismo idioma; el aviso de IA ya se dio en la anterior
+                        if cuerpo.get("idioma") in config.IDIOMAS:
+                            conv.idioma = cuerpo["idioma"]
+                        conv.aviso_dado = True
+                        frase = conv.f("sesion_perdida")
+                        conv.historial.append(("bot", frase))
+                        salida.update(idioma=conv.idioma, ui=conv.ui(), mensajes=[{"tipo": "texto", "texto": frase}])
                     with cerrojo:
                         sesiones[sid] = conv
-                    return self._json(200, {"sesion": sid, "idioma": conv.idioma, "ui": conv.ui()})
+                    return self._json(200, salida)
                 with cerrojo:
                     conv = sesiones.get(str(cuerpo.get("sesion", "")))
-                if conv is None:
-                    return self._json(404, {"error": error_ui})
+                if conv is None:   # sesión que ya no existe: el navegador empieza otra
+                    return self._json(404, {"error": error_ui, "sesion_perdida": True})
                 with cerrojo:
                     if ruta == "/api/mensaje":
                         formulario = cuerpo.get("formulario")

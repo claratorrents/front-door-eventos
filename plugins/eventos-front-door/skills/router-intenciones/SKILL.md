@@ -16,7 +16,7 @@ Se aplica antes que las demás skills, en cada mensaje del cliente. Contexto en 
 
 | Intención | Señales | Qué pasa | ¿Va a n8n? | `ruta` |
 |---|---|---|---|---|
-| `informacion` | Pregunta sobre un espacio o una política sin plan de evento ("¿Tenéis parking en el Fòrum?") | Guardrails + datos del espacio; media si pide fotos, plano o tour. Si no hay dato: contacto del equipo, sin plazos | No | `informacion` |
+| `informacion` | Pregunta sobre un espacio o una política sin plan de evento ("¿Tenéis parking en el Fòrum?") | Guardrails + datos del espacio; media si pide fotos o plano. Si no hay dato: contacto del equipo, sin plazos | No | `informacion` |
 | `nuevo_evento` | Quiere organizar algo, aunque ya diga espacio y fecha ("Queremos una cena para 120", "Quiero el Mirador el 14 de marzo") | Recomendador + cualificador; media cuando toque; al final, consentimiento y envío a n8n (`envio-n8n`) | Sí, una vez, al final | `lead` |
 | `cambio_reserva` | Habla de una reserva que ya tiene ("Necesito cambiar la fecha de mi reserva", "Quiero cancelar") | Contacto del equipo, sin plazos ni datos. `escalar_humano`, motivo `cambio_reserva` | No | `cambio` |
 | `queja` | Reclamación o problema legal ("Quiero poner una reclamación") | Contacto del equipo, sin plazos ni datos. `escalar_humano`, motivo `queja` (o `legal`) | No | `incidencia` |

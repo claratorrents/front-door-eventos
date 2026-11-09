@@ -334,6 +334,24 @@ a = cv.recibir(texto="no me entendéis")
 comprobar("frustración con consulta → B14 con su prefijo y botones",
           textos(a) == [es("frustracion_prefijo") + " " + es("persona_con_consulta")] and len(a["botones"]) == 2, textos(a))
 
+# Botones de las tarjetas: "Ver plano", "Ver fotos" y "Elegir este" funcionan en todas, también la primera
+cv, _ = nueva()
+s = cv.recibir(texto=RUTAS["ruta 1"][1]["texto"])
+ids = [t["id"] for m in s["mensajes"] if m["tipo"] == "tarjetas" for t in m["tarjetas"]]
+for eid in ids:
+    a = cv.recibir(accion=f"plano:{eid}")
+    comprobar(f"Ver plano en la tarjeta de {eid}", any(m["tipo"] == "plano" and m["url"].startswith(f"/media/{eid[3:]}-plano")
+                                                       for m in a["mensajes"]), a["mensajes"])
+    a = cv.recibir(accion=f"fotos:{eid}")
+    comprobar(f"Ver fotos en la tarjeta de {eid}", any(m["tipo"] == "galeria" and m["fotos"] for m in a["mensajes"]), a["mensajes"])
+for eid in ids:
+    cv, _ = nueva()
+    cv.recibir(texto=RUTAS["ruta 1"][1]["texto"])
+    a = cv.recibir(accion=f"elegir:{eid}")
+    nombre = cv.nombre(eid)
+    comprobar(f"Elegir este en la tarjeta de {eid}", textos(a)[0] == es("elegido", espacio=nombre) and cv.c["espacio"] == eid,
+              textos(a))
+
 # --- 4. Servidor HTTP local --------------------------------------------------------------
 import servidor  # noqa: E402
 
@@ -371,7 +389,31 @@ for t in ["Hola", RUTAS["ruta 1"][1]["texto"], "¿Tiene parking el Llum?"]:
 comprobar("API de mensajes responde 200 con tarjetas", codigo == 200 and b"tarjetas" in respuestas[2])
 comprobar("ni la URL ni la clave de n8n llegan nunca al navegador",
           all(URL_FALSA.encode() not in r and CLAVE_FALSA.encode() not in r for r in respuestas))
-comprobar("sesión desconocida → 404", http("POST", "/api/mensaje", {"sesion": "conv-no", "texto": "Hola"})[0] == 404)
+codigo, _, cuerpo = http("POST", "/api/mensaje", {"sesion": "conv-no", "texto": "Hola"})
+comprobar("sesión desconocida → 404 con sesion_perdida", codigo == 404 and json.loads(cuerpo).get("sesion_perdida") is True)
+
+# Sesión perdida (p. ej. reinicio del servidor): los tres botones de una tarjeta dan 404 con sesion_perdida,
+# y /api/nueva con motivo sesion_perdida empieza otra en el mismo idioma, con la frase nueva y sin repetir el aviso
+_, _, c = http("POST", "/api/nueva", {})
+perdida = json.loads(c)["sesion"]
+http("POST", "/api/mensaje", {"sesion": perdida, "texto": "Hi"})
+http("POST", "/api/mensaje", {"sesion": perdida, "texto": RUTAS["ruta 2"][1]["texto"]})
+srv.sesiones.pop(perdida)                     # como si el servidor se hubiera reiniciado
+for accion in ("plano:sp-mirador-montjuic", "fotos:sp-mirador-montjuic", "elegir:sp-mirador-montjuic"):
+    codigo, _, cuerpo = http("POST", "/api/mensaje", {"sesion": perdida, "accion": accion})
+    comprobar(f"sesión perdida, {accion} → 404 con sesion_perdida",
+              codigo == 404 and json.loads(cuerpo).get("sesion_perdida") is True, cuerpo)
+codigo, _, cuerpo = http("POST", "/api/nueva", {"motivo": "sesion_perdida", "idioma": "en"})
+nueva_s = json.loads(cuerpo)
+comprobar("nueva sesión tras la pérdida: frase en el mismo idioma, sin botones",
+          codigo == 200 and nueva_s["idioma"] == "en" and nueva_s["sesion"] != perdida
+          and [m["texto"] for m in nueva_s["mensajes"]] == [en("sesion_perdida")] and "botones" not in nueva_s, nueva_s)
+codigo, _, cuerpo = http("POST", "/api/mensaje", {"sesion": nueva_s["sesion"], "texto": RUTAS["ruta 2"][1]["texto"]})
+textos_nueva = [m["texto"] for m in json.loads(cuerpo)["mensajes"] if m["tipo"] == "texto"]
+comprobar("la conversación nueva sigue sin repetir el aviso de IA",
+          codigo == 200 and en("aviso") not in textos_nueva and textos_nueva[-1] == en("hora_fin"), textos_nueva)
+codigo, _, cuerpo = http("POST", "/api/nueva", {"motivo": "sesion_perdida", "idioma": "es"})
+comprobar("en castellano, la frase en castellano", [m["texto"] for m in json.loads(cuerpo)["mensajes"]] == [es("sesion_perdida")])
 comprobar("cuerpo demasiado grande → 413", http("POST", "/api/mensaje", {"sesion": sesion, "texto": "a" * 20000})[0] == 413)
 codigo, _, cuerpo = http("POST", "/api/cerrar", {"sesion": sesion})
 comprobar("POST /api/cerrar → despedida y registro", codigo == 200 and json.loads(cuerpo)["cerrada"]

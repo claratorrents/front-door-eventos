@@ -1,6 +1,6 @@
 {
   "name": "eventos-front-door",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Chatbot front door para una empresa de alquiler de espacios para eventos: router, guardrails, consentimiento, recomendador, cualificador, media y envío a n8n, con scripts de reglas fijas y datos sintéticos.",
   "author": {
     "name": "Equipo front door eventos (La Salle)"
