@@ -181,8 +181,8 @@ Ruta estrella de la demo: **consulta → recomendación con fotos → elige espa
 
 **Pendiente:**
 - Nombre de la empresa (cambiar también el campo `project`).
-- Chat web: tapar tarjetas, IBAN y DNI siempre, y email y teléfono si no hay permiso, antes de guardar la conversación o enviarla a n8n.
-- Chat web: usar la hora real para saber si se está en horario de atención.
+- ~~Chat web: tapar tarjetas, IBAN y DNI siempre, y email y teléfono si no hay permiso, antes de guardar la conversación o enviarla a n8n.~~ Hecho: lo hace `scripts/enviar_n8n.py` (9 de noviembre).
+- ~~Chat web: usar la hora real para saber si se está en horario de atención.~~ Sustituido: el horario solo se da como dato junto al contacto del equipo y no se prometen plazos (§3.1).
 - n8n: si el cliente retira el permiso, borrar también sus datos del Sheet.
 - Media: las 12 fotos están en media/placeholders/ (ilustrativas, generadas con IA). Los 6 planos son SVG esquemáticos generados con los datos (`scripts/generar_planos.py`, "Plano orientativo"). Los tours 360° están con `approved: false` hasta que exista uno de verdad; en el chat, "más fotos" es una galería.
 
@@ -403,7 +403,7 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 - [x] Planos en SVG: las urls de `data/espacios.json` apuntan a `plano.svg` (`a68026c`). Los archivos todavía no existen.
 - [x] Paso 13: repositorio en GitHub, `github.com/claratorrents/front-door-eventos`.
 - [x] Integración con n8n: decisiones y contrato del webhook de Ale en §3.2 (`f33b7bb`).
-- Tests al 9/11: `test_recomendar.py` 35/35, `test_generar_planos.py` 7/7, `test_datos_consulta.py` 13/13, `test_router.py` 12/12, `test_enviar_n8n.py` 17/17; validador correcto (avisa de los planos y tours que faltan).
+- Tests al 9/11: `chat/test_entender.py` 127/127, `chat/test_rutas.py` 2155/2155, `test_recomendar.py` 35/35, `test_generar_planos.py` 7/7, `test_datos_consulta.py` 13/13, `test_router.py` 12/12, `test_enviar_n8n.py` 17/17; validador correcto (avisa de los planos y tours que faltan).
 
 ### Pendiente inmediato
 - [ ] Decidir el nombre de la empresa.
@@ -416,7 +416,10 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
     - Sin consentimiento, en `conversation` se tapan nombre, email, teléfono y empresa.
     - Solo teléfono (acepta pero no da email): se envía sin datos personales, como un "no", y se le da el teléfono del equipo.
     - Campos del registro anónimo (`registros/conversaciones.jsonl`, decisión 11): fijados en la tabla de la §3.2.
-- [ ] Paso 8: chat web con el envío a n8n según el contrato de la §3.2 (simulado hasta tener la URL y la clave), con las tareas de "Pendiente" de §3.1.
+- [x] Paso 8: chat web en `chat/` (9 de noviembre). Por reglas, sin API externa ni instalar nada: servidor con la biblioteca estándar de Python y una página HTML, CSS y JavaScript.
+  - **Arrancar:** desde la carpeta del proyecto, `python3 chat/servidor.py` y abrir http://127.0.0.1:8000. El envío a n8n es SIMULADO mientras no haya `N8N_WEBHOOK_URL` y `N8N_API_KEY`; el registro anónimo va a `registros/` (ignorado por git). `.claude/launch.json` lo tiene configurado, pero la app de escritorio no puede leer el Escritorio (permiso de macOS), así que se arranca desde el terminal.
+  - **Piezas:** `entender_reglas.py` (lee el mensaje: intención y datos, por palabras clave es/en; se puede cambiar por un LLM con la misma entrada y salida), `conversacion.py` (estado y orden de los pasos; decide con `router.py`, `recomendar.py`, `datos_consulta.py` y `enviar_n8n.py`), `frases.json` (todas las frases es/en), `config.py` ([EMPRESA] y contacto en un solo sitio).
+  - **Tests:** `chat/test_entender.py` (18 pasos × 6 formas de decirlo y casos sueltos) y `chat/test_rutas.py` (las 3 rutas de la demo con el guion fijo, cada paso con sus 5 variantes, casos de error y el servidor). Variantes de prueba en `chat/variantes.py`, pendientes de revisión del equipo.
 
 ### Plan
 1. Carpeta y proyecto en Claude Code.
@@ -426,7 +429,7 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 5. Skills 1, 2, 3 y 4 (router, recomendador, media, cualificador con script).
 6. Pruebas y correcciones documentadas.
 7. Plugin `eventos-front-door` de Claude Code: `plugins/eventos-front-door/` con `.claude-plugin/plugin.json` y las skills, más `.claude-plugin/marketplace.json` en la raíz para instalarlo desde el repo (ver §4).
-8. Chat web + envío de la consulta a n8n con el contrato de la §3.2 (simulado hasta tener la URL y la clave). Antes: resumen estructurado por conversación en local (sustituido por §3.2).
+8. (Hecho) Chat web + envío de la consulta a n8n con el contrato de la §3.2 (simulado hasta tener la URL y la clave). Antes: resumen estructurado por conversación en local (sustituido por §3.2).
 9. n8n: prueba de punta a punta con el flujo de Ale (una consulta → respuesta 202 → fila en Enquiries), solo con emails de prueba de Ale. Las skills 5 y 6 se descartan (§3.2).
 10. Dashboard de métricas.
 11. Elegir las 3 rutas de la demo.

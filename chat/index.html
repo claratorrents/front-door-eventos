@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asistente de eventos</title>
+  <link rel="stylesheet" href="/static/chat.css">
+</head>
+<body>
+  <div class="chat">
+    <header class="cabecera">
+      <h1 id="cabecera">Asistente de eventos</h1>
+      <button id="terminar" class="boton-secundario" type="button">Terminar</button>
+    </header>
+    <main id="mensajes" class="mensajes" aria-live="polite"></main>
+    <div id="botones" class="botones"></div>
+    <form id="formulario" class="formulario" hidden>
+      <label><span id="l-nombre">Nombre y apellidos*</span><input name="nombre" autocomplete="name" maxlength="200" required></label>
+      <label><span id="l-email">Email*</span><input name="email" type="email" autocomplete="email" maxlength="200" required></label>
+      <label><span id="l-empresa">Empresa (si es para una empresa)</span><input name="empresa" autocomplete="organization" maxlength="200"></label>
+      <label><span id="l-telefono">Teléfono (opcional)</span><input name="telefono" type="tel" autocomplete="tel" maxlength="40"></label>
+      <button id="f-enviar" type="submit">Enviar mis datos</button>
+    </form>
+    <form id="entrada" class="entrada">
+      <input id="texto" autocomplete="off" maxlength="1000" placeholder="Escribe tu mensaje…" aria-label="Mensaje">
+      <button id="enviar" type="submit">Enviar</button>
+    </form>
+    <footer id="pie" class="pie">Prototipo académico con datos ficticios.</footer>
+  </div>
+  <script src="/static/chat.js"></script>
+</body>
+</html>
