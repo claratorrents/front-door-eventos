@@ -191,7 +191,5 @@ Las skills aparecen como `eventos-front-door:<skill>`.
 - **Flujo de n8n:** la versión de `n8n/` (v1) arranca a mano y lee casos de prueba de una hoja; no tiene todavía el nodo de webhook que recibiría nuestro envío.
 - **`preferred_location`:** el flujo de Ale asigna el espacio comparando la zona con los alias de su hoja. Si le llega el nombre de un espacio ("Llum del Poblenou"), hace falta que esos nombres estén como alias.
 - **Solo en este ordenador:** el servidor solo escucha en `127.0.0.1`, así que otro front tiene que ejecutarse en el mismo ordenador.
-- **Arranque desde la app:** la app de escritorio no puede arrancar el servidor desde `.claude/launch.json` (permiso de macOS sobre el Escritorio); se arranca desde el terminal.
 - **Traducciones:** las frases en inglés del grupo que venía de las skills las tradujo Claude Code; el equipo las revisó y aprobó.
 - **Pruebas simuladas:** las pruebas de `pruebas/` son conversaciones simuladas (Claude hace de chatbot siguiendo las skills, con los scripts ejecutados de verdad). Las del chat web son tests automáticos. Falta una prueba con personas reales.
-- **Plugin desde la app:** la instalación del plugin con `/plugin` desde la app de escritorio no está comprobada; la del terminal sí (`KNOWLEDGE.md` §4).
