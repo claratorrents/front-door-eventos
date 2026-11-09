@@ -11,6 +11,7 @@ Sale con código 0 si todos pasan y 1 si alguno falla.
 
 import copy
 import datetime
+import os
 import json
 import re
 import secrets
@@ -22,7 +23,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from enviar_n8n import CAMPOS, FRASES, procesar  # noqa: E402
+from enviar_n8n import CAMPOS, FRASES, RAIZ, procesar  # noqa: E402
 
 TMP = Path(tempfile.mkdtemp(prefix="test_enviar_n8n_"))
 _n = 0
@@ -50,7 +51,6 @@ BASE = {
         {"quien": "cliente", "texto": "Laura Martínez, laura@ejemplo.example, mi móvil es +34 600 000 099."},
         {"quien": "bot", "texto": "Gracias, Laura. También puedes escribir a atencion@empresa-eventos.example o llamar al +34 930 000 000."},
     ],
-    "resuelto_sin_humano": "si",
 }
 
 
@@ -212,8 +212,42 @@ for modo, nombre, esperado in (
     comprobar(nombre, ok, f"{r['respuesta']} · peticiones: {len(rec)}")
 srv.shutdown()
 
+# 13. resuelto_sin_humano lo calcula el script
+def resuelto(**cambios):
+    reg = registro_nuevo()
+    procesar(caso(id_conversacion=f"c13-{_n}", **cambios), registro=reg)
+    return json.loads(reg.read_text(encoding="utf-8"))["resuelto_sin_humano"]
+
+
+r13 = {
+    "consulta enviada con escalado (escalar_comercial, descuento)": (resuelto(decision="escalar_comercial", motivo_escalado="descuento"), "si"),
+    "consulta enviada sin escalados": (resuelto(decision="ninguna"), "si"),
+    "queja fuera de una consulta (escalar_humano)": (resuelto(ruta="incidencia", decision="escalar_humano", motivo_escalado="queja"), "no"),
+    "pregunta sin dato (pendiente_confirmar)": (resuelto(ruta="informacion", decision="pendiente_confirmar", motivo_escalado="sin_dato"), "no"),
+    "contacto del equipo fuera de una consulta (accion contacto_equipo)": (resuelto(ruta="informacion", decision="ninguna", accion="contacto_equipo"), "no"),
+    "información resuelta por el chat": (resuelto(ruta="informacion", decision="ninguna"), "si"),
+    "se ignora resuelto_sin_humano si viene en la entrada": (resuelto(decision="escalar_humano", resuelto_sin_humano="si"), "no"),
+}
+malos = {k: v for k, v in r13.items() if v[0] != v[1]}
+comprobar("13. resuelto_sin_humano: no con escalar_humano, pendiente_confirmar o contacto del equipo fuera de consulta; si en el resto",
+          not malos, malos)
+
+# 14. Sin ruta de registro, se escribe en registros/ del directorio de trabajo, nunca junto al script
+trabajo = TMP / "carpeta-del-chat"
+trabajo.mkdir()
+habia_registro_en_raiz = (RAIZ / "registros").exists()
+antes = os.getcwd()
+try:
+    os.chdir(trabajo)
+    procesar(caso(id_conversacion="c14"))
+finally:
+    os.chdir(antes)
+comprobar("14. registro en registros/ del directorio de trabajo, no en la carpeta del script/plugin",
+          (trabajo / "registros" / "conversaciones.jsonl").exists()
+          and (RAIZ / "registros").exists() == habia_registro_en_raiz)
+
 # 12. Ningún registro contiene datos personales (ni la URL ni la clave)
-todo = "".join(f.read_text(encoding="utf-8") for f in TMP.glob("*.jsonl"))
+todo = "".join(f.read_text(encoding="utf-8") for f in TMP.rglob("*.jsonl"))
 comprobar("12. ningún registro contiene nombre, email, teléfono, empresa, URL ni clave",
           personales_fuera(todo) and "laura" not in todo.lower() and url_local not in todo and clave_prueba not in todo
           and "conversation" not in todo)

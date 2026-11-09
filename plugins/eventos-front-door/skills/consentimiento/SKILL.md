@@ -26,8 +26,10 @@ Se aplica junto con guardrails y `envio-n8n`. Contexto en `${CLAUDE_SKILL_DIR}/.
 
 ## 4. Pregunta de privacidad (antes de enviar)
 - Se piden los datos y el permiso en el mismo mensaje, mencionando la política de privacidad:
-  "Para que el equipo prepare tu propuesta y se ponga en contacto contigo, necesito tu nombre y tu email. ¿Aceptas que los usemos solo para gestionar tu consulta, según nuestra política de privacidad?"
+  "Para que el equipo prepare tu propuesta y se ponga en contacto contigo, necesito tu nombre y tu email (y el nombre de la empresa, si el evento es para una empresa). ¿Aceptas que los usemos solo para gestionar tu consulta, según nuestra política de privacidad?"
+  La parte de la empresa solo se dice si el evento es corporativo.
 - Solo cuenta un "sí" claro → `gdpr_consent: yes`. Silencio, "vale, ¿y el precio?" o cambiar de tema no son un sí.
+- Si el cliente cambia de tema sin responder, se atiende su tema y se repite la pregunta una sola vez. Si sigue sin responder, no se envía la consulta (envio-n8n §1).
 - **Si el cliente da su email antes de que se lo pidamos:** no se usa hasta que responda a la pregunta de privacidad.
 - Si dice que no → gdpr_consent: no. Un solo mensaje: 'Sin problema, no guardamos tus datos. Gracias por tu consulta; si quieres que te respondamos, escríbenos a atencion@empresa-eventos.example.' La consulta se envía sin nombre, email, teléfono ni empresa, y esos datos se tapan en la conversación (por confirmar con Ale; KNOWLEDGE §3.2).
 - Si acepta pero no quiere dar el email (solo teléfono): 'Sin email no puedo pasar tus datos al equipo. Si prefieres, llámanos al +34 930 000 000.' La consulta se envía como un 'no' (sin datos personales), para que quede contada.
@@ -56,7 +58,7 @@ Se aplica junto con guardrails y `envio-n8n`. Contexto en `${CLAUDE_SKILL_DIR}/.
 ## 9. Ejemplos
 - Mal (primer mensaje): "¿Cuál es tu nombre, email, teléfono y empresa?"
   Bien: aviso de IA + "¿Qué evento tenéis en mente?"
-- Bien (final de una consulta): "Para que el equipo prepare tu propuesta y se ponga en contacto contigo, necesito tu nombre y tu email. ¿Aceptas que los usemos solo para gestionar tu consulta, según nuestra política de privacidad?" → "Sí, Laura Martínez, laura@ejemplo.example" → "¿Quieres recibir también novedades de espacios y eventos? Es opcional."
+- Bien (final de una consulta): "Para que el equipo prepare tu propuesta y se ponga en contacto contigo, necesito tu nombre y tu email (y el nombre de la empresa, si el evento es para una empresa). ¿Aceptas que los usemos solo para gestionar tu consulta, según nuestra política de privacidad?" → "Sí, Laura Martínez, laura@ejemplo.example" → "¿Quieres recibir también novedades de espacios y eventos? Es opcional."
 - Cliente: "Mi email es ana@ejemplo.example, ¿cuánto cuesta el Llum?" (antes de la pregunta de privacidad)
   Bien: "El precio te lo prepara el comercial en una propuesta a medida. Antes de usar tu email te preguntaré si aceptas nuestra política de privacidad. ¿Cuántos asistentes seríais?"
 - Cliente: "Prefiero no dar mi email, llamadme al 600 000 099."

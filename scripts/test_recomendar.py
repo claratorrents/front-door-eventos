@@ -156,6 +156,19 @@ CASOS_VALIDAR_FOTO = [
      "llum-poblenou-foto-01"),
 ]
 
+# Zona del cliente: primero los de su zona; los demás con otra_zona: true
+CASOS_ZONA = [
+    ("zona Poblenou, presentación 120 → Llum primero; el resto con otra_zona",
+     dict(asistentes=120, disposicion="theater", zona="Poblenou"),
+     [("sp-llum-poblenou", False), ("sp-mirador-montjuic", True), ("sp-forum-les-corts", True)]),
+    ("zona Gràcia, presentación 120 (en Gràcia no encaja ninguno) → todos con otra_zona",
+     dict(asistentes=120, disposicion="theater", zona="Gràcia"),
+     [("sp-mirador-montjuic", True), ("sp-llum-poblenou", True), ("sp-forum-les-corts", True)]),
+    ('zona "Distrito 22@" = Poblenou → Llum primero',
+     dict(asistentes=120, disposicion="theater", zona="Distrito 22@"),
+     [("sp-llum-poblenou", False), ("sp-mirador-montjuic", True), ("sp-forum-les-corts", True)]),
+]
+
 # Validar un espacio que queda en bajo_60: opcion_comodo solo si la recomendación normal tiene una
 CASOS_VALIDAR_AMPLIO = [
     ("validar: Nau, 100 banquet → bajo_60, opcion_comodo Mirador (con los campos foto y avisos_zona)",
@@ -180,6 +193,13 @@ def test_validar():
         if not ok:
             fallos += 1
             print(f"      obtenido: {r}")
+    for nombre, args, esperado in CASOS_ZONA:
+        r = recomendar(**args)["recomendados"]
+        ok = [(x["id"], x["otra_zona"]) for x in r] == esperado
+        print(f"{'OK   ' if ok else 'FALLO'} {nombre}")
+        if not ok:
+            fallos += 1
+            print(f"      obtenido: {[(x['id'], x['otra_zona']) for x in r]}")
     for nombre, args, opcion in CASOS_VALIDAR_AMPLIO:
         r = validar_espacio(**args)
         ok = r["encaja"] and r.get("grupo") == "bajo_60"
@@ -228,7 +248,7 @@ def main():
     fallos += test_fotos()
     fallos += test_media()
     fallos += test_validar()
-    total = len(CASOS) + 2 + len(CASOS_FOTO) + len(CASOS_MEDIA) + len(CASOS_VALIDAR) + len(CASOS_VALIDAR_ZONA) + len(CASOS_VALIDAR_FOTO) + len(CASOS_VALIDAR_AMPLIO)
+    total = len(CASOS) + 2 + len(CASOS_FOTO) + len(CASOS_MEDIA) + len(CASOS_VALIDAR) + len(CASOS_VALIDAR_ZONA) + len(CASOS_VALIDAR_FOTO) + len(CASOS_VALIDAR_AMPLIO) + len(CASOS_ZONA)
     print(f"\n{total - fallos}/{total} casos correctos")
     sys.exit(1 if fallos else 0)
 

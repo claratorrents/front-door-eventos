@@ -55,6 +55,7 @@ El LLM nunca cambia el orden ni añade espacios que el script no devuelve. **El 
 - Si es `bajo_60` (porque no hay otra opción): "Es más grande de lo que necesitáis, pero es el que encaja con [horario / fecha]."
 - Si el espacio elegido queda en bajo_60, se respeta la elección y se avisa: 'Os quedará amplio. Si preferís algo más ajustado, [espacio] tiene sitio para [N].', solo si la respuesta de `scripts/recomendar.py --validar` trae una opción comodo (`opcion_comodo`).
 - **Nunca precio** (guardrails, regla 1). Nunca "está disponible" (guardrails, regla 2).
+- Si el cliente ha dicho una zona, primero los espacios de esa zona. Los de otras zonas se presentan aparte: 'Fuera de [zona], también os encajaría…'. Si en su zona no encaja ninguno: 'En [zona] no tenemos ningún espacio que encaje; os propongo estos en otras zonas.'
 - Al final, una sola pregunta que junta las dos: "¿Cuál os encaja más? También puedo enseñaros el plano o el recorrido 360°."
 - **Elección:** el espacio que elija el cliente va en `preferred_location` del envío (KNOWLEDGE §3.2, decisión 2), y desde ese momento se puede decir el nombre de su comercial (guardrails, "Nombre del comercial").
 

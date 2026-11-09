@@ -250,7 +250,7 @@ POST a `N8N_WEBHOOK_URL` con las cabeceras `Content-Type: application/json` y `X
 - **Por confirmar con Ale:** si el cliente dice "no" a la privacidad, proponemos enviar la consulta **sin** nombre, email, teléfono ni empresa (con `gdpr_consent: no`), para que quede contada sin guardar datos personales.
 
 #### Registro anónimo de conversaciones
-Una línea por conversación en `registros/conversaciones.jsonl`, vaya o no a n8n (decisión 11). Lo escribe `scripts/enviar_n8n.py` (skill `envio-n8n`).
+Una línea por conversación en `registros/conversaciones.jsonl`, vaya o no a n8n (decisión 11). Lo escribe `scripts/enviar_n8n.py` (skill `envio-n8n`) en la carpeta desde la que se ejecuta el chat (directorio de trabajo), nunca dentro de la carpeta del plugin.
 
 | Campo | Valores |
 |---|---|
@@ -267,7 +267,7 @@ Una línea por conversación en `registros/conversaciones.jsonl`, vaya o no a n8
 | `lead_id` | el enviado, o "" (une con la hoja Enquiries de Ale) |
 | `consentimiento_datos` | si / no |
 | `consentimiento_publicidad` | si / no |
-| `resuelto_sin_humano` | si / no |
+| `resuelto_sin_humano` | si / no. Lo calcula el script: `no` si la decision es `escalar_humano` o `pendiente_confirmar`, o si el chatbot dio el contacto del equipo fuera de una consulta; `si` en el resto, incluidas las consultas enviadas a n8n aunque lleven escalados en el message (es el proceso normal) |
 
 Nunca: nombre, email, teléfono, empresa, texto de la conversación.
 
@@ -403,12 +403,12 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 - [x] Planos en SVG: las urls de `data/espacios.json` apuntan a `plano.svg` (`a68026c`). Los archivos todavía no existen.
 - [x] Paso 13: repositorio en GitHub, `github.com/claratorrents/front-door-eventos`.
 - [x] Integración con n8n: decisiones y contrato del webhook de Ale en §3.2 (`f33b7bb`).
-- Tests al 9/11: `test_recomendar.py` 29/29, `test_datos_consulta.py` 10/10, `test_router.py` 12/12, `test_enviar_n8n.py` 15/15; validador correcto (avisa de los planos y tours que faltan).
+- Tests al 9/11: `test_recomendar.py` 32/32, `test_datos_consulta.py` 13/13, `test_router.py` 12/12, `test_enviar_n8n.py` 17/17; validador correcto (avisa de los planos y tours que faltan).
 
 ### Pendiente inmediato
 - [ ] Decidir el nombre de la empresa.
 - [ ] Paso 2 de la integración con n8n (adaptar el proyecto a la §3.2), en 8 puntos: 1. `AGENTS.md` y `KNOWLEDGE.md` · 2. consentimiento · 3. cualificador · 4. router · 5. guardrails · 6. recomendador · 7. skill nueva de envío a n8n · 8. regenerar el plugin y prueba completa.
-  - Hecho: 1 (`747b8ab`, `af71d87`); 2, consentimiento versión 3 (`f80294f`, `0405c3e`); 3, cualificador con `scripts/datos_consulta.py`, que ya no puntúa (`8d1ce27`, corrección 09); 4, router sin la intención `reserva`, con `a_n8n` y `--consulta-en-marcha` (`ee2c71f`, `bf737b3`, corrección 10); 5, guardrails (`52b9313`, `b815673`, corrección 11); 6, recomendador (`e641c20`, `0c5cd9a`, `f61f1f4`, corrección 12); 7, skill `envio-n8n` con `scripts/enviar_n8n.py` y el registro anónimo (`b689180`, `c2dc7f9`); 8, plugin 0.2.0 regenerado y prueba completa de la ruta estrella con envío simulado (`pruebas/prueba-envio-n8n-01.md`: 19 de 21 reglas; quedan abiertos dos fallos: el recomendador no usa la zona y la privacidad llega antes de tener los datos).
+  - Hecho: 1 (`747b8ab`, `af71d87`); 2, consentimiento versión 3 (`f80294f`, `0405c3e`); 3, cualificador con `scripts/datos_consulta.py`, que ya no puntúa (`8d1ce27`, corrección 09); 4, router sin la intención `reserva`, con `a_n8n` y `--consulta-en-marcha` (`ee2c71f`, `bf737b3`, corrección 10); 5, guardrails (`52b9313`, `b815673`, corrección 11); 6, recomendador (`e641c20`, `0c5cd9a`, `f61f1f4`, corrección 12); 7, skill `envio-n8n` con `scripts/enviar_n8n.py` y el registro anónimo (`b689180`, `c2dc7f9`); 8, plugin 0.2.0 regenerado y prueba completa de la ruta estrella con envío simulado (`pruebas/prueba-envio-n8n-01.md`: 19 de 21 reglas; dos fallos: el recomendador no usaba la zona y la privacidad llegaba antes de tener los datos). Arreglados en el plugin 0.2.1: zona en `recomendar.py`, preguntas pendientes en `datos_consulta.py`, frase de privacidad con la empresa, `resuelto_sin_humano` calculado y registro en el directorio de trabajo (`pruebas/prueba-envio-n8n-02.md`: 21 de 21 reglas).
   - **Punto 7 (skill `envio-n8n`), decidido el 8 de noviembre** (hecho: lo aplican la skill y `scripts/enviar_n8n.py`) (sale de la prueba 03 de consentimiento):
     - Sin "sí" a la privacidad: `marketing_consent: no`.
     - Si el cliente no contesta a la publicidad o cierra el chat: se envía con `marketing_consent: no`.

@@ -11,16 +11,20 @@ Uso:
 
 Entrada (JSON):
   id_conversacion, idioma (es/ca/en), ruta, rutas_adicionales, decision, motivo_escalado,
+  accion (la del router: contacto_equipo / ofrecer_envio, si la hay),
   consulta {tipo_evento, asistentes, espacio_elegido, zona, fecha, presupuesto,
             necesidades, escalados: [frases]},
   cliente {nombre, email, telefono, empresa},
   privacidad (si/no/solo_telefono/sin_respuesta), publicidad (si/no/sin_respuesta),
-  conversacion [{quien: bot|cliente, texto}], resuelto_sin_humano (si/no)
+  conversacion [{quien: bot|cliente, texto}]
+  (resuelto_sin_humano no viene en la entrada: lo calcula el script; ver resuelto_sin_humano())
 
 Salida (JSON): enviado (si/no/simulado), respuesta (202/202_simulada/403/404/
   sin_respuesta/—), lead_id, frase, payload (tapado) y, si ya se había enviado,
   ya_enviado: true.
-Registro: una línea por conversación en registros/conversaciones.jsonl, sin datos personales.
+Registro: una línea por conversación en registros/conversaciones.jsonl del directorio de
+trabajo (la carpeta desde la que se ejecuta el chat), nunca dentro de la carpeta del plugin.
+Sin datos personales.
 """
 
 import datetime
@@ -38,7 +42,7 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
 ESPACIOS = RAIZ / "data" / "espacios.json"
-REGISTRO = RAIZ / "registros" / "conversaciones.jsonl"
+REGISTRO_RELATIVO = Path("registros") / "conversaciones.jsonl"   # dentro del directorio de trabajo
 TIMEOUT = 10  # segundos (contrato)
 
 CAMPOS = ["lead_id", "timestamp", "name", "email", "company", "phone", "preferred_location",
@@ -226,9 +230,23 @@ def registrar(linea, registro):
         f.write(json.dumps(linea, ensure_ascii=False) + "\n")
 
 
+def resuelto_sin_humano(datos):
+    """'no' si la decision es escalar_humano o pendiente_confirmar, o si el chatbot dio el
+    contacto del equipo fuera de una consulta (accion contacto_equipo del router sin ruta
+    lead); 'si' en el resto, incluidas las consultas enviadas a n8n aunque lleven escalados
+    en el message (es el proceso normal)."""
+    es_lead = datos.get("ruta") == "lead" or "lead" in (datos.get("rutas_adicionales") or [])
+    if datos.get("decision") in ("escalar_humano", "pendiente_confirmar"):
+        return "no"
+    if datos.get("accion") == "contacto_equipo" and not es_lead:
+        return "no"
+    return "si"
+
+
 # --- Proceso ------------------------------------------------------------------------
-def procesar(datos, url=None, clave=None, registro=REGISTRO, timeout=TIMEOUT, ahora=None):
-    registro = Path(registro)
+def procesar(datos, url=None, clave=None, registro=None, timeout=TIMEOUT, ahora=None):
+    # Por defecto, en el directorio de trabajo (se calcula en cada llamada, no al importar)
+    registro = Path(registro) if registro is not None else Path.cwd() / REGISTRO_RELATIVO
     ahora = ahora or datetime.datetime.now(datetime.timezone.utc)
     idioma = datos.get("idioma") if datos.get("idioma") in ("es", "ca", "en") else "es"
 
@@ -269,7 +287,7 @@ def procesar(datos, url=None, clave=None, registro=REGISTRO, timeout=TIMEOUT, ah
         "lead_id": resultado["lead_id"],
         "consentimiento_datos": "si" if con_datos else "no",
         "consentimiento_publicidad": "si" if con_datos and datos.get("publicidad") == "si" else "no",
-        "resuelto_sin_humano": datos.get("resuelto_sin_humano", "no"),
+        "resuelto_sin_humano": resuelto_sin_humano(datos),
     }, registro)
     return resultado
 

@@ -27,14 +27,29 @@ CASOS = [
     ("Todo dado con día exacto → [], listo true",
      {**CON_ESPACIO, "fecha": "dia", "presupuesto": "6.000 €", "necesidades": "audiovisuales"},
      {"siguientes_preguntas": [], "listo_para_enviar": True}),
-    ("Fecha mes, ya preguntados día exacto y presupuesto → [necesidades], listo false",
-     {**CON_ESPACIO, "fecha": "mes", "preguntados": ["dia_exacto", "presupuesto"]},
+    # Casos 6 y 7: "ya preguntados" quería decir que el cliente contestó ("aún no sabemos",
+    # cualificador §6). Con la regla nueva se expresan con respondidos; el esperado no cambia.
+    ("Fecha mes, ya contestados día exacto y presupuesto → [necesidades], listo false",
+     {**CON_ESPACIO, "fecha": "mes", "preguntados": ["dia_exacto", "presupuesto"],
+      "respondidos": ["dia_exacto", "presupuesto"]},
      {"siguientes_preguntas": ["necesidades"], "listo_para_enviar": False}),
-    ("Lo anterior + ya preguntadas necesidades → [], listo true",
-     {**CON_ESPACIO, "fecha": "mes", "preguntados": ["dia_exacto", "presupuesto", "necesidades"]},
+    ("Lo anterior + ya contestadas necesidades → [], listo true",
+     {**CON_ESPACIO, "fecha": "mes", "preguntados": ["dia_exacto", "presupuesto", "necesidades"],
+      "respondidos": ["dia_exacto", "presupuesto", "necesidades"]},
      {"siguientes_preguntas": [], "listo_para_enviar": True}),
     ("Sin espacio pero con zona Gràcia → la zona cuenta como dada", {**BASE, "zona": "Gràcia"},
      {"no_falta": "espacio_o_zona"}),
+    # Cuándo cuenta como preguntado (prueba envio-n8n 01)
+    ("Parking y descuento en medio (una vez cada pregunta, sin respuesta) → no listo; se repiten",
+     {**CON_ESPACIO, "zona": "Poblenou", "fecha": "mes", "preguntados": ["dia_exacto", "presupuesto", "necesidades"]},
+     {"siguientes_preguntas": ["dia_exacto", "presupuesto"], "listo_para_enviar": False}),
+    ("Dos veces cada pregunta sin respuesta → cuentan como preguntadas, listo true",
+     {**CON_ESPACIO, "fecha": "mes",
+      "preguntados": ["dia_exacto", "presupuesto", "dia_exacto", "presupuesto", "necesidades", "necesidades"]},
+     {"siguientes_preguntas": [], "listo_para_enviar": True}),
+    ('"Aún no sabemos el presupuesto" → cuenta como respondido',
+     {**CON_ESPACIO, "fecha": "dia", "preguntados": ["presupuesto"], "respondidos": ["presupuesto"]},
+     {"siguientes_preguntas": ["necesidades"], "no_falta": "presupuesto"}),
 ]
 
 

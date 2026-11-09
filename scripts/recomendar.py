@@ -6,6 +6,13 @@ Uso:
   python3 scripts/recomendar.py --asistentes 120 --disposicion banquet
   python3 scripts/recomendar.py --asistentes 100 --disposicion cocktail --hora-fin 03:00
   python3 scripts/recomendar.py --asistentes 180 --disposicion theater --dias 5
+  python3 scripts/recomendar.py --asistentes 120 --disposicion theater --zona Poblenou
+
+Zona del cliente (--zona): primero los espacios de esa zona que encajan y después los de
+otras zonas, marcados con "otra_zona": true. La zona se compara con el barrio
+(neighborhood) y el área (n8n_routing.zone) de data/espacios.json: "Poblenou" y
+"Distrito 22@" son la misma. Las reglas 1-5 se aplican a cada bloque por separado y el
+máximo de 3 cuenta para el total.
 
 Salida (JSON):
   recomendados: [{id, nombre, ocupacion, grupo, alternativa, avisos_zona}]   (máximo 3, ya ordenados)
@@ -37,6 +44,7 @@ import argparse
 import json
 import re
 import sys
+import unicodedata
 from fractions import Fraction
 from pathlib import Path
 
@@ -108,6 +116,24 @@ def media_aprobada(espacio_id, tipo, espacios=None):
             if m.get("type") == tipo and m.get("approved") is True]
 
 
+# Palabras que no identifican una zona ("Distrito 22@" = "22@"; "Les Corts" = "corts")
+PALABRAS_VACIAS_ZONA = {"de", "del", "la", "el", "l", "les", "els", "distrito", "districte",
+                        "zona", "barrio", "barri", "eje"}
+
+
+def _terminos_zona(texto):
+    t = unicodedata.normalize("NFD", (texto or "").lower())
+    t = "".join(c for c in t if unicodedata.category(c) != "Mn")
+    return {w for w in re.findall(r"[a-z0-9@]+", t) if w not in PALABRAS_VACIAS_ZONA}
+
+
+def en_zona(esp, zona):
+    """True si todas las palabras de la zona del cliente están en el barrio o el área del espacio."""
+    buscadas = _terminos_zona(zona)
+    del_espacio = _terminos_zona(esp.get("neighborhood")) | _terminos_zona(esp.get("n8n_routing", {}).get("zone"))
+    return bool(buscadas) and buscadas <= del_espacio
+
+
 def avisos_de_zona(reglas, fin):
     """Zonas que cierran antes de la hora de fin pedida (fin en minutos, o None)."""
     if fin is None:
@@ -121,7 +147,7 @@ def cargar_espacios():
         return json.load(f)["venues"]
 
 
-def recomendar(asistentes, disposicion, dias=None, hora_fin=None, espacios=None):
+def recomendar(asistentes, disposicion, dias=None, hora_fin=None, espacios=None, zona=None):
     if not isinstance(asistentes, int) or asistentes <= 0:
         raise ValueError("asistentes debe ser un entero mayor que 0")
     if disposicion not in DISPOSICIONES:
@@ -164,17 +190,39 @@ def recomendar(asistentes, disposicion, dias=None, hora_fin=None, espacios=None)
 
         candidatos.append({
             "id": esp["id"], "nombre": esp["name"], "aforo": aforo, "avisos_zona": avisos_zona,
+            "otra_zona": bool(zona) and not en_zona(esp, zona),
             "foto": foto_tarjeta(esp, disposicion, {a["zona"] for a in avisos_zona}),
             "ocupacion_exacta": ocupacion, "grupo": grupo(ocupacion),
         })
 
-    # 5. Orden: grupo; dentro del grupo, cercanía al 80 %; empate: menos aforo primero
-    candidatos.sort(key=lambda c: (ORDEN_GRUPOS[c["grupo"]],
-                                   abs(c["ocupacion_exacta"] - OBJETIVO),
-                                   c["aforo"]))
+    # 5 y 4. Orden y bajo_60. Con zona, se aplica a cada bloque por separado:
+    # primero los de la zona del cliente, después los de otras zonas.
+    if zona:
+        candidatos = (_ordenar([c for c in candidatos if not c["otra_zona"]])
+                      + _ordenar([c for c in candidatos if c["otra_zona"]]))
+    else:
+        candidatos = _ordenar(candidatos)
 
-    # 4. bajo_60 solo si no queda ningún comodo ni al_limite.
-    #    Si la única opción es al_limite, se añade como alternativa el primer bajo_60.
+    # 6. Máximo 3
+    recomendados = [
+        {"id": c["id"], "nombre": c["nombre"],
+         "ocupacion": round(float(c["ocupacion_exacta"]) * 100), "grupo": c["grupo"],
+         "alternativa": c["alternativa"], "otra_zona": c["otra_zona"],
+         "avisos_zona": c["avisos_zona"], "foto": c["foto"]}
+        for c in candidatos[:MAX_RECOMENDADOS]
+    ]
+
+    # 7. Descartados por antelación u horario
+    return {"recomendados": recomendados, "descartados": descartados}
+
+
+def _ordenar(candidatos):
+    """Reglas 4 y 5: orden por grupo y cercanía al 80 % (empate: menos aforo); bajo_60 solo
+    si no queda ningún comodo ni al_limite; si la única opción es al_limite, se añade como
+    alternativa el primer bajo_60."""
+    candidatos = sorted(candidatos, key=lambda c: (ORDEN_GRUPOS[c["grupo"]],
+                                                   abs(c["ocupacion_exacta"] - OBJETIVO),
+                                                   c["aforo"]))
     for c in candidatos:
         c["alternativa"] = False
     principales = [c for c in candidatos if c["grupo"] != "bajo_60"]
@@ -184,17 +232,7 @@ def recomendar(asistentes, disposicion, dias=None, hora_fin=None, espacios=None)
         if len(principales) == 1 and principales[0]["grupo"] == "al_limite" and bajos:
             bajos[0]["alternativa"] = True
             candidatos = principales + bajos[:1]
-
-    # 6. Máximo 3
-    recomendados = [
-        {"id": c["id"], "nombre": c["nombre"],
-         "ocupacion": round(float(c["ocupacion_exacta"]) * 100), "grupo": c["grupo"],
-         "alternativa": c["alternativa"], "avisos_zona": c["avisos_zona"], "foto": c["foto"]}
-        for c in candidatos[:MAX_RECOMENDADOS]
-    ]
-
-    # 7. Descartados por antelación u horario
-    return {"recomendados": recomendados, "descartados": descartados}
+    return candidatos
 
 
 def validar_espacio(espacio_id, asistentes, disposicion, dias=None, hora_fin=None, espacios=None):
@@ -253,6 +291,7 @@ def main():
     p.add_argument("--disposicion", choices=DISPOSICIONES)
     p.add_argument("--dias", type=int, help="días que faltan hasta el evento")
     p.add_argument("--hora-fin", help="hora de fin HH:MM (antes de 08:00 = madrugada)")
+    p.add_argument("--zona", help="zona que pide el cliente (primero los espacios de esa zona)")
     p.add_argument("--media", metavar="ID_ESPACIO", help="devuelve la media aprobada de este espacio")
     p.add_argument("--tipo", choices=TIPOS_MEDIA, help="tipo de media con --media")
     p.add_argument("--validar", metavar="ID_ESPACIO", help="valida el espacio elegido por el cliente")
@@ -269,7 +308,7 @@ def main():
         else:
             if a.asistentes is None or a.disposicion is None:
                 raise ValueError("faltan --asistentes y --disposicion")
-            resultado = recomendar(a.asistentes, a.disposicion, a.dias, a.hora_fin)
+            resultado = recomendar(a.asistentes, a.disposicion, a.dias, a.hora_fin, zona=a.zona)
     except ValueError as e:
         print(json.dumps({"error": str(e)}, ensure_ascii=False))
         sys.exit(2)

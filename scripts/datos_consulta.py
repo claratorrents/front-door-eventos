@@ -14,17 +14,23 @@ Datos, en el orden de la §2:
   7. necesidades     catering, audiovisuales, extras…       (recomendable)
 
 Reglas (§4):
-  - Cada dato se pregunta una sola vez: si ya se preguntó (aunque el cliente no
-    lo supiera o no contestara), no vuelve a salir.
-  - Faltan los datos que no están dados ni preguntados, en el orden de la §2.
+  - Un dato queda cerrado si está dado, si el cliente contestó a esa pregunta
+    (aunque sea "no lo sé" o "aún no": --respondidos) o si ya se le preguntó dos
+    veces sin respuesta (el dato aparece dos veces en --preguntados).
+  - Si el cliente cambia de tema sin contestar, la pregunta sigue pendiente: vuelve a
+    salir después de atender su tema.
+  - Faltan los datos que no están cerrados, en el orden de la §2.
   - Siguientes preguntas: las dos primeras que faltan.
-  - listo_para_enviar: verdadero cuando cada dato está dado o ya se preguntó.
+  - listo_para_enviar: verdadero cuando no falta ninguno.
 
 Uso:
   python3 scripts/datos_consulta.py --tipo "cena de empresa" --asistentes 120 \\
-      --espacio "Llum del Poblenou" --fecha mes --preguntados dia_exacto,presupuesto
+      --espacio "Llum del Poblenou" --fecha mes --preguntados dia_exacto,presupuesto \\
+      --respondidos presupuesto
   --fecha: dia / mes / temporada / nada (por defecto, nada)
-  --preguntados: datos ya preguntados, separados por comas (nombres de arriba)
+  --preguntados: cada vez que el chatbot hace una pregunta, su dato (se repite si se
+                 pregunta dos veces), separados por comas
+  --respondidos: datos cuya pregunta el cliente contestó, aunque fuera "no lo sé"
 
 Salida (JSON): datos_que_faltan, siguientes_preguntas y listo_para_enviar.
 """
@@ -35,6 +41,7 @@ import json
 ORDEN = ["tipo", "asistentes", "espacio_o_zona", "fecha", "dia_exacto", "presupuesto", "necesidades"]
 NIVELES_FECHA = ["dia", "mes", "temporada", "nada"]
 MAX_PREGUNTAS = 2
+MAX_VECES_SIN_RESPUESTA = 2   # tras dos preguntas sin respuesta, el dato queda cerrado
 
 
 def _dado(valor):
@@ -42,12 +49,12 @@ def _dado(valor):
 
 
 def datos_consulta(tipo=None, asistentes=None, espacio=None, zona=None, fecha="nada",
-                   presupuesto=None, necesidades=None, preguntados=()):
+                   presupuesto=None, necesidades=None, preguntados=(), respondidos=()):
     if fecha not in NIVELES_FECHA:
         raise ValueError(f"fecha '{fecha}' no es una de {NIVELES_FECHA}")
-    desconocidos = set(preguntados) - set(ORDEN)
+    desconocidos = (set(preguntados) | set(respondidos)) - set(ORDEN)
     if desconocidos:
-        raise ValueError(f"datos preguntados desconocidos: {sorted(desconocidos)}; deben ser de {ORDEN}")
+        raise ValueError(f"datos desconocidos: {sorted(desconocidos)}; deben ser de {ORDEN}")
 
     dados = {
         "tipo": _dado(tipo),
@@ -62,7 +69,10 @@ def datos_consulta(tipo=None, asistentes=None, espacio=None, zona=None, fecha="n
     aplica["dia_exacto"] = fecha in ("mes", "temporada")
     dados["dia_exacto"] = fecha == "dia"
 
-    faltan = [d for d in ORDEN if aplica[d] and not dados[d] and d not in preguntados]
+    preguntados = list(preguntados)
+    cerrado = {d: dados[d] or d in respondidos or preguntados.count(d) >= MAX_VECES_SIN_RESPUESTA
+               for d in ORDEN}
+    faltan = [d for d in ORDEN if aplica[d] and not cerrado[d]]
     return {
         "datos_que_faltan": faltan,
         "siguientes_preguntas": faltan[:MAX_PREGUNTAS],
@@ -79,11 +89,13 @@ def main():
     ap.add_argument("--fecha", choices=NIVELES_FECHA, default="nada")
     ap.add_argument("--presupuesto")
     ap.add_argument("--necesidades")
-    ap.add_argument("--preguntados", default="", help="datos ya preguntados, separados por comas")
+    ap.add_argument("--preguntados", default="", help="un dato por cada vez que se preguntó, separados por comas")
+    ap.add_argument("--respondidos", default="", help="datos cuya pregunta contestó el cliente, separados por comas")
     a = ap.parse_args()
     preguntados = [p.strip() for p in a.preguntados.split(",") if p.strip()]
+    respondidos = [p.strip() for p in a.respondidos.split(",") if p.strip()]
     r = datos_consulta(a.tipo, a.asistentes, a.espacio, a.zona, a.fecha,
-                       a.presupuesto, a.necesidades, preguntados)
+                       a.presupuesto, a.necesidades, preguntados, respondidos)
     print(json.dumps(r, ensure_ascii=False, indent=2))
 
 

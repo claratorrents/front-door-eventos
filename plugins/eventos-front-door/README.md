@@ -19,7 +19,7 @@ Al final de una consulta de evento, la skill envio-n8n llama a `scripts/enviar_n
 - **La URL y la clave solo van en variables de entorno:** `N8N_WEBHOOK_URL` y `N8N_API_KEY`. Nunca en el código, en el repositorio, en el chat ni en el navegador. El plugin no incluye ninguna.
 - **Sin esas variables, el envío se simula:** el script no envía nada y responde `202_simulada`, con el mismo formato que un envío real. Así se puede probar el chatbot sin conectar n8n.
 - Sin consentimiento, los datos personales no se envían y se tapan en la conversación; tarjetas, IBAN y DNI se tapan siempre.
-- El registro se crea en la carpeta `registros/` junto a los scripts del plugin.
+- El registro se crea en `registros/` de la carpeta desde la que se ejecuta el chat (directorio de trabajo), nunca dentro de la carpeta del plugin.
 
 ## Instalación
 Desde Claude Code, con el repositorio del proyecto en tu ordenador:

@@ -41,7 +41,7 @@ El cualificador **no puntúa ni decide** nada sobre el lead: solo qué preguntar
 Se ejecuta `${CLAUDE_SKILL_DIR}/../../scripts/datos_consulta.py` con lo que se sabe y con lo que ya se ha preguntado. Devuelve:
 - los datos que faltan, en el orden de la §2;
 - **las siguientes preguntas** (máximo dos, las dos primeras que falten);
-- `listo_para_enviar`: verdadero cuando cada dato está dado **o ya se preguntó una vez**.
+- listo_para_enviar: verdadero cuando cada dato está dado, o el cliente ha contestado que no lo sabe, o ya se le ha preguntado dos veces sin respuesta. Si el cliente cambia de tema, primero se atiende su tema y después se repite la pregunta pendiente.
 
 Reglas:
 - **Cada dato se pregunta una sola vez.** Si el cliente no lo sabe o no contesta, no se insiste: cuenta como preguntado.
