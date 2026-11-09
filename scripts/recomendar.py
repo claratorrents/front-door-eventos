@@ -34,7 +34,9 @@ Validar el espacio que ha elegido el cliente (skill router-intenciones §3):
   También avisos_zona y la foto de la tarjeta (foto_tarjeta), igual que la recomendación normal.
   Si el espacio encaja pero queda en bajo_60, añade opcion_comodo: la mejor opción comodo
   de la recomendación normal (mismos criterios: aforo de la disposición, antelación, horario,
-  avisos de zona y foto). Si no hay ninguna comodo, no se añade nada.
+  avisos de zona y foto). Con --zona, primero la busca en esa zona; si allí no hay ninguna
+  comodo, en cualquier zona (marcada con otra_zona). Si no hay ninguna comodo, no se añade
+  nada. Las alternativas (si no encaja) también ponen primero la zona.
   descartados:  [{id, nombre, motivo, detalle}]    (solo por antelación u horario)
 
 Solo lee data/espacios.json. No da precios ni disponibilidad.
@@ -235,7 +237,7 @@ def _ordenar(candidatos):
     return candidatos
 
 
-def validar_espacio(espacio_id, asistentes, disposicion, dias=None, hora_fin=None, espacios=None):
+def validar_espacio(espacio_id, asistentes, disposicion, dias=None, hora_fin=None, espacios=None, zona=None):
     """Comprueba el espacio elegido con las reglas 1-3 de la recomendación (aforo de la
     disposición, antelación y horario). Devuelve todos los motivos que fallan, no solo el
     primero, y las alternativas que daría la recomendación normal si no encaja."""
@@ -275,13 +277,19 @@ def validar_espacio(espacio_id, asistentes, disposicion, dias=None, hora_fin=Non
         resultado["ocupacion"] = round(asistentes / aforo * 100)
         resultado["grupo"] = grupo(Fraction(asistentes, aforo))
         if resultado["grupo"] == "bajo_60":
-            # Espacio amplio: la mejor opción comodo de la recomendación normal, si la hay
-            comodos = [r for r in recomendar(asistentes, disposicion, dias, hora_fin, espacios)["recomendados"]
-                       if r["grupo"] == "comodo" and r["id"] != esp["id"]]
-            if comodos:
-                resultado["opcion_comodo"] = comodos[0]
+            # Espacio amplio: la mejor opción comodo, primero en la zona del cliente y, si allí
+            # no hay ninguna, en cualquier zona
+            def comodos(z):
+                return [r for r in recomendar(asistentes, disposicion, dias, hora_fin, espacios, zona=z)["recomendados"]
+                        if r["grupo"] == "comodo" and r["id"] != esp["id"] and not (z and r["otra_zona"])]
+            opciones = (comodos(zona) if zona else []) or comodos(None)
+            if opciones:
+                opcion = dict(opciones[0])
+                por_id = {e["id"]: e for e in espacios}
+                opcion["otra_zona"] = bool(zona) and not en_zona(por_id[opcion["id"]], zona)
+                resultado["opcion_comodo"] = opcion
     else:
-        resultado["alternativas"] = recomendar(asistentes, disposicion, dias, hora_fin, espacios)["recomendados"]
+        resultado["alternativas"] = recomendar(asistentes, disposicion, dias, hora_fin, espacios, zona=zona)["recomendados"]
     return resultado
 
 
@@ -300,7 +308,7 @@ def main():
         if a.validar:
             if a.asistentes is None or a.disposicion is None:
                 raise ValueError("--validar necesita --asistentes y --disposicion")
-            resultado = validar_espacio(a.validar, a.asistentes, a.disposicion, a.dias, a.hora_fin)
+            resultado = validar_espacio(a.validar, a.asistentes, a.disposicion, a.dias, a.hora_fin, zona=a.zona)
         elif a.media:
             if not a.tipo:
                 raise ValueError("--media necesita --tipo")

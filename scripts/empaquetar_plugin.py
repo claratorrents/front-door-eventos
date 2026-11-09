@@ -32,7 +32,7 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
 NOMBRE = "eventos-front-door"
-VERSION = "0.2.1"  # 0.2.0: integración con n8n; 0.2.1: zona en el recomendador, preguntas pendientes y registro en el directorio de trabajo
+VERSION = "0.2.2"  # 0.2.0: integración con n8n; 0.2.1: zona en el recomendador, preguntas pendientes y registro en el directorio de trabajo; 0.2.2: --validar con zona y textos de zona y preguntas
 DESCRIPCION = ("Chatbot front door para una empresa de alquiler de espacios para eventos: "
                "router, guardrails, consentimiento, recomendador, cualificador, media y envío a n8n, "
                "con scripts de reglas fijas y datos sintéticos.")

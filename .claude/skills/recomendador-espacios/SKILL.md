@@ -22,7 +22,7 @@ Se aplica junto con guardrails, cualificador-leads y media-espacios. Datos en `d
 - **Día exacto más tarde:** si el cliente ya eligió espacio y después da el día exacto, se vuelve a validar ese espacio con `scripts/recomendar.py --validar` (antelación). Si ya no encaja, se explica el motivo y se proponen las alternativas que dé el script.
 
 ## 2. La decisión la toma el script
-Se ejecuta `scripts/recomendar.py` con asistentes, disposición y, si se conocen, días hasta el evento y hora de fin. El script aplica estas reglas, en este orden:
+Se ejecuta `scripts/recomendar.py` con asistentes, disposición y, si se conocen, días hasta el evento y hora de fin, y la zona, si el cliente la ha dicho (--zona). El script aplica estas reglas, en este orden:
 1. **Aforo:** se usa el de la disposición pedida, nunca `absolute_max`. Fuera todo espacio con menos aforo que asistentes.
 2. **Antelación:** si se sabe la fecha, fuera los espacios cuyo `min_lead_time_days` no se cumple.
 3. **Horario:** si se sabe la hora de fin, fuera los espacios cuya `max_end_time` es anterior.
@@ -56,6 +56,7 @@ El LLM nunca cambia el orden ni añade espacios que el script no devuelve. **El 
 - Si el espacio elegido queda en bajo_60, se respeta la elección y se avisa: 'Os quedará amplio. Si preferís algo más ajustado, [espacio] tiene sitio para [N].', solo si la respuesta de `scripts/recomendar.py --validar` trae una opción comodo (`opcion_comodo`).
 - **Nunca precio** (guardrails, regla 1). Nunca "está disponible" (guardrails, regla 2).
 - Si el cliente ha dicho una zona, primero los espacios de esa zona. Los de otras zonas se presentan aparte: 'Fuera de [zona], también os encajaría…'. Si en su zona no encaja ninguno: 'En [zona] no tenemos ningún espacio que encaje; os propongo estos en otras zonas.'
+- Si en su zona solo hay un espacio que queda muy amplio (bajo_60): 'En [zona] tenemos [espacio], aunque para [n] personas os quedaría muy amplio. Fuera de [zona], os encajaría mejor…' y se presenta la mejor opción comodo de otra zona.
 - Al final, una sola pregunta que junta las dos: "¿Cuál os encaja más? También puedo enseñaros el plano o el recorrido 360°."
 - **Elección:** el espacio que elija el cliente va en `preferred_location` del envío (KNOWLEDGE §3.2, decisión 2), y desde ese momento se puede decir el nombre de su comercial (guardrails, "Nombre del comercial").
 

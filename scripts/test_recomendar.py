@@ -164,6 +164,9 @@ CASOS_ZONA = [
     ("zona Gràcia, presentación 120 (en Gràcia no encaja ninguno) → todos con otra_zona",
      dict(asistentes=120, disposicion="theater", zona="Gràcia"),
      [("sp-mirador-montjuic", True), ("sp-llum-poblenou", True), ("sp-forum-les-corts", True)]),
+    ("zona Sant Martí, 100 en banquete → Nau primero (bajo_60) y opciones comodo con otra_zona",
+     dict(asistentes=100, disposicion="banquet", zona="Sant Martí"),
+     [("sp-nau-besos", False), ("sp-mirador-montjuic", True), ("sp-llum-poblenou", True)]),
     ('zona "Distrito 22@" = Poblenou → Llum primero',
      dict(asistentes=120, disposicion="theater", zona="Distrito 22@"),
      [("sp-llum-poblenou", False), ("sp-mirador-montjuic", True), ("sp-forum-les-corts", True)]),
@@ -177,6 +180,12 @@ CASOS_VALIDAR_AMPLIO = [
     ("validar: Mirador, fiesta 100 cocktail hasta las 01:00 → bajo_60, sin opcion_comodo",
      dict(espacio_id="sp-mirador-montjuic", asistentes=100, disposicion="cocktail", hora_fin="01:00"),
      None),
+    ("validar --zona Poblenou: Nau, 100 banquet → opcion_comodo de la zona (Llum), no la mejor de todas (Mirador)",
+     dict(espacio_id="sp-nau-besos", asistentes=100, disposicion="banquet", zona="Poblenou"),
+     "sp-llum-poblenou"),
+    ("validar --zona Sant Martí: Nau, 100 banquet → en la zona no hay comodo: opcion_comodo de otra zona (Mirador)",
+     dict(espacio_id="sp-nau-besos", asistentes=100, disposicion="banquet", zona="Sant Martí"),
+     "sp-mirador-montjuic"),
 ]
 
 
@@ -208,6 +217,8 @@ def test_validar():
         else:
             o = r.get("opcion_comodo") or {}
             ok &= o.get("id") == opcion and o.get("grupo") == "comodo" and "foto" in o and "avisos_zona" in o
+            if args.get("zona"):
+                ok &= o.get("otra_zona") == (opcion != "sp-llum-poblenou")  # solo el Llum está en Poblenou
         print(f"{'OK   ' if ok else 'FALLO'} {nombre}")
         if not ok:
             fallos += 1

@@ -44,7 +44,7 @@ Se ejecuta `${CLAUDE_SKILL_DIR}/../../scripts/datos_consulta.py` con lo que se s
 - listo_para_enviar: verdadero cuando cada dato está dado, o el cliente ha contestado que no lo sabe, o ya se le ha preguntado dos veces sin respuesta. Si el cliente cambia de tema, primero se atiende su tema y después se repite la pregunta pendiente.
 
 Reglas:
-- **Cada dato se pregunta una sola vez.** Si el cliente no lo sabe o no contesta, no se insiste: cuenta como preguntado.
+- **Cada dato se pregunta como máximo dos veces.** Si el cliente contesta que no lo sabe, no se insiste: cuenta como respondido. Si cambia de tema, se atiende su tema y la pregunta se repite una sola vez.
 - Una o dos preguntas por mensaje, intercaladas con la conversación. Nunca un cuestionario seguido.
 - Cuando `listo_para_enviar` es verdadero → skill consentimiento (§4, pregunta de privacidad) → `envio-n8n`.
 
