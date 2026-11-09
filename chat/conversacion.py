@@ -167,6 +167,11 @@ class Conversacion:
             return self._salida(r)
         self.no_entendidos = 0
 
+        # Despedida: una frase, sin preguntas ni botones; no cierra la conversación (decisión del 9/11)
+        if e.get("despedida"):
+            r.texto(self.f("despedida_cliente"))
+            return self._salida(r, sin_repetir=True)
+
         for i in e["intenciones"]:
             if i == "informacion" and self.consulta_activa:
                 continue                       # información dentro de un evento: no cambia la ruta
@@ -800,9 +805,9 @@ class Conversacion:
             self._cerrar(Respuesta(), despedida=False)
 
     # --- Salida ------------------------------------------------------------------------
-    def _salida(self, r):
+    def _salida(self, r, sin_repetir=False):
         # Volver a la privacidad pendiente una sola vez (consentimiento §4)
-        if getattr(self, "_repetir_privacidad", False) and self.fase == "privacidad" and self.priv_veces < 2 \
+        if not sin_repetir and getattr(self, "_repetir_privacidad", False) and self.fase == "privacidad" and self.priv_veces < 2 \
                 and not any(p["privacidad"] for p in r.cola):
             self._preguntar_privacidad(r, prefijo=self.f("volviendo") + " ")
         self._repetir_privacidad = False

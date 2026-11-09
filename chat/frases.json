@@ -149,7 +149,8 @@
       "oferta_si": "Sí, envíalo",
       "oferta_no": "No, sigamos"
     },
-    "descarte_aforo": "{Espacio} no tiene sitio para {n} personas en formato {disposicion}: su máximo es {aforo}. ¿Quieres que te enseñe otras opciones?"
+    "descarte_aforo": "{Espacio} no tiene sitio para {n} personas en formato {disposicion}: su máximo es {aforo}. ¿Quieres que te enseñe otras opciones?",
+    "despedida_cliente": "Gracias a ti. Si necesitas algo más, aquí estoy."
   },
   "en": {
     "aviso": "Hi, I'm the virtual assistant of [EMPRESA]. I can help you find a venue for your event; a member of the team reviews bookings and proposals.",
@@ -300,6 +301,7 @@
       "oferta_si": "Yes, send it",
       "oferta_no": "No, let's continue"
     },
-    "descarte_aforo": "{Espacio} doesn't have room for {n} people in {disposicion} layout: its maximum is {aforo}. Would you like to see other options?"
+    "descarte_aforo": "{Espacio} doesn't have room for {n} people in {disposicion} layout: its maximum is {aforo}. Would you like to see other options?",
+    "despedida_cliente": "Thank you. If you need anything else, I'm here."
   }
 }

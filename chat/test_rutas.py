@@ -310,6 +310,30 @@ a = cv.recibir(accion="plano:sp-mirador-montjuic")
 comprobar("plano en inglés → /media/mirador-montjuic-plano.en",
           any(m["tipo"] == "plano" and m["url"] == "/media/mirador-montjuic-plano.en" for m in a["mensajes"]), a["mensajes"])
 
+# Despedida: una frase, sin preguntas ni botones; no cierra ni registra; no repite la privacidad pendiente
+cv, reg = nueva()
+for paso_ruta in RUTAS["ruta 1"][:7]:
+    paso(cv, paso_ruta)
+a = cv.recibir(texto="ok gracias, adios")
+comprobar("despedida → frase del equipo, sin preguntas ni botones, sin cerrar ni registrar",
+          textos(a) == [es("despedida_cliente")] and not a["botones"] and not a["cerrada"] and not reg.exists()
+          and cv.no_entendidos == 0, (textos(a), a["botones"]))
+cv, _ = nueva()
+cv.recibir(texto="Hi")
+a = cv.recibir(texto="thanks, bye")
+comprobar("despedida en inglés", textos(a) == [en("despedida_cliente")], textos(a))
+
+# Frustración: con consulta, B14; sin consulta, B13
+cv, _ = nueva()
+cv.recibir(texto="Hola")
+a = cv.recibir(texto="no me entendéis")
+comprobar("frustración sin consulta → B13", textos(a) == [es("persona_sin_consulta")], textos(a))
+cv, _ = nueva()
+cv.recibir(texto=RUTAS["ruta 1"][1]["texto"])
+a = cv.recibir(texto="no me entendéis")
+comprobar("frustración con consulta → B14 con su prefijo y botones",
+          textos(a) == [es("frustracion_prefijo") + " " + es("persona_con_consulta")] and len(a["botones"]) == 2, textos(a))
+
 # --- 4. Servidor HTTP local --------------------------------------------------------------
 import servidor  # noqa: E402
 

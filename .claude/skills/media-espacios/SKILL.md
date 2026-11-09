@@ -1,6 +1,6 @@
 ---
 name: media-espacios
-description: Elige y presenta el material visual aprobado de un espacio (fotos, plano y recorrido 360°): la foto de la tarjeta de recomendación y lo que el cliente pida después. Úsala cuando el recomendador presenta un espacio o el cliente pide fotos, plano, vídeo o recorrido virtual. No se usa para recomendar espacios ni para dar precios o disponibilidad.
+description: Elige y presenta el material visual aprobado de un espacio (fotos, plano y más fotos): la foto de la tarjeta de recomendación y lo que el cliente pida después. Úsala cuando el recomendador presenta un espacio o el cliente pide fotos, plano, vídeo o recorrido virtual. No se usa para recomendar espacios ni para dar precios o disponibilidad.
 ---
 
 # Media de espacios
@@ -21,8 +21,8 @@ Se aplica junto con guardrails y recomendador-espacios. Datos en `data/espacios.
 ## 3. Lo que el cliente pide después
 - **"¿Tenéis más fotos?"** → todas las fotos aprobadas del espacio, con su `description` como pie de foto.
 - **Plano** → el plano aprobado, con su `description`.
-- **Galería de fotos** → el tour aprobado.
-- Las fotos adicionales, el plano y el tour se piden al script; el LLM no los busca en los datos.
+- **Galería de fotos** → las fotos aprobadas del espacio.
+- Las fotos adicionales, el plano y las fotos se piden al script; el LLM no los busca en los datos.
 - Al final de la recomendación se puede ofrecer: "¿Queréis ver el plano o más fotos de alguno?" (una sola pregunta).
 
 ## 4. Lo que no hay

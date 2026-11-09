@@ -13,6 +13,7 @@ exactamente lo mismo):
 
     salida:  {"idioma": "es"|"en"|None,
               "saludo": bool,
+              "despedida": bool,
               "intenciones": [informacion, nuevo_evento, cambio_reserva, queja, privacidad,
                               persona, fuera_tema],
               "legal": bool,
@@ -88,6 +89,11 @@ MESES = {"enero": 1, "febrero": 2, "marzo": 3, "abril": 4, "mayo": 5, "junio": 6
          "august": 8, "september": 9, "october": 10, "november": 11, "december": 12}
 RE_MES = "|".join(sorted(MESES, key=len, reverse=True))
 RE_MES_SIN_MAY = "|".join(sorted((m for m in MESES if m != "may"), key=len, reverse=True))
+# Abreviados (decisión del equipo, 9/11): con o sin punto. Solo cuentan junto a un día ("15 dic") o con
+# "en/in" ("en feb"), porque solos se confunden con palabras ("vistas al mar").
+MESES_ABR = {"ene": 1, "feb": 2, "mar": 3, "abr": 4, "may": 5, "jun": 6, "jul": 7, "ago": 8, "sep": 9, "oct": 10,
+             "nov": 11, "dic": 12, "jan": 1, "apr": 4, "aug": 8, "dec": 12}
+RE_ABR = "|".join(sorted(MESES_ABR, key=len, reverse=True))
 TEMPORADA = (r"\b(primavera|verano|otono|invierno|el ano que viene|el proximo ano|"
              r"spring|summer|autumn|fall|winter|next year)\b")
 
@@ -120,6 +126,13 @@ def extraer_fecha(t, hoy):
             r = _fecha_dia(int(m.group(gd)), MESES[m.group(gm)], m.group(ga), hoy)
             if r:
                 return {"fecha_nivel": "dia", "fecha": r[0].isoformat(), "fecha_pasada": r[1]}
+    for patron, gd, gm in ((rf"\b(\d{{1,2}})(?:st|nd|rd|th)?\s+(?:de\s+|of\s+)?({RE_ABR})\.?(?![a-z])", 1, 2),
+                           (rf"\b({RE_ABR})\.?\s+(\d{{1,2}})(?:st|nd|rd|th)?\b", 2, 1)):
+        m = re.search(patron, t)
+        if m:
+            r = _fecha_dia(int(m.group(gd)), MESES_ABR[m.group(gm)], None, hoy)
+            if r:
+                return {"fecha_nivel": "dia", "fecha": r[0].isoformat(), "fecha_pasada": r[1]}
     m = re.search(r"\b(\d{1,2})/(\d{1,2})(?:/(\d{2,4}))?\b", t)   # dd/mm(/aaaa)
     if m:
         r = _fecha_dia(int(m.group(1)), int(m.group(2)), m.group(3), hoy)
@@ -127,7 +140,8 @@ def extraer_fecha(t, hoy):
             return {"fecha_nivel": "dia", "fecha": r[0].isoformat(), "fecha_pasada": r[1]}
     # Solo el mes: "en enero", "in March" o el nombre del mes suelto ("may" en inglés solo con "in")
     if re.search(rf"\b(?:en|in|para|for|durante|during)\s+(?:el mes de\s+)?(?:{RE_MES})\b", t) or \
-            re.search(rf"\b(?:{RE_MES_SIN_MAY})\b", t):
+            re.search(rf"\b(?:{RE_MES_SIN_MAY})\b", t) or \
+            re.search(rf"\b(?:en|in)\s+(?:{RE_ABR})\.?(?![a-z])", t):
         return {"fecha_nivel": "mes"}
     if re.search(TEMPORADA, t):
         return {"fecha_nivel": "temporada"}
@@ -169,9 +183,9 @@ TIPOS = [
     (r"comida\w*|almuerzo\w*|lunch\w*", "comida", "banquet", False, None),
     (r"boda\w*|wedding\w*", "boda", "banquet", True, None),
     (r"gala\w*", "gala", "banquet", True, "gala"),
-    (r"networking", "networking", "cocktail", False, "networking"),
+    (r"networking|afterwork\w*|after work", "networking", "cocktail", False, "networking"),
     (r"coctel\w*|cocktail\w*", "coctel", "cocktail", False, None),
-    (r"fiesta\w*|party|parties", "fiesta", "cocktail", True, None),
+    (r"fiesta\w*|party|parties|cumple\w*|birthday\w*", "fiesta", "cocktail", True, None),
     (r"formacion\w*|curso\w*|training|course\w*", "formacion", "classroom", False, "formacion"),
     (r"taller\w*|workshop\w*", "taller", "classroom", False, "taller"),
 ]
@@ -302,13 +316,14 @@ CAMBIO = (r"\b(mi|nuestra|my|our) (reserva|booking|reservation)\b|\b(cancelar|an
 PERSONA = (r"\bhablar con (?:una persona|alguien|un humano|un agente|el equipo|una persona real)\b|"
            r"\b(?:speak|talk) to (?:a |someone|somebody|a real |an? )?(?:person|human|agent|someone|team)\b|"
            r"\breal person\b|\bpersona real\b")
-FRUSTRACION = (r"\b(no me entiendes|no me estas entendiendo|ya te lo he dicho|no me escuchas|"
-               r"you don't understand|you dont understand|i already told you|i've already said)\b")
+FRUSTRACION = (r"\b(no me entiendes|no me entendeis|no me estas entendiendo|no me estais entendiendo|ya te lo he dicho|"
+               r"no me escuchas|you don't understand|you dont understand|i already told you|i've already said)\b")
 FUERA_TEMA = (r"\b(tiempo hara|el tiempo|clima|futbol|receta\w*|chiste\w*|weather|football|soccer|"
               r"recipe\w*|joke\w*|politica|politics)\b")
 PRECIO = (r"\b(cuanto (?:me |nos |te |os )?(?:cuesta|vale|sale|costaria|saldria)|precio\w*|tarifa\w*|coste\w*|how much|price\w*|"
           r"cost\w*|rate\w*|quote)\b")
-DESCUENTO = r"\b(descuento\w*|rebaja\w*|mas barato|oferta|discount\w*|cheaper|deal)\b|\d+\s*%\s*off|% off"
+PRECIO_ESPECIAL = r"\b(precio especial|special price|mejor precio|better price)\b"   # es pedir descuento, no precio
+DESCUENTO = rf"\b(descuento\w*|rebaja\w*|mas barato|oferta|discount\w*|cheaper|deal)\b|\d+\s*%\s*off|% off|{PRECIO_ESPECIAL}"
 DISPONIBILIDAD = r"\b(libre|disponible\w*|disponibilidad|ocupad\w*|available|availability|free on)\b"
 INYECCION = (r"\b(ignora\w*|ignore\w*|olvida\w*|forget|disregard)\b.*\b(instruccion\w*|instructions?|rules?|"
              r"reglas?|normas?|you were given)\b|\b(system prompt|tu prompt|your prompt|el prompt)\b|"
@@ -331,6 +346,8 @@ MEDIA = [("video", r"\b(video\w*)\b"), ("plano", r"\b(plano\w*|floor ?plan\w*|pl
 SI = (r"^(si|sí|vale|de acuerdo|acepto|claro|ok|okay|perfecto|adelante|por supuesto|yes|yeah|yep|sure|"
       r"i agree|of course|go ahead|please do)\b")
 NO = r"^(no|nope|prefiero no|mejor no|i'd rather not|id rather not|no thanks|no, thanks)\b"
+DESPEDIDA = (r"\b(adios|adeu|hasta luego|hasta pronto|hasta otra|nos vemos|chao|chau|bye|goodbye|see you)\b|"
+             r"^(?:ok|okay|vale|perfecto|genial|great|perfect)?[\s,.!]*(?:muchas |many )?(?:gracias|thanks|thank you)[\s!.]*$")
 NO_LO_SE = (r"\b(no lo se|no se|aun no|todavia no|ya veremos|ni idea|sin decidir|no lo tenemos|"
             r"don't know|dont know|not sure|not yet|no idea|tbd|to be decided)\b")
 
@@ -340,7 +357,7 @@ def entender(texto, contexto=None):
     hoy = contexto.get("hoy") or datetime.date.today()
     texto = unicodedata.normalize("NFC", (texto or "").strip())
     t = norm(texto)   # misma longitud que texto: los valores se recortan del original
-    out = {"idioma": detectar_idioma(t), "saludo": False, "intenciones": [], "legal": False, "datos": {},
+    out = {"idioma": detectar_idioma(t), "saludo": False, "despedida": False, "intenciones": [], "legal": False, "datos": {},
            "no_lo_sabe": False, "si_no": None, "senales": {}, "entendido": False}
     if not t:
         return out
@@ -357,7 +374,7 @@ def entender(texto, contexto=None):
         s["confirmar_reserva"] = True
     if _hay(PIDE_PROMPT, t):
         s["pide_prompt"] = True
-    if _hay(PRECIO, t) and not _hay(r"\b(presupuesto|budget)\b", t):
+    if _hay(PRECIO, t) and not _hay(r"\b(presupuesto|budget)\b", t) and not _hay(PRECIO_ESPECIAL, t):
         s["precio"] = True
     if _hay(DESCUENTO, t):
         m = re.search(r"(\d{1,2})\s*%", t)
@@ -437,10 +454,16 @@ def entender(texto, contexto=None):
         out["si_no"] = "si"
     elif _hay(NO, t) and not _hay(r"^no (lo )?se\b|^no idea|^not sure", t):
         out["si_no"] = "no"
+    if s.get("frustracion"):
+        out["si_no"] = None      # "no me entendéis" no es un "no" a la privacidad
     if _hay(NO_LO_SE, t):
         out["no_lo_sabe"] = True
     if _hay(SALUDO, re.sub(r"^[^\w]+", "", t)) and not intenciones and not d and not s:
         out["saludo"] = True
 
-    out["entendido"] = bool(out["saludo"] or intenciones or d or s or out["si_no"] or out["no_lo_sabe"])
+    # Despedida ("gracias, adiós", "thanks, bye"): no es una intención ni un "no entendido"
+    if _hay(DESPEDIDA, t) and not intenciones and not d and not s:
+        out["despedida"] = True
+        out["si_no"] = None
+    out["entendido"] = bool(out["saludo"] or out["despedida"] or intenciones or d or s or out["si_no"] or out["no_lo_sabe"])
     return out
