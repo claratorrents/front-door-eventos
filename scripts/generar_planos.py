@@ -9,7 +9,9 @@ Solo usa lo que hay en los datos (decisión del equipo, 9 de noviembre):
 No dibuja medidas ni proporciones reales y no usa la description del plano.
 Pie: "Plano orientativo · [nombre del espacio]".
 
-Se guarda cada plano en la ruta de la url de su elemento de media (…/plano.svg).
+Las etiquetas salen en el idioma de la conversación: plano.svg (castellano, en la ruta de la url
+de su elemento de media) y plano.en.svg (inglés, al lado). Montajes: Cóctel / Teatro / Banquete /
+Taller y Cocktail / Theatre / Banquet / Workshop (decisión del equipo, 9 de noviembre).
 Uso:  python3 scripts/generar_planos.py
 """
 
@@ -20,8 +22,14 @@ from xml.sax.saxutils import escape
 RAIZ = Path(__file__).resolve().parent.parent
 ESPACIOS = RAIZ / "data" / "espacios.json"
 
-# Montajes en el orden del catálogo, con el nombre que usan las skills
-MONTAJES = [("cocktail", "Cóctel"), ("theater", "Teatro"), ("banquet", "Banquete"), ("classroom", "Escuela")]
+# Textos por idioma (montajes en el orden del catálogo)
+TEXTOS = {
+    "es": {"montajes": ["Cóctel", "Teatro", "Banquete", "Taller"], "pie": "Plano orientativo",
+           "alt": "Plano orientativo de", "zonas": {"terraza": "Terraza", "patio": "Patio"}},
+    "en": {"montajes": ["Cocktail", "Theatre", "Banquet", "Workshop"], "pie": "Indicative floor plan",
+           "alt": "Indicative floor plan of", "zonas": {"terraza": "Terrace", "patio": "Courtyard"}},
+}
+CLAVES_MONTAJE = ["cocktail", "theater", "banquet", "classroom"]
 ANCHO, ALTO = 640, 400
 
 
@@ -32,12 +40,13 @@ def zonas(esp):
     return list(dict.fromkeys(z.strip().lower() for z in vistas if z.strip()))
 
 
-def generar_svg(esp):
+def generar_svg(esp, idioma="es"):
+    tx = TEXTOS[idioma]
     nombre = escape(esp["name"])
     z = zonas(esp)
     partes = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ANCHO} {ALTO}" width="{ANCHO}" height="{ALTO}" '
-        f'role="img" aria-label="Plano orientativo de {nombre}" font-family="Helvetica, Arial, sans-serif">',
+        f'role="img" aria-label="{tx["alt"]} {nombre}" font-family="Helvetica, Arial, sans-serif">',
         f'<rect x="0" y="0" width="{ANCHO}" height="{ALTO}" fill="#ffffff"/>',
     ]
     # Bloque principal (sin escala) y, a su derecha, una caja por zona de los datos
@@ -54,17 +63,17 @@ def generar_svg(esp):
             partes.append(f'<rect x="{x0 + ancho_principal + 10}" y="{y}" width="190" height="{alto_zona}" '
                           f'fill="#e6efe4" stroke="#55524d" stroke-width="2" stroke-dasharray="6 4"/>')
             partes.append(f'<text x="{x0 + ancho_principal + 105}" y="{y + alto_zona / 2}" text-anchor="middle" '
-                          f'font-size="18" fill="#2b2926">{escape(zona.capitalize())}</text>')
+                          f'font-size="18" fill="#2b2926">{escape(tx["zonas"].get(zona, zona.capitalize()))}</text>')
     # Tabla de aforos por montaje
     cap = esp.get("capacities", {})
     y_tabla = y0 + alto + 35
-    for i, (clave, etiqueta) in enumerate(MONTAJES):
+    for i, (clave, etiqueta) in enumerate(zip(CLAVES_MONTAJE, tx["montajes"])):
         x = x0 + i * 145
         partes.append(f'<text x="{x}" y="{y_tabla}" font-size="15" fill="#55524d">{etiqueta}</text>')
         partes.append(f'<text x="{x}" y="{y_tabla + 22}" font-size="18" font-weight="bold" fill="#2b2926">'
                       f'{int(cap.get(clave, 0))}</text>')
     partes.append(f'<text x="{x0}" y="{ALTO - 12}" font-size="13" fill="#55524d">'
-                  f'Plano orientativo · {nombre}</text>')
+                  f'{tx["pie"]} · {nombre}</text>')
     partes.append("</svg>")
     return "\n".join(partes) + "\n"
 
@@ -77,8 +86,9 @@ def main():
             if m.get("type") == "plano" and m.get("approved") is True and m.get("url", "").endswith(".svg"):
                 destino = RAIZ / m["url"].lstrip("/")
                 destino.parent.mkdir(parents=True, exist_ok=True)
-                destino.write_text(generar_svg(esp), encoding="utf-8")
-                print(f"{esp['id']}: {destino.relative_to(RAIZ)} (zonas: {', '.join(zonas(esp)) or 'ninguna'})")
+                destino.write_text(generar_svg(esp, "es"), encoding="utf-8")
+                destino.with_name(destino.stem + ".en.svg").write_text(generar_svg(esp, "en"), encoding="utf-8")
+                print(f"{esp['id']}: {destino.relative_to(RAIZ)} y .en.svg (zonas: {', '.join(zonas(esp)) or 'ninguna'})")
 
 
 if __name__ == "__main__":

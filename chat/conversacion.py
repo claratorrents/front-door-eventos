@@ -179,11 +179,12 @@ class Conversacion:
             return self._salida(r)
 
         ints = e["intenciones"]
+        # Inyección: si pide confirmar la reserva, B4; si además pide el prompt, la 23 sin su pregunta
         if s.get("confirmar_reserva"):
             r.texto(self.f("confirmar_reserva"))
             r.otro_tema = True
-        elif s.get("inyeccion"):
-            if self.consulta_activa:
+        if s.get("pide_prompt") or (s.get("inyeccion") and not s.get("confirmar_reserva")):
+            if self.consulta_activa or s.get("confirmar_reserva"):
                 r.texto(self.f("prompt").split("?")[0].rsplit(".", 1)[0] + ".")
             else:
                 r.pregunta_ya(self.f("prompt"))
@@ -211,7 +212,8 @@ class Conversacion:
                 prefijo = self.f("frustracion_prefijo") + " " if motivo == "frustracion" else ""
                 ui = self.ui()
                 r.pregunta_ya(prefijo + self.f("persona_con_consulta"))
-                r.botones = [{"texto": ui["si"], "accion": "oferta:si"}, {"texto": ui["no"], "accion": "oferta:no"}]
+                r.botones = [{"texto": ui["oferta_si"], "accion": "oferta:si"},
+                             {"texto": ui["oferta_no"], "accion": "oferta:no"}]
                 self.fase = "oferta_envio"
                 self._motivo_oferta = motivo
                 self._decidir("escalar_humano", motivo)
@@ -245,6 +247,15 @@ class Conversacion:
         if d.get("email") and self.fase not in ("privacidad", "formulario"):
             r.texto(self.f("email_antes"))
 
+        # Datos de un evento sin intención clara ("somos unos 80…"): se abre la consulta
+        claves_evento = ("tipo", "asistentes", "zona", "fecha_nivel") if (s.get("info") or s.get("media")) \
+            else ("tipo", "asistentes", "espacio", "zona", "fecha_nivel")   # preguntar por un espacio no es un evento
+        if not self.consulta_activa and self.fase is None and any(d.get(k) for k in claves_evento) and not (
+                set(ints) & {"queja", "privacidad", "cambio_reserva", "persona"}):
+            self.consulta_activa = True
+            if "nuevo_evento" not in self.intenciones:
+                self.intenciones.append("nuevo_evento")
+
         if self.fase == "enviado":
             if any(k in d for k in DATOS_CONSULTA):
                 r.texto(self.f("ya_enviada_cambio"))
@@ -254,6 +265,11 @@ class Conversacion:
             self._consulta(e, r)
         elif e["saludo"]:
             r.pregunta(self.f("que_evento"))
+        # Nunca se queda callado: si no hay nada que decir, "no te he entendido" (B2)
+        if not r.cola and all(m.get("texto") == self.f("aviso") for m in r.mensajes) and not r.botones \
+                and not r.formulario:
+            self.no_entendidos += 1
+            r.texto(self.f("no_entendido" if self.no_entendidos == 1 else "no_entendido_2"))
         return self._salida(r)
 
     def _escalado(self, frase):
@@ -297,6 +313,12 @@ class Conversacion:
                 self.fase = None
                 return False
             self.fase = None
+            return False
+        if self.fase == "oferta_alternativas":
+            self.fase = None
+            if si_no == "si":
+                self._mostrar_alternativas(getattr(self, "_alternativas", []), r)
+                return True
             return False
         if self.fase == "oferta_fotos":
             self.fase = None
@@ -367,7 +389,7 @@ class Conversacion:
             self.publicidad = "si" if valor == "si" else "no"
             self._enviar(r)
         elif tipo == "oferta" and self.fase == "oferta_envio":
-            self.historial.append(("cliente", ui["si" if valor == "si" else "no"]))
+            self.historial.append(("cliente", ui["oferta_si" if valor == "si" else "oferta_no"]))
             if valor == "si":
                 self._aceptar_oferta(r)
             else:
@@ -478,7 +500,7 @@ class Conversacion:
             r.texto(self.f("apuntado"))
 
         # 2. Cualificador: lo que falta (datos_consulta.py)
-        if self.fase in ("privacidad", "formulario", "publicidad", "oferta_envio", "enviado"):
+        if self.fase in ("privacidad", "formulario", "publicidad", "oferta_envio", "oferta_alternativas", "enviado"):
             return
         espacio_nombre = self.espacios[c["espacio"]]["name"] if c["espacio"] else None
         dc = datos_consulta(tipo=c["tipo"], asistentes=c["asistentes_texto"], espacio=espacio_nombre, zona=c["zona"],
@@ -642,16 +664,25 @@ class Conversacion:
             self.validado = (c["espacio"], c["fecha"], c["hora_fin"])
             return
         # No encaja: motivo con el dato del script y alternativas del script (router §3)
+        aforo = None
         for m in res["motivos"]:
             if m["motivo"] == "antelacion":
                 r.texto(self.f("descarte_antelacion", espacio=self.nombre(c["espacio"]), dias=str(m["necesita_dias"])))
             elif m["motivo"] == "horario":
                 r.texto(self._descarte({"id": c["espacio"], "motivo": "horario"}))
             else:
-                r.texto(self.f("descarte_aforo", espacio=self.nombre(c["espacio"]), n=str(m["asistentes"]),
-                               disposicion=self.pieza("disposiciones", m["disposicion"]), aforo=str(m["aforo"])))
+                aforo = m
+        if aforo:   # por aforo, se pregunta antes de enseñar otras opciones
+            r.pregunta_ya(self.f("descarte_aforo", espacio=self.nombre(c["espacio"]), n=str(aforo["asistentes"]),
+                                 disposicion=self.pieza("disposiciones", aforo["disposicion"]), aforo=str(aforo["aforo"])))
+            self._alternativas = res.get("alternativas", [])
+            c["espacio"], self.validado = None, None
+            self.fase = "oferta_alternativas"
+            return
         c["espacio"], self.validado = None, None
-        alternativas = res.get("alternativas", [])
+        self._mostrar_alternativas(res.get("alternativas", []), r)
+
+    def _mostrar_alternativas(self, alternativas, r):
         if alternativas:
             self.recomendados = [x["id"] for x in alternativas]
             self.recomendado = True
@@ -710,7 +741,8 @@ class Conversacion:
         planos = media_aprobada(eid, "plano")
         if planos:
             nombre = self.espacios[eid]["name"]
-            r.bloque({"tipo": "plano", "url": f"/media/{planos[0]['id']}",
+            sufijo = ".en" if self.idioma == "en" else ""   # etiquetas del plano en el idioma de la conversación
+            r.bloque({"tipo": "plano", "url": f"/media/{planos[0]['id']}{sufijo}",
                       "alt": self.ui()["alt_plano"].format(nombre=nombre)})
 
     def _galeria(self, eid, r):

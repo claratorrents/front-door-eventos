@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400" role="img" aria-label="Indicative floor plan of Llum del Poblenou" font-family="Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="640" height="400" fill="#ffffff"/>
+<rect x="30" y="30" width="580" height="260" fill="#f4f1ec" stroke="#55524d" stroke-width="2"/>
+<text x="320.0" y="160.0" text-anchor="middle" font-size="20" fill="#2b2926">Llum del Poblenou</text>
+<text x="30" y="325" font-size="15" fill="#55524d">Cocktail</text>
+<text x="30" y="347" font-size="18" font-weight="bold" fill="#2b2926">250</text>
+<text x="175" y="325" font-size="15" fill="#55524d">Theatre</text>
+<text x="175" y="347" font-size="18" font-weight="bold" fill="#2b2926">200</text>
+<text x="320" y="325" font-size="15" fill="#55524d">Banquet</text>
+<text x="320" y="347" font-size="18" font-weight="bold" fill="#2b2926">150</text>
+<text x="465" y="325" font-size="15" fill="#55524d">Workshop</text>
+<text x="465" y="347" font-size="18" font-weight="bold" fill="#2b2926">100</text>
+<text x="30" y="388" font-size="13" fill="#55524d">Indicative floor plan · Llum del Poblenou</text>
+</svg>

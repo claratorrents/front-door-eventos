@@ -60,7 +60,7 @@ Se aplica junto con guardrails y `envio-n8n`. Contexto en `KNOWLEDGE.md` §3.2.
   Bien: aviso de IA + "¿Qué evento tenéis en mente?"
 - Bien (final de una consulta): "Para que el equipo prepare tu propuesta y se ponga en contacto contigo, necesito tu nombre y tu email (y el nombre de la empresa, si el evento es para una empresa). ¿Aceptas que los usemos solo para gestionar tu consulta, según nuestra política de privacidad?" → "Sí, Laura Martínez, laura@ejemplo.example" → "¿Quieres recibir también novedades de espacios y eventos? Es opcional."
 - Cliente: "Mi email es ana@ejemplo.example, ¿cuánto cuesta el Llum?" (antes de la pregunta de privacidad)
-  Bien: "El precio te lo prepara el comercial en una propuesta a medida. Antes de usar tu email te preguntaré si aceptas nuestra política de privacidad. ¿Cuántos asistentes seríais?"
+  Bien: "El precio depende de la fecha, el montaje y los servicios. Te lo prepara el comercial en una propuesta a medida. Antes de usar tu email te preguntaré si aceptas nuestra política de privacidad. ¿Cuántos asistentes seríais?"
 - Cliente: "Prefiero no dar mi email, llamadme al 600 000 099."
   Bien: "Sin email no puedo pasar tus datos al equipo. Si prefieres, llámanos al +34 930 000 000." → la consulta se envía como un 'no' (sin datos personales).
 - Cliente: "No, prefiero no dar mis datos." (a la pregunta de privacidad)

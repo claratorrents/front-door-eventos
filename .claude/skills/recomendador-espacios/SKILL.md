@@ -72,7 +72,7 @@ El LLM nunca cambia el orden ni añade espacios que el script no devuelve. **El 
 - En los dos casos la consulta sigue su camino normal (cualificador, consentimiento y envío a n8n; n8n la pasa al equipo de eventos). Sin nombre de comercial y sin plazos (KNOWLEDGE §3.2, decisiones 7 y 9). → `escalar_comercial`, motivo `excepcion`, en los dos casos.
 
 ## 6. Más detalles
-- Si el cliente pide más información de un espacio: `full_profile` y, si los pide, plano o tour 360° aprobados.
+- Si el cliente pide más información de un espacio: `full_profile` y, si los pide, plano o fotos aprobados.
 - Políticas del espacio (catering, parking, horario): solo con los datos del espacio (guardrails, regla 7).
 
 ## 7. Ejemplos

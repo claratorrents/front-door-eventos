@@ -1,6 +1,6 @@
 {
   "es": {
-    "_nota": "Frases del chat web. El castellano es el texto del equipo (skills y borrador del 9/11, apartados B y C). El inglés del grupo (a) lo tradujo Claude Code y está pendiente de revisión; el de B y C es del equipo. [EMPRESA] se sustituye con chat/config.py. Los huecos van entre llaves.",
+    "_nota": "Frases del chat web. El castellano es el texto del equipo (skills y borrador del 9/11, apartados B y C). El inglés del grupo (a) lo tradujo Claude Code y lo aprobó el equipo el 9/11; el de B y C es del equipo. [EMPRESA] se sustituye con chat/config.py. Los huecos van entre llaves.",
     "aviso": "Hola, soy el asistente virtual de [EMPRESA]. Te ayudo a encontrar espacio para tu evento; una persona del equipo revisa las reservas y propuestas.",
     "que_evento": "¿Qué evento tenéis en mente?",
     "confirmar_disposicion": "Para {un_tipo} lo normal es formato {disposicion}; ¿os encaja?",
@@ -66,7 +66,7 @@
     "falta_dato": "Me falta {falta} para pasar tu consulta al equipo.",
     "fuera_tema": "De eso no sé mucho; lo mío son los eventos. ¿Tenéis alguno en mente?",
     "persona_sin_consulta": "Claro. Puedes hablar con el equipo en atencion@empresa-eventos.example o en el +34 930 000 000 (de lunes a sábado, de 9 a 18 h).",
-    "persona_con_consulta": "Claro. Si quieres, paso ya tu consulta al equipo con lo que me has contado. ¿Te parece?",
+    "persona_con_consulta": "Claro. Si quieres, paso ya tu consulta al equipo con lo que me has contado. ¿Te parece? Si prefieres hablar con una persona, escribe a atencion@empresa-eventos.example o llama al +34 930 000 000 (de lunes a sábado, de 9 a 18 h).",
     "frustracion_prefijo": "Perdona si no me estoy explicando bien.",
     "fecha_pasada": "Esa fecha ya ha pasado. ¿Para qué día sería?",
     "intro_tarjetas": "Estos son los espacios que mejor os encajan:",
@@ -79,7 +79,7 @@
       "theater": "teatro",
       "banquet": "banquete",
       "cocktail": "cóctel",
-      "classroom": "escuela"
+      "classroom": "taller"
     },
     "un_tipo": {
       "presentacion": "una presentación",
@@ -145,10 +145,11 @@
       "alt_foto": "Foto ilustrativa de {nombre}",
       "alt_plano": "Plano orientativo de {nombre}",
       "si": "Sí",
-      "no": "No"
+      "no": "No",
+      "oferta_si": "Sí, envíalo",
+      "oferta_no": "No, sigamos"
     },
-    "_provisional": "descarte_aforo no existe en las skills ni en el borrador: texto provisional de Claude Code, pendiente de que lo escriba el equipo.",
-    "descarte_aforo": "{Espacio} no tiene sitio para {n} personas en {disposicion}: caben {aforo}."
+    "descarte_aforo": "{Espacio} no tiene sitio para {n} personas en formato {disposicion}: su máximo es {aforo}. ¿Quieres que te enseñe otras opciones?"
   },
   "en": {
     "aviso": "Hi, I'm the virtual assistant of [EMPRESA]. I can help you find a venue for your event; a member of the team reviews bookings and proposals.",
@@ -216,7 +217,7 @@
     "falta_dato": "I still need {falta} to pass your enquiry to the team.",
     "fuera_tema": "That's not really my area; I help with events. Do you have one in mind?",
     "persona_sin_consulta": "Of course. You can reach the team at atencion@empresa-eventos.example or on +34 930 000 000 (Monday to Saturday, 9 am to 6 pm).",
-    "persona_con_consulta": "Of course. If you like, I can pass your enquiry to the team now with what you've told me. Shall I?",
+    "persona_con_consulta": "Of course. If you like, I can pass your enquiry to the team now with what you've told me. Shall I? If you'd rather speak to a person, email atencion@empresa-eventos.example or call +34 930 000 000 (Monday to Saturday, 9 am to 6 pm).",
     "frustracion_prefijo": "Sorry if I'm not explaining myself well.",
     "fecha_pasada": "That date has already passed. Which day did you have in mind?",
     "intro_tarjetas": "These are the venues that suit you best:",
@@ -229,7 +230,7 @@
       "theater": "theatre",
       "banquet": "banquet",
       "cocktail": "cocktail",
-      "classroom": "classroom"
+      "classroom": "workshop"
     },
     "un_tipo": {
       "presentacion": "a presentation",
@@ -295,8 +296,10 @@
       "alt_foto": "Illustrative photo of {nombre}",
       "alt_plano": "Indicative floor plan of {nombre}",
       "si": "Yes",
-      "no": "No"
+      "no": "No",
+      "oferta_si": "Yes, send it",
+      "oferta_no": "No, let's continue"
     },
-    "descarte_aforo": "{Espacio} doesn't have room for {n} people in {disposicion} layout: it holds {aforo}."
+    "descarte_aforo": "{Espacio} doesn't have room for {n} people in {disposicion} layout: its maximum is {aforo}. Would you like to see other options?"
   }
 }

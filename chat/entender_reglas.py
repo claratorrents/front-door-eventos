@@ -23,7 +23,7 @@ exactamente lo mismo):
               "no_lo_sabe": bool,
               "si_no": "si"|"no"|None,
               "senales": {precio, descuento, disponibilidad, inyeccion, confirmar_reserva,
-                          ofensivo, sensible, info, media, frustracion, retirar_email},
+                          pide_prompt, ofensivo, sensible, info, media, frustracion, retirar_email},
               "entendido": bool}
 Solo devuelve en "datos" las claves que encuentra.
 """
@@ -195,8 +195,10 @@ def extraer_tipo(texto, t):
 ESPACIOS = [("sp-llum-poblenou", r"llum(?: del poblenou)?"), ("sp-jardi-gracia", r"jardi(?: de gracia)?"),
             ("sp-mirador-montjuic", r"mirador(?: de montjuic)?"), ("sp-atelier-sant-antoni", r"atelier(?: de sant antoni)?"),
             ("sp-forum-les-corts", r"forum(?: de les corts)?"), ("sp-nau-besos", r"nau(?: del besos)?")]
-ZONAS = ["poblenou", "22@", "gracia", "eixample", "sant antoni", "montjuic", "sants", "les corts",
-         "diagonal", "besos", "sant marti"]
+# zona normalizada → cómo se escribe (como en el catálogo)
+ZONAS = {"poblenou": "Poblenou", "22@": "22@", "gracia": "Gràcia", "eixample": "Eixample", "sant antoni": "Sant Antoni",
+         "montjuic": "Montjuïc", "sants": "Sants", "les corts": "Les Corts", "diagonal": "Diagonal", "besos": "Besòs",
+         "sant marti": "Sant Martí"}
 
 
 def extraer_espacio_y_zona(texto, t):
@@ -209,7 +211,7 @@ def extraer_espacio_y_zona(texto, t):
     for z in sorted(ZONAS, key=len, reverse=True):
         m = re.search(rf"(?<![\w@]){re.escape(z)}(?![\w@])", resto)
         if m:
-            out["zona"] = texto[m.start():m.end()]
+            out["zona"] = ZONAS[z]
             break
     return out
 
@@ -304,13 +306,15 @@ FRUSTRACION = (r"\b(no me entiendes|no me estas entendiendo|ya te lo he dicho|no
                r"you don't understand|you dont understand|i already told you|i've already said)\b")
 FUERA_TEMA = (r"\b(tiempo hara|el tiempo|clima|futbol|receta\w*|chiste\w*|weather|football|soccer|"
               r"recipe\w*|joke\w*|politica|politics)\b")
-PRECIO = (r"\b(cuanto cuesta|cuanto vale|cuanto sale|precio\w*|tarifa\w*|coste\w*|how much|price\w*|"
+PRECIO = (r"\b(cuanto (?:me |nos |te |os )?(?:cuesta|vale|sale|costaria|saldria)|precio\w*|tarifa\w*|coste\w*|how much|price\w*|"
           r"cost\w*|rate\w*|quote)\b")
 DESCUENTO = r"\b(descuento\w*|rebaja\w*|mas barato|oferta|discount\w*|cheaper|deal)\b|\d+\s*%\s*off|% off"
 DISPONIBILIDAD = r"\b(libre|disponible\w*|disponibilidad|ocupad\w*|available|availability|free on)\b"
 INYECCION = (r"\b(ignora\w*|ignore\w*|olvida\w*|forget|disregard)\b.*\b(instruccion\w*|instructions?|rules?|"
              r"reglas?|normas?|you were given)\b|\b(system prompt|tu prompt|your prompt|el prompt)\b|"
              r"\b(actua como|pretend (?:you|to be)|you are now)\b")
+PIDE_PROMPT = (r"\b(system prompt|tu prompt|your prompt|el prompt|the prompt)\b|"
+               r"\b(dime|muestra\w*|ensena\w*|dame|tell|show|give|reveal|what are)\b.*\b(instruccion\w*|instructions?|reglas|rules)\b")
 CONFIRMAR = (r"\b(confirm\w*)\b.*\b(reserva|booking|reservation)\b|\b(booking|reserva) (?:is|esta) confirm\w*|"
              r"\breserva confirmada\b")
 INSULTOS = r"(inutil\w*|idiota\w*|estupid\w*|imbecil\w*|gilipollas|basura|useless|idiot\w*|stupid|moron\w*|garbage)"
@@ -351,6 +355,8 @@ def entender(texto, contexto=None):
         s["inyeccion"] = True
     if _hay(CONFIRMAR, t):
         s["confirmar_reserva"] = True
+    if _hay(PIDE_PROMPT, t):
+        s["pide_prompt"] = True
     if _hay(PRECIO, t) and not _hay(r"\b(presupuesto|budget)\b", t):
         s["precio"] = True
     if _hay(DESCUENTO, t):

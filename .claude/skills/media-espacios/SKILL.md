@@ -21,9 +21,9 @@ Se aplica junto con guardrails y recomendador-espacios. Datos en `data/espacios.
 ## 3. Lo que el cliente pide después
 - **"¿Tenéis más fotos?"** → todas las fotos aprobadas del espacio, con su `description` como pie de foto.
 - **Plano** → el plano aprobado, con su `description`.
-- **Recorrido virtual / tour 360°** → el tour aprobado.
+- **Galería de fotos** → el tour aprobado.
 - Las fotos adicionales, el plano y el tour se piden al script; el LLM no los busca en los datos.
-- Al final de la recomendación se puede ofrecer: "¿Queréis ver el plano o el recorrido 360° de alguno?" (una sola pregunta).
+- Al final de la recomendación se puede ofrecer: "¿Queréis ver el plano o más fotos de alguno?" (una sola pregunta).
 
 ## 4. Lo que no hay
 - **Vídeo:** no hay vídeos de ningún espacio. "No tenemos vídeo de este espacio, pero sí más fotos. ¿Te las enseño?"

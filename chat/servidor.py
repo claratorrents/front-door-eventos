@@ -49,6 +49,9 @@ def mapa_media():
                 ruta = (RAIZ / m["url"].lstrip("/")).resolve()
                 if base in ruta.parents and ruta.is_file() and ruta.suffix.lower() in TIPOS_MEDIA:
                     mapa[m["id"]] = ruta
+                    en = ruta.with_name(ruta.stem + ".en" + ruta.suffix)   # plano en inglés (plano.en.svg)
+                    if m["type"] == "plano" and en.is_file():
+                        mapa[m["id"] + ".en"] = en
     return mapa
 
 
