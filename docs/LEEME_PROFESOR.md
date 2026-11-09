@@ -190,6 +190,6 @@ Las skills aparecen como `eventos-front-door:<skill>`.
 **Otras que he visto en el repositorio** (también por confirmar):
 - **Flujo de n8n:** la versión de `n8n/` (v1) arranca a mano y lee casos de prueba de una hoja; no tiene todavía el nodo de webhook que recibiría nuestro envío.
 - **`preferred_location`:** el flujo de Ale asigna el espacio comparando la zona con los alias de su hoja. Si le llega el nombre de un espacio ("Llum del Poblenou"), hace falta que esos nombres estén como alias.
-- **Solo en este ordenador:** el servidor solo escucha en `127.0.0.1`, así que otro front tiene que ejecutarse en el mismo ordenador.
+- **Alojamiento:** en local, el servidor solo escucha en `127.0.0.1`. Está preparado para Render (`render.yaml`, `docs/INTEGRACION.md` §9), pero no está desplegado. En el plan gratuito se duerme tras unos 15 minutos sin uso y el registro anónimo se borra al reiniciar.
 - **Traducciones:** las frases en inglés del grupo que venía de las skills las tradujo Claude Code; el equipo las revisó y aprobó.
 - **Pruebas simuladas:** las pruebas de `pruebas/` son conversaciones simuladas (Claude hace de chatbot siguiendo las skills, con los scripts ejecutados de verdad). Las del chat web son tests automáticos. Falta una prueba con personas reales.

@@ -4,16 +4,22 @@
 Uso (desde la carpeta del proyecto):
     python3 chat/servidor.py            → http://127.0.0.1:8000
 
-- Solo escucha en este ordenador (127.0.0.1).
+- Dirección: si existe la variable PORT (la pone Render), escucha en 0.0.0.0 y en ese puerto y
+  entiende que está detrás de un proxy (la IP del cliente sale de X-Forwarded-For). Si no existe,
+  solo en este ordenador: 127.0.0.1 y CHAT_PUERTO (por defecto 8000).
 - La URL y la clave de n8n se leen de N8N_WEBHOOK_URL y N8N_API_KEY y no salen del servidor.
   Sin ellas, el envío se simula (202_simulada).
 - El registro anónimo se escribe en registros/ de la carpeta desde la que se arranca.
 - La media se sirve por id (/media/<id>), solo si está aprobada; el navegador nunca ve rutas.
-- CORS (otro front en otra dirección): CHAT_CORS_ORIGIN=http://localhost:5173 hace que el servidor
-  responda con Access-Control-Allow-Origin con ese valor y conteste a la petición previa OPTIONS.
-  Por defecto está vacía: sin CORS. Nunca "*".
+- CORS (otro front en otra dirección): CHAT_CORS_ORIGIN con uno o varios orígenes exactos separados
+  por comas. Solo se responde con Access-Control-Allow-Origin si el Origin de la petición está en la
+  lista. Por defecto está vacía: sin CORS. Nunca "*".
+- GET /health → {"ok": true} (para que el alojamiento sepa que está vivo).
+- Límites: MAX_SESIONES conversaciones en memoria (se cierran las más antiguas) y
+  LIMITE_PETICIONES_MINUTO peticiones a /api/ por IP (429 con una frase amable).
 """
 
+import collections
 import json
 import os
 import secrets
@@ -58,9 +64,28 @@ def mapa_media():
     return mapa
 
 
+def leer_origenes(valor):
+    """'https://a.com, https://b.com' → ['https://a.com', 'https://b.com']. Nunca '*'."""
+    if not valor:
+        return []
+    if isinstance(valor, (list, tuple)):
+        origenes = [str(v).strip() for v in valor]
+    else:
+        origenes = [v.strip() for v in str(valor).split(",")]
+    origenes = [o.rstrip("/") for o in origenes if o]
+    if "*" in origenes:
+        raise ValueError('CHAT_CORS_ORIGIN no puede ser "*": pon las direcciones exactas del front, '
+                         'p. ej. https://spaces.flowstate.digital')
+    return origenes
+
+
 def crear_servidor(host=config.HOST, puerto=config.PUERTO, url=None, clave=None, registro=None, hoy=None,
-                   cors_origin=None):
+                   cors_origin=None, detras_de_proxy=False, max_sesiones=config.MAX_SESIONES,
+                   limite_por_minuto=config.LIMITE_PETICIONES_MINUTO):
     sesiones, cerrojo = {}, threading.Lock()
+    origenes = leer_origenes(cors_origin)
+    peticiones = collections.defaultdict(collections.deque)   # IP → momentos de sus peticiones a /api/
+    cerrojo_ip = threading.Lock()
     media = mapa_media()
     error_ui = FRASES["es"]["ui"]["error"]
 
@@ -83,14 +108,22 @@ def crear_servidor(host=config.HOST, puerto=config.PUERTO, url=None, clave=None,
             self.end_headers()
             self.wfile.write(datos)
 
+        def _origen_permitido(self):
+            origen = (self.headers.get("Origin") or "").rstrip("/")
+            return origen if origen and origen in origenes else None
+
         def _cors(self):
-            if cors_origin:   # solo si se ha configurado CHAT_CORS_ORIGIN (un origen concreto, nunca "*")
-                self.send_header("Access-Control-Allow-Origin", cors_origin)
+            if origenes:   # solo si se ha configurado CHAT_CORS_ORIGIN (orígenes exactos, nunca "*")
                 self.send_header("Vary", "Origin")
+                permitido = self._origen_permitido()
+                if permitido:
+                    self.send_header("Access-Control-Allow-Origin", permitido)
 
         def do_OPTIONS(self):   # petición previa del navegador (CORS)
-            if not cors_origin:
+            if not origenes:
                 return self._json(405, {"error": "no permitido"})
+            if not self._origen_permitido():
+                return self._json(403, {"error": "origen no permitido"})
             self.send_response(204)
             self._cors()
             self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -102,8 +135,29 @@ def crear_servidor(host=config.HOST, puerto=config.PUERTO, url=None, clave=None,
         def _json(self, codigo, obj):
             self._enviar(codigo, json.dumps(obj, ensure_ascii=False), "application/json; charset=utf-8")
 
+        def _ip(self):
+            if detras_de_proxy:   # detrás del proxy de Render: primer valor de X-Forwarded-For
+                reenviada = (self.headers.get("X-Forwarded-For") or "").split(",")[0].strip()
+                if reenviada:
+                    return reenviada
+            return self.client_address[0]
+
+        def _demasiadas(self):
+            """True si esta IP ha superado el límite de peticiones a /api/ en el último minuto."""
+            ahora, ip = time.time(), self._ip()
+            with cerrojo_ip:
+                cola = peticiones[ip]
+                while cola and cola[0] < ahora - 60:
+                    cola.popleft()
+                if len(cola) >= limite_por_minuto:
+                    return True
+                cola.append(ahora)
+                return False
+
         def do_GET(self):
             ruta = urlparse(self.path).path
+            if ruta == "/health":
+                return self._json(200, {"ok": True})
             if ruta in ESTATICOS:
                 archivo, tipo = ESTATICOS[ruta]
                 return self._enviar(200, (CHAT / archivo).read_bytes(), tipo)
@@ -125,6 +179,12 @@ def crear_servidor(host=config.HOST, puerto=config.PUERTO, url=None, clave=None,
             except (ValueError, json.JSONDecodeError):
                 return self._json(400, {"error": error_ui})
             try:
+                with cerrojo:
+                    conv = sesiones.get(str(cuerpo.get("sesion", "")))
+                if self._demasiadas():   # 429 con una frase amable en el idioma de la conversación
+                    idioma = conv.idioma if conv else (cuerpo.get("idioma") if cuerpo.get("idioma") in config.IDIOMAS
+                                                       else "es")
+                    return self._json(429, {"error": FRASES[idioma]["demasiado_rapido"], "limite": True})
                 if ruta == "/api/nueva":
                     sid = "conv-" + secrets.token_hex(8)
                     conv = Conversacion(sid, hoy=hoy, url=url, clave=clave, registro=registro)
@@ -139,10 +199,13 @@ def crear_servidor(host=config.HOST, puerto=config.PUERTO, url=None, clave=None,
                         conv.historial.append(("bot", frase))
                         salida.update(idioma=conv.idioma, ui=conv.ui(), mensajes=[{"tipo": "texto", "texto": frase}])
                     with cerrojo:
+                        # Límite de conversaciones en memoria: se cierran (y registran) las más antiguas
+                        while len(sesiones) >= max_sesiones:
+                            antigua = min(sesiones, key=lambda s: sesiones[s].ultimo)
+                            sesiones[antigua].cerrar_por_inactividad()
+                            del sesiones[antigua]
                         sesiones[sid] = conv
                     return self._json(200, salida)
-                with cerrojo:
-                    conv = sesiones.get(str(cuerpo.get("sesion", "")))
                 if conv is None:   # sesión que ya no existe: el navegador empieza otra
                     return self._json(404, {"error": error_ui, "sesion_perdida": True})
                 with cerrojo:
@@ -156,13 +219,14 @@ def crear_servidor(host=config.HOST, puerto=config.PUERTO, url=None, clave=None,
                     else:
                         return self._json(404, {"error": "no encontrado"})
                 return self._json(200, salida)
-            except Exception as e:  # noqa: BLE001 — al navegador, solo la frase de error
+            except Exception as e:  # noqa: BLE001 — al navegador, solo la frase de error (ni rutas ni trazas)
                 sys.stderr.write(f"error: {type(e).__name__}: {e}\n")
                 return self._json(500, {"error": error_ui})
 
     servidor = ThreadingHTTPServer((host, puerto), Manejador)
     servidor.daemon_threads = True
     servidor.sesiones = sesiones
+    servidor.peticiones = peticiones
 
     def vigilar_inactividad():
         while True:
@@ -173,6 +237,10 @@ def crear_servidor(host=config.HOST, puerto=config.PUERTO, url=None, clave=None,
                     if conv.ultimo < limite:
                         conv.cerrar_por_inactividad()     # registra la conversación (decisión 5)
                         del sesiones[sid]
+            with cerrojo_ip:                              # olvida las IP sin peticiones en el último minuto
+                for ip, cola in list(peticiones.items()):
+                    if not cola or cola[-1] < time.time() - 60:
+                        del peticiones[ip]
 
     threading.Thread(target=vigilar_inactividad, daemon=True).start()
     return servidor
@@ -180,14 +248,18 @@ def crear_servidor(host=config.HOST, puerto=config.PUERTO, url=None, clave=None,
 
 def main():
     url, clave = os.environ.get("N8N_WEBHOOK_URL"), os.environ.get("N8N_API_KEY")
-    puerto = int(os.environ.get("CHAT_PUERTO", config.PUERTO))
-    cors = (os.environ.get("CHAT_CORS_ORIGIN") or "").strip() or None
-    if cors == "*":
-        sys.exit('CHAT_CORS_ORIGIN no puede ser "*": pon la dirección exacta del front, p. ej. http://localhost:5173')
-    servidor = crear_servidor(config.HOST, puerto, url=url, clave=clave, cors_origin=cors)
+    if os.environ.get("PORT"):   # alojado (Render): escucha en la red, detrás de su proxy
+        host, puerto, proxy = "0.0.0.0", int(os.environ["PORT"]), True
+    else:                        # en local: solo este ordenador
+        host, puerto, proxy = config.HOST, int(os.environ.get("CHAT_PUERTO", config.PUERTO)), False
+    try:
+        origenes = leer_origenes(os.environ.get("CHAT_CORS_ORIGIN"))
+    except ValueError as e:
+        sys.exit(str(e))
+    servidor = crear_servidor(host, puerto, url=url, clave=clave, cors_origin=origenes, detras_de_proxy=proxy)
     modo = "envío real a n8n" if (url and clave) else "envío SIMULADO (sin N8N_WEBHOOK_URL / N8N_API_KEY)"
-    print(f"Chat en http://{config.HOST}:{puerto} · {modo} · CORS: {cors or 'no'} · registro en {Path.cwd() / 'registros'}",
-          flush=True)
+    print(f"Chat escuchando en {host}:{puerto} · {modo} · CORS: {', '.join(origenes) or 'no'} · "
+          f"registro en {Path.cwd() / 'registros'}", flush=True)
     try:
         servidor.serve_forever()
     except KeyboardInterrupt:

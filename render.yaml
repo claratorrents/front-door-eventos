@@ -1,0 +1,17 @@
+# Despliegue del servidor del chat en Render (plan gratuito). Ver docs/INTEGRACION.md, "Alojamiento en Render".
+# Las variables con sync: false se rellenan en el panel de Render: nunca van valores en este archivo.
+services:
+  - type: web
+    name: front-door-eventos-chat
+    runtime: python
+    plan: free
+    buildCommand: echo ok          # sin dependencias: solo biblioteca estándar de Python
+    startCommand: python3 chat/servidor.py
+    healthCheckPath: /health
+    envVars:
+      - key: N8N_WEBHOOK_URL       # sin ella (y sin la clave), el envío a n8n es simulado
+        sync: false
+      - key: N8N_API_KEY
+        sync: false
+      - key: CHAT_CORS_ORIGIN      # direcciones exactas de la web de Amit, separadas por comas
+        sync: false

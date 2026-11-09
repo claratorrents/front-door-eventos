@@ -361,14 +361,21 @@ threading.Thread(target=srv.serve_forever, daemon=True).start()
 base = "http://127.0.0.1:%d" % srv.server_address[1]
 
 
-def http(metodo, ruta, cuerpo=None):
+ERRORES_VISTOS = []
+
+
+def http(metodo, ruta, cuerpo=None, cabeceras=None):
     datos = json.dumps(cuerpo).encode() if cuerpo is not None else None
-    req = urllib.request.Request(base + ruta, data=datos, method=metodo, headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(base + ruta, data=datos, method=metodo,
+                                 headers={"Content-Type": "application/json", **(cabeceras or {})})
     try:
         with urllib.request.urlopen(req, timeout=5) as r:
             return r.status, r.headers, r.read()
     except urllib.error.HTTPError as e:
-        return e.code, e.headers, e.read()
+        cuerpo_error = e.read()
+        if e.code in (400, 404, 413, 429) and cuerpo_error.startswith(b"{"):
+            ERRORES_VISTOS.append(cuerpo_error)
+        return e.code, e.headers, cuerpo_error
 
 
 codigo, cab, cuerpo = http("GET", "/")
@@ -422,19 +429,75 @@ comprobar("sin CHAT_CORS_ORIGIN no hay cabecera CORS",
           "Access-Control-Allow-Origin" not in http("POST", "/api/nueva", {})[1] and http("OPTIONS", "/api/mensaje")[0] == 405)
 srv.shutdown()
 
-# Con CHAT_CORS_ORIGIN: cabecera con ese origen (nunca "*") y respuesta a la petición previa OPTIONS
-ORIGEN = "http://localhost:5173"
-srv2 = servidor.crear_servidor("127.0.0.1", 0, registro=TMP / "http2.jsonl", hoy=HOY, cors_origin=ORIGEN)
+# CORS con varios orígenes: solo se responde con Access-Control-Allow-Origin si el Origin está en la lista
+VISTA, PUBLICADA, OTRO = "https://vista-previa.lovable.example", "https://spaces.flowstate.digital", "https://otra.example"
+srv2 = servidor.crear_servidor("127.0.0.1", 0, registro=TMP / "http2.jsonl", hoy=HOY,
+                               cors_origin=f"{VISTA}, {PUBLICADA}")
 threading.Thread(target=srv2.serve_forever, daemon=True).start()
 base = "http://127.0.0.1:%d" % srv2.server_address[1]
-codigo, cab, _ = http("POST", "/api/nueva", {})
-comprobar("con CHAT_CORS_ORIGIN, Access-Control-Allow-Origin = ese origen", cab["Access-Control-Allow-Origin"] == ORIGEN)
-codigo, cab, _ = http("OPTIONS", "/api/mensaje")
-comprobar("petición previa OPTIONS → 204 con métodos y cabeceras permitidos",
-          codigo == 204 and cab["Access-Control-Allow-Origin"] == ORIGEN and "POST" in cab["Access-Control-Allow-Methods"]
+for origen in (VISTA, PUBLICADA):
+    codigo, cab, _ = http("POST", "/api/nueva", {}, {"Origin": origen})
+    comprobar(f"CORS: origen de la lista ({origen}) → Access-Control-Allow-Origin con ese origen y Vary: Origin",
+              cab["Access-Control-Allow-Origin"] == origen and cab["Vary"] == "Origin")
+codigo, cab, _ = http("POST", "/api/nueva", {}, {"Origin": OTRO})
+comprobar("CORS: origen fuera de la lista → sin Access-Control-Allow-Origin (con Vary: Origin)",
+          "Access-Control-Allow-Origin" not in cab and cab["Vary"] == "Origin")
+codigo, cab, _ = http("OPTIONS", "/api/mensaje", None, {"Origin": PUBLICADA})
+comprobar("petición previa OPTIONS de un origen de la lista → 204 con métodos y cabeceras",
+          codigo == 204 and cab["Access-Control-Allow-Origin"] == PUBLICADA and "POST" in cab["Access-Control-Allow-Methods"]
           and cab["Access-Control-Allow-Headers"] == "Content-Type")
-comprobar("la media también lleva la cabecera CORS", http("GET", "/media/llum-poblenou-foto-01")[1]["Access-Control-Allow-Origin"] == ORIGEN)
+comprobar("petición previa OPTIONS de otro origen → 403 sin cabecera", http("OPTIONS", "/api/mensaje", None, {"Origin": OTRO})[0] == 403)
+comprobar("la media también lleva la cabecera CORS para un origen de la lista",
+          http("GET", "/media/llum-poblenou-foto-01", None, {"Origin": VISTA})[1]["Access-Control-Allow-Origin"] == VISTA)
 srv2.shutdown()
+for valor in ("*", "https://spaces.flowstate.digital, *"):
+    try:
+        servidor.leer_origenes(valor)
+        ok = False
+    except ValueError:
+        ok = True
+    comprobar(f"CHAT_CORS_ORIGIN={valor!r} → no se acepta", ok)
+comprobar("lista de orígenes: separada por comas, sin espacios ni barra final",
+          servidor.leer_origenes(" https://a.example/ ,https://b.example") == ["https://a.example", "https://b.example"])
+
+# /health, límite de peticiones por IP (429 con frase amable), IP detrás del proxy, límite de sesiones
+srv3 = servidor.crear_servidor("127.0.0.1", 0, registro=TMP / "http3.jsonl", hoy=HOY, detras_de_proxy=True,
+                               limite_por_minuto=5, max_sesiones=3)
+threading.Thread(target=srv3.serve_forever, daemon=True).start()
+base = "http://127.0.0.1:%d" % srv3.server_address[1]
+codigo, _, cuerpo = http("GET", "/health")
+comprobar("GET /health → {\"ok\": true} y nada más", codigo == 200 and json.loads(cuerpo) == {"ok": True})
+IP_A, IP_B = {"X-Forwarded-For": "203.0.113.7, 10.0.0.1"}, {"X-Forwarded-For": "198.51.100.9"}
+_, _, c = http("POST", "/api/nueva", {}, IP_A)
+s_en = json.loads(c)["sesion"]
+http("POST", "/api/mensaje", {"sesion": s_en, "texto": "Hi"}, IP_A)
+for _ in range(3):
+    ultimo = http("POST", "/api/mensaje", {"sesion": s_en, "texto": "Hi"}, IP_A)
+codigo, _, cuerpo = http("POST", "/api/mensaje", {"sesion": s_en, "texto": "Hi"}, IP_A)
+comprobar("la petición 6 en un minuto desde la misma IP → 429 con la frase en el idioma de la conversación (inglés)",
+          ultimo[0] == 200 and codigo == 429 and json.loads(cuerpo) == {"error": en("demasiado_rapido"), "limite": True}, cuerpo)
+codigo, _, cuerpo = http("POST", "/api/nueva", {}, IP_B)
+comprobar("otra IP (primer valor de X-Forwarded-For) no está limitada", codigo == 200)
+comprobar("sin sesión, la frase del 429 va en castellano",
+          json.loads(http("POST", "/api/nueva", {}, IP_A)[2])["error"] == es("demasiado_rapido"))
+comprobar("/health no cuenta para el límite", http("GET", "/health", None, IP_A)[0] == 200)
+sesiones_creadas = [json.loads(http("POST", "/api/nueva", {}, {"X-Forwarded-For": f"192.0.2.{i}"})[2])["sesion"]
+                    for i in range(1, 5)]
+comprobar("límite de sesiones (3): se cierran las más antiguas",
+          len(srv3.sesiones) == 3 and sesiones_creadas[-1] in srv3.sesiones and s_en not in srv3.sesiones,
+          list(srv3.sesiones))
+s_largo = sesiones_creadas[-1]
+codigo, _, cuerpo = http("POST", "/api/mensaje", {"sesion": s_largo, "texto": "Hola " + "a" * 5000}, {"X-Forwarded-For": "192.0.2.50"})
+comprobar("mensaje de 5.000 caracteres → se procesa recortado a 1.000, sin error",
+          codigo == 200 and srv3.sesiones[s_largo].historial[0][1] == ("Hola " + "a" * 5000)[:1000], codigo)
+srv3.shutdown()
+print_errores = [json.loads(b) for b in ERRORES_VISTOS]
+comprobar("los errores (400, 404, 413, 429) solo llevan la frase, sin rutas ni trazas",
+          all(set(e) <= {"error", "sesion_perdida", "limite"} and "/" not in e["error"] and "Traceback" not in e["error"]
+              for e in print_errores), print_errores)
+js = (CHAT / "static" / "chat.js").read_text(encoding="utf-8")
+comprobar("el front de referencia nunca usa innerHTML (todo el texto va escapado con textContent)",
+          "innerHTML" not in js.replace("nunca innerHTML", "") and "textContent" in js)
 
 print(f"3 rutas con el guion fijo, {n_variantes} variantes de paso y casos de error y de servidor")
 print(f"{sum(resultados)}/{len(resultados)} comprobaciones correctas")

@@ -8,4 +8,5 @@ Sin `N8N_WEBHOOK_URL` y `N8N_API_KEY`, el envío a n8n es simulado.
 
 - Para entender el proyecto en 5 minutos (profesor): [docs/LEEME_PROFESOR.md](docs/LEEME_PROFESOR.md).
 - Para usar `chat/` como backend de otro front: [docs/INTEGRACION.md](docs/INTEGRACION.md).
+- Para alojar el servidor en Render (plan gratuito): [docs/INTEGRACION.md, §9](docs/INTEGRACION.md#9-alojamiento-en-render-plan-gratuito) y `render.yaml`.
 - Contexto y decisiones del proyecto: [KNOWLEDGE.md](KNOWLEDGE.md) · reglas: [AGENTS.md](AGENTS.md).

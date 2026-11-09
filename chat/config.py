@@ -14,5 +14,9 @@ INACTIVIDAD_MINUTOS = 30
 MAX_TEXTO = 1000          # caracteres por mensaje
 MAX_CUERPO = 16 * 1024    # bytes por petición
 
+# Protección cuando el servidor está expuesto (p. ej. en Render)
+MAX_SESIONES = 500                # conversaciones abiertas en memoria; si se supera, se cierran las más antiguas
+LIMITE_PETICIONES_MINUTO = 60     # peticiones a /api/ por IP y minuto; si se supera, 429
+
 # Idiomas del chat (decisión del equipo): castellano e inglés
 IDIOMAS = ("es", "en")

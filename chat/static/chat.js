@@ -15,6 +15,7 @@ async function api(ruta, cuerpo) {
   if (!r.ok) {
     const error = new Error(datos.error || estado.ui.error || "Error");
     error.sesionPerdida = Boolean(datos.sesion_perdida);
+    error.limite = Boolean(datos.limite);   // 429: el servidor manda una frase amable para enseñar
     throw error;
   }
   return datos;
@@ -176,7 +177,7 @@ async function enviar(cuerpo, textoCliente) {
         return true;
       } catch (e2) { /* sigue abajo con el error genérico */ }
     }
-    burbuja(estado.ui.error || e.message, "bot error");
+    burbuja(e.limite ? e.message : (estado.ui.error || e.message), "bot error");
     return false;
   }
 }

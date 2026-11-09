@@ -17,19 +17,25 @@ python3 chat/servidor.py
 Al arrancar escribe una línea como esta:
 
 ```
-Chat en http://127.0.0.1:8000 · envío SIMULADO (sin N8N_WEBHOOK_URL / N8N_API_KEY) · CORS: no · registro en …/registros
+Chat escuchando en 127.0.0.1:8000 · envío SIMULADO (sin N8N_WEBHOOK_URL / N8N_API_KEY) · CORS: no · registro en …/registros
 ```
 
 | Variable de entorno | Para qué | Por defecto |
 |---|---|---|
-| `CHAT_PUERTO` | Puerto del servidor | `8000` |
-| `CHAT_CORS_ORIGIN` | Dirección exacta del otro front, si está en otro puerto o dominio (ver §4) | vacía: sin CORS |
+| `PORT` | La pone el alojamiento (Render). Si existe, el servidor escucha en `0.0.0.0` y en ese puerto, y lee la IP del cliente de `X-Forwarded-For` (ver §9) | no existe: `127.0.0.1` |
+| `CHAT_PUERTO` | Puerto en local (cuando no hay `PORT`) | `8000` |
+| `CHAT_CORS_ORIGIN` | Direcciones exactas del otro front, separadas por comas, si está en otro puerto o dominio (ver §4) | vacía: sin CORS |
 | `N8N_WEBHOOK_URL`, `N8N_API_KEY` | Envío real a n8n. Sin ellas, el envío es **simulado** | vacías |
 
-- **Dirección:** el servidor solo escucha en `127.0.0.1`, es decir, en el mismo ordenador. **No existe una variable `CHAT_HOST`**. Si el front tiene que llegar desde otra máquina, hay que pedirlo: hoy no está previsto.
+- **Dirección:** en local, el servidor solo escucha en `127.0.0.1`, es decir, en el mismo ordenador. Solo escucha en la red (`0.0.0.0`) cuando existe `PORT`, que es lo que pasa en Render (§9). No hay una variable `CHAT_HOST`.
 - **Registro:** el registro anónimo de conversaciones se escribe en `registros/conversaciones.jsonl` **de la carpeta desde la que se arranca** (git lo ignora).
 - **Memoria:** el estado de cada conversación vive en memoria. Si se reinicia el servidor, las conversaciones abiertas dejan de existir (ver "Sesión perdida", §3.6).
 - **Inactividad:** a los 30 minutos sin mensajes, la conversación se cierra y se registra.
+- **Límites:**
+  - como mucho 500 conversaciones abiertas a la vez; si se supera, se cierran (y registran) las más antiguas;
+  - como mucho 60 peticiones a `/api/` por minuto y por IP; si se supera, 429 (§3.6).
+
+  Los dos valores están en `chat/config.py`.
 
 ---
 
@@ -54,6 +60,7 @@ Todas las peticiones son `POST` con cuerpo JSON (`Content-Type: application/json
 | `POST /api/mensaje` | `{"sesion": …, "texto": …}` · `{"sesion": …, "accion": …}` · `{"sesion": …, "formulario": {…}}` | respuesta de turno (§3.2) |
 | `POST /api/cerrar` | `{"sesion": …}` | respuesta de turno con `"cerrada": true` |
 | `GET /media/<id>` | — | la imagen (JPG o SVG) |
+| `GET /health` | — | `{"ok": true}` y nada más (para que el alojamiento sepa que está vivo) |
 
 > No hay una ruta `/plano/<id>.svg`: los planos se piden como cualquier otra media, con el `url` que da el servidor (`/media/<id del plano>`, y `/media/<id del plano>.en` para la versión en inglés). El front nunca construye estas URL: usa siempre la que viene en la respuesta.
 
@@ -243,6 +250,7 @@ POST /api/nueva
 |---|---|
 | `400` | Cuerpo que no es JSON |
 | `413` | Petición de más de 16 KB (los mensajes de texto se cortan a 1.000 caracteres) |
+| `429` | Más de 60 peticiones a `/api/` en un minuto desde la misma IP. El cuerpo trae `"limite": true` y una frase amable en el idioma de la conversación ("Estás escribiendo muy rápido; espera un momento." / "You're typing very fast; please wait a moment."), que es lo que se enseña en lugar del error genérico |
 | `500` | Fallo interno. El cuerpo trae `error` con la frase genérica, que es lo que se enseña |
 
 ### 3.7 `GET /media/<id>`
@@ -254,16 +262,18 @@ POST /api/nueva
 
 ## 4. Front en otra dirección: CORS
 
-Si el front está en otro puerto o dominio (por ejemplo, `http://localhost:5173`), el navegador bloquea las peticiones al backend si este no lo permite. Para permitirlo:
+Si el front está en otro puerto o dominio (por ejemplo, `http://localhost:5173`), el navegador bloquea las peticiones al backend si este no lo permite. Para permitirlo, se ponen las direcciones exactas del front (con protocolo y, si lo hay, puerto), separadas por comas:
 
 ```bash
-CHAT_CORS_ORIGIN=http://localhost:5173 python3 chat/servidor.py
+CHAT_CORS_ORIGIN="http://localhost:5173, https://spaces.flowstate.digital" python3 chat/servidor.py
 ```
 
-- **Con la variable:** el servidor responde con `Access-Control-Allow-Origin: http://localhost:5173` (y `Vary: Origin`) en todas las respuestas. A la petición previa `OPTIONS` contesta `204` con `Access-Control-Allow-Methods: GET, POST, OPTIONS` y `Access-Control-Allow-Headers: Content-Type`.
+- **Con la variable:** el servidor compara el `Origin` de cada petición con la lista.
+  - Si está, responde con `Access-Control-Allow-Origin: <ese origen>`; si no está, sin esa cabecera. Siempre añade `Vary: Origin`.
+  - A la petición previa `OPTIONS` de un origen de la lista contesta `204` con `Access-Control-Allow-Methods: GET, POST, OPTIONS` y `Access-Control-Allow-Headers: Content-Type`; si el origen no está en la lista, `403`.
 - **Sin la variable** (por defecto): no hay cabeceras CORS y `OPTIONS` devuelve 405.
-- **Nunca `*`:** si se pone `CHAT_CORS_ORIGIN="*"`, el servidor no arranca. Hay que poner la dirección exacta del front, con protocolo y puerto.
-- **Mismo ordenador:** recordad que el backend solo escucha en `127.0.0.1`, así que el front tiene que ejecutarse en el mismo ordenador.
+- **Nunca `*`:** si `*` aparece en la lista, el servidor no arranca.
+- **En local:** si no hay `PORT`, el backend solo escucha en `127.0.0.1`, así que el front tiene que ejecutarse en el mismo ordenador.
 
 ---
 
@@ -363,3 +373,35 @@ curl -s -X POST http://127.0.0.1:8000/api/cerrar -H 'Content-Type: application/j
 ```
 
 **Para ver el flujo completo en el navegador:** abrid `127.0.0.1:8000` con el servidor arrancado. Es nuestro front de referencia, y pinta cada tipo de elemento como se describe en §3.3.
+
+---
+
+## 9. Alojamiento en Render (plan gratuito)
+
+El repositorio trae `render.yaml` con un servicio web:
+- entorno Python y plan `free`;
+- `buildCommand: echo ok` (no hay dependencias: no hace falta `requirements.txt`);
+- `startCommand: python3 chat/servidor.py`;
+- `healthCheckPath: /health`.
+
+**Pasos** (los hace quien tenga la cuenta de Render; nosotras no desplegamos):
+1. Tener el repositorio en GitHub.
+2. En Render: **New → Blueprint**, elegir el repositorio. Render lee `render.yaml` y crea el servicio.
+3. Rellenar en el panel las tres variables marcadas con `sync: false`. **Nunca se escriben en el repositorio**:
+
+| Variable | Valor |
+|---|---|
+| `CHAT_CORS_ORIGIN` | Las direcciones de la web de Amit separadas por comas, con `https://` y sin barra final: la publicada (`https://spaces.flowstate.digital`) y la de la vista previa de Lovable. PENDIENTE: dirección exacta de la vista previa |
+| `N8N_WEBHOOK_URL`, `N8N_API_KEY` | Las que pase Amit. Si se dejan vacías, el envío es **simulado** |
+
+4. Desplegar. El servicio queda en una dirección del tipo `https://<nombre>.onrender.com`. Para comprobarlo, abrir `https://<nombre>.onrender.com/health`, que tiene que devolver `{"ok": true}`.
+5. En el front, la dirección base del backend es esa. Las URL de la media (`/media/…`) se piden con esa base delante.
+
+**Qué cambia al estar en Render:**
+- **Dirección:** Render pone la variable `PORT`; con ella, el servidor escucha en `0.0.0.0` y en ese puerto, y lo dice al arrancar ("Chat escuchando en 0.0.0.0:…").
+- **IP del cliente:** detrás del proxy de Render, sale del primer valor de `X-Forwarded-For`; es la que se usa para el límite de peticiones.
+
+**Pegas del plan gratuito:**
+- **Se duerme** tras unos 15 minutos sin peticiones. La primera respuesta después tarda cerca de un minuto. Conviene que el front lo avise o lo despierte con `/health` al abrir la página.
+- **Al dormirse o reiniciarse, se pierde la memoria:** las conversaciones abiertas dejan de existir. El chat lo gestiona como "sesión perdida" (§3.6).
+- **El disco no se conserva:** el registro anónimo (`registros/conversaciones.jsonl`) se escribe en el disco del servicio, y en el plan gratuito se borra al reiniciar o volver a desplegar. Las conversaciones que estaban abiertas cuando el servicio se duerme no llegan a registrarse. Es una limitación conocida: hoy no se cambia.

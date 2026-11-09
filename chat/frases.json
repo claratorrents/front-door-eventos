@@ -151,7 +151,8 @@
     },
     "descarte_aforo": "{Espacio} no tiene sitio para {n} personas en formato {disposicion}: su máximo es {aforo}. ¿Quieres que te enseñe otras opciones?",
     "despedida_cliente": "Gracias a ti. Si necesitas algo más, aquí estoy.",
-    "sesion_perdida": "Parece que esta conversación se ha cerrado. Empecemos de nuevo: ¿qué evento tenéis en mente?"
+    "sesion_perdida": "Parece que esta conversación se ha cerrado. Empecemos de nuevo: ¿qué evento tenéis en mente?",
+    "demasiado_rapido": "Estás escribiendo muy rápido; espera un momento."
   },
   "en": {
     "aviso": "Hi, I'm the virtual assistant of [EMPRESA]. I can help you find a venue for your event; a member of the team reviews bookings and proposals.",
@@ -304,6 +305,7 @@
     },
     "descarte_aforo": "{Espacio} doesn't have room for {n} people in {disposicion} layout: its maximum is {aforo}. Would you like to see other options?",
     "despedida_cliente": "Thank you. If you need anything else, I'm here.",
-    "sesion_perdida": "It looks like this conversation has ended. Let's start again: what event do you have in mind?"
+    "sesion_perdida": "It looks like this conversation has ended. Let's start again: what event do you have in mind?",
+    "demasiado_rapido": "You're typing very fast; please wait a moment."
   }
 }

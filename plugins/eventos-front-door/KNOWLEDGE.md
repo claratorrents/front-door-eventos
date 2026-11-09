@@ -403,7 +403,7 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 - [x] Planos en SVG: las urls de `data/espacios.json` apuntan a `plano.svg` (`a68026c`). Los archivos todavía no existen.
 - [x] Paso 13: repositorio en GitHub, `github.com/claratorrents/front-door-eventos`.
 - [x] Integración con n8n: decisiones y contrato del webhook de Ale en §3.2 (`f33b7bb`).
-- Tests al 9/11: `chat/test_entender.py` 151/151, `chat/test_rutas.py` 2186/2186, `chat/frases_dificiles.py` 22/22 seguras, `test_recomendar.py` 35/35, `test_generar_planos.py` 14/14, `test_datos_consulta.py` 13/13, `test_router.py` 12/12, `test_enviar_n8n.py` 17/17; validador correcto (avisa de los planos y tours que faltan).
+- Tests al 9/11: `chat/test_entender.py` 151/151, `chat/test_rutas.py` 2201/2201, `chat/frases_dificiles.py` 22/22 seguras, `test_recomendar.py` 35/35, `test_generar_planos.py` 14/14, `test_datos_consulta.py` 13/13, `test_router.py` 12/12, `test_enviar_n8n.py` 17/17; validador correcto (avisa de los planos y tours que faltan).
 
 ### Pendiente inmediato
 - [ ] Decidir el nombre de la empresa.
@@ -424,6 +424,14 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
   - **Ajustes del 9/11, tras la revisión:** "classroom" se dice "taller" / "workshop"; planos en el idioma de la conversación (`plano.svg` y `plano.en.svg`); frase nueva para un espacio elegido que no cabe por aforo; B14 con botones "Sí, envíalo" / "No, sigamos" y el contacto del equipo; ante una inyección que pide confirmar la reserva, B4 (y la 23 sin su pregunta solo si pide el prompt). Después: despedida del cliente ("Gracias a ti. Si necesitas algo más, aquí estoy.", sin cerrar la conversación); afterwork → networking; cumple/cumpleaños/birthday → fiesta; "no me entendéis" como frustración; "precio especial" / "mejor precio" como descuento; meses abreviados ("15 dic", "en feb"). Sesión perdida: el estado vive en memoria, así que si se reinicia el servidor la conversación abierta deja de existir; el chat empieza otra sola, en el mismo idioma, con "Parece que esta conversación se ha cerrado. Empecemos de nuevo: ¿qué evento tenéis en mente?" (antes salía el error genérico).
   - **Otro front:** `docs/INTEGRACION.md` explica cómo usar `chat/` como backend de otra web: arranque, contrato de la API con ejemplos reales (`/api/nueva`, `/api/mensaje`, `/api/cerrar`, `/media/<id>`, sesión perdida), cómo pintar cada elemento, las reglas del front y lo que nunca puede hacer (la URL y la clave de n8n solo en el servidor). Si el front está en otra dirección, `CHAT_CORS_ORIGIN=<origen exacto>` activa CORS (por defecto, sin CORS; `"*"` no se acepta). El servidor solo escucha en 127.0.0.1 (no hay `CHAT_HOST`). `README.md` en la raíz, con un resumen y el enlace.
   - **Para el profesor:** `docs/LEEME_PROFESOR.md` explica el proyecto en 5 minutos (problema, cómo funciona, IA frente a reglas, skills y scripts, evidencia del lab sheet, cómo ejecutarlo, guardrails y privacidad, limitaciones). Las cifras salen de ejecutar los tests y contar en el repositorio; lo que falta va marcado como PENDIENTE (la decisión que se pide a dirección). Plugin 0.2.7: regenerado para que su copia de `KNOWLEDGE.md` coincida con la del proyecto.
+  - **Preparado para Render (9 de noviembre, sin desplegar):**
+    - con la variable `PORT`, el servidor escucha en `0.0.0.0` y en ese puerto, y lee la IP de `X-Forwarded-For`; sin ella, como antes (`127.0.0.1:8000`);
+    - `CHAT_CORS_ORIGIN` admite varios orígenes separados por comas y solo responde con `Access-Control-Allow-Origin` si el `Origin` de la petición está en la lista exacta (nunca `*`);
+    - `GET /health` → `{"ok": true}`;
+    - como mucho 500 sesiones en memoria (se cierran las más antiguas) y 60 peticiones por minuto e IP (429 con "Estás escribiendo muy rápido; espera un momento.");
+    - `render.yaml` en la raíz, con las variables de n8n y de CORS como `sync: false`; los pasos están en `docs/INTEGRACION.md` §9.
+    - **Limitaciones del plan gratuito:** se duerme tras unos 15 minutos, el estado vive en memoria y el registro anónimo se borra al reiniciar.
+    - PENDIENTE: dirección exacta de la vista previa de Lovable para `CHAT_CORS_ORIGIN`.
 
 ### Plan
 1. Carpeta y proyecto en Claude Code.
