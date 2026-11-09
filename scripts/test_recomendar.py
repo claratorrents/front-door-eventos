@@ -96,7 +96,8 @@ CASOS_MEDIA = [
     ("media: fotos del Jardí → solo foto-01 (la 02 no está aprobada)", "sp-jardi-gracia", "foto",
      ["jardi-gracia-foto-01"]),
     ("media: plano del Mirador", "sp-mirador-montjuic", "plano", ["mirador-montjuic-plano"]),
-    ("media: tour de la Nau", "sp-nau-besos", "tour360", ["nau-besos-tour360"]),
+    # Antes esperaba ["nau-besos-tour360"]; desde el 9/11 los tours están con approved: false (decisión 8 del chat web)
+    ("media: tour de la Nau → ninguno (no aprobado)", "sp-nau-besos", "tour360", []),
     ("media: vídeo de la Nau → ninguno", "sp-nau-besos", "video", []),
 ]
 

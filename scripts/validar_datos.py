@@ -6,8 +6,8 @@ Sale con código 0 si todo está bien y 1 si hay errores (los avisos no cuentan)
 Solo lee los archivos: nunca los modifica.
 
 Archivos de media: cada foto aprobada tiene que existir en la ruta de su url
-(relativa a la raíz del proyecto). Los planos y los tours que faltan salen como
-aviso, porque todavía no están hechos.
+(relativa a la raíz del proyecto). Los planos y los tours aprobados que faltan salen
+como aviso; los no aprobados no se enseñan, así que no avisan.
 """
 
 import json
@@ -26,6 +26,7 @@ CAMPOS_ESPACIO = [
     "chatbot_guardrails", "media", "n8n_routing",
 ]
 ORDEN_AFOROS = ["cocktail", "theater", "banquet", "classroom"]
+ARTICULOS = {"el", "la"}  # nombre corto con artículo: "el Llum", "la Nau"
 CAMPOS_PROHIBIDOS = {"description", "max_capacity_alert", "default_lead_tier"}
 PALABRAS_PROHIBIDAS = ["ficticio", "ficticia"]
 CAMPOS_MEDIA = ["id", "type", "url", "description", "approved", "illustrative"]
@@ -61,7 +62,7 @@ def revisar_archivo(eid, mid, m):
     tipo, aprobada = m.get("type"), m.get("approved")
     if tipo == "foto" and aprobada is True:
         error(f"{eid}/{mid}: foto aprobada sin archivo en {url}")
-    elif tipo in TIPOS_PENDIENTES:
+    elif tipo in TIPOS_PENDIENTES and aprobada is True:
         aviso(f"{eid}/{mid}: todavía no existe el archivo {url}")
 
 
@@ -119,6 +120,15 @@ def validar_espacios(datos):
         for campo in CAMPOS_ESPACIO:
             if campo not in esp or esp[campo] in (None, "", [], {}):
                 error(f"{eid}: falta el campo '{campo}' o está vacío")
+
+        # Nombre corto y artículo (chat web: "el Llum", "la Nau")
+        corto = esp.get("nombre_corto")
+        if not isinstance(corto, str) or not corto.strip():
+            error(f"{eid}: falta nombre_corto")
+        elif corto not in esp.get("name", ""):
+            error(f"{eid}: nombre_corto {corto!r} no forma parte del nombre {esp.get('name')!r}")
+        if esp.get("articulo") not in ARTICULOS:
+            error(f"{eid}: articulo debe ser uno de {sorted(ARTICULOS)} (es {esp.get('articulo')!r})")
 
         # Aforos
         cap = esp.get("capacities", {})

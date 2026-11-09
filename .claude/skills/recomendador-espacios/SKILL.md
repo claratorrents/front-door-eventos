@@ -57,7 +57,7 @@ El LLM nunca cambia el orden ni añade espacios que el script no devuelve. **El 
 - **Nunca precio** (guardrails, regla 1). Nunca "está disponible" (guardrails, regla 2).
 - Si el cliente ha dicho una zona, primero los espacios de esa zona. Los de otras zonas se presentan aparte: 'Fuera de [zona], también os encajaría…'. Si en su zona no encaja ninguno: 'En [zona] no tenemos ningún espacio que encaje; os propongo estos en otras zonas.'
 - Si en su zona solo hay un espacio que queda muy amplio (bajo_60): 'En [zona] tenemos [espacio], aunque para [n] personas os quedaría muy amplio. Fuera de [zona], os encajaría mejor…' y se presenta la mejor opción comodo de otra zona.
-- Al final, una sola pregunta que junta las dos: "¿Cuál os encaja más? También puedo enseñaros el plano o el recorrido 360°."
+- Al final, una sola pregunta que junta las dos: "¿Cuál os encaja más? También puedo enseñaros el plano o más fotos."
 - **Elección:** el espacio que elija el cliente va en `preferred_location` del envío (KNOWLEDGE §3.2, decisión 2), y desde ese momento se puede decir el nombre de su comercial (guardrails, "Nombre del comercial").
 
 ## 4. Descartes que hay que explicar

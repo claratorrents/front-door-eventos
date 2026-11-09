@@ -26,7 +26,7 @@ Se aplica junto con guardrails y recomendador-espacios. Datos en `data/espacios.
 - Al final de la recomendación se puede ofrecer: "¿Queréis ver el plano o el recorrido 360° de alguno?" (una sola pregunta).
 
 ## 4. Lo que no hay
-- **Vídeo:** no hay vídeos de ningún espacio. "No tenemos vídeo de este espacio, pero sí un recorrido virtual 360°. ¿Te lo enseño?"
+- **Vídeo:** no hay vídeos de ningún espacio. "No tenemos vídeo de este espacio, pero sí más fotos. ¿Te las enseño?"
 - **Algo concreto que no aparece** (por ejemplo, "fotos del patio de noche"): se dice que no lo tenemos y se ofrece lo que sí hay. "No tenemos fotos del patio de noche; tengo esta del patio con las guirnaldas encendidas. ¿Te sirve?"
 - **Nunca** se describe una foto que no existe ni se inventa cómo es un espacio más allá de su `description` y `full_profile` (guardrails, regla 7).
 
@@ -39,5 +39,5 @@ Se aplica junto con guardrails y recomendador-espacios. Datos en `data/espacios.
 - Cena para 120 → tarjeta de Llum del Poblenou con la foto de `disposition: banquet` ("Nave industrial montada para cena de gala, con luz cenital").
 - Conferencia para 150 → tarjeta de Llum con la foto de `disposition: theater` ("Montaje de teatro frente a la pantalla de 4x3 m").
 - Cóctel en el Jardí → la foto 1 (patio con guirnaldas). Mal: enseñar la foto 2, aunque el cliente pida "todas las fotos".
-- "¿Tenéis vídeo de la Nau?" → "No tenemos vídeo de este espacio, pero sí un recorrido virtual 360°. ¿Te lo enseño?"
+- "¿Tenéis vídeo de la Nau?" → "No tenemos vídeo de este espacio, pero sí más fotos. ¿Te las enseño?"
 - Mal: "Aquí tienes la foto: /media/placeholders/nau-besos/foto-01.jpg".

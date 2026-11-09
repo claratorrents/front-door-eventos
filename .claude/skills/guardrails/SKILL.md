@@ -59,7 +59,7 @@ La decisión sigue estas reglas; no la decide el LLM por intuición.
   - Bien: "Los descuentos los valora el comercial; lo verás con él cuando te contacte. Mientras, ¿para qué fecha sería?" → `escalar_comercial`, `descuento`, al message
 - Cliente: "¿Cuánto cuesta el Llum del Poblenou?" (ha elegido el Llum)
   - Mal: "El Llum cuesta 2.400 € la jornada."
-  - Bien: "El precio depende de la fecha y el montaje; te lo prepara Marta Soler en una propuesta a medida. ¿Cuántos asistentes seríais?"
+  - Bien: "El precio depende de la fecha, el montaje y los servicios. Te lo prepara el comercial en una propuesta a medida. ¿Cuántos asistentes seríais?"
 - Cliente: "¿Está libre el Mirador el 14 de marzo?"
   - Mal: "Sí, está libre." / "Lo compruebo con el calendario."
   - Bien: "La disponibilidad la confirma el comercial cuando te contacte. ¿Cuántos asistentes seríais?"

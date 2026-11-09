@@ -17,6 +17,8 @@
     {
       "id": "sp-llum-poblenou",
       "name": "Llum del Poblenou",
+      "nombre_corto": "Llum",
+      "articulo": "el",
       "city": "Barcelona",
       "neighborhood": "Poblenou (Distrito 22@)",
       "tagline": "Antigua nave textil reconvertida con luz cenital e interior industrial",
@@ -93,7 +95,7 @@
           "url": "/media/placeholders/llum-poblenou/tour-360.html",
           "description": "Recorrido virtual por la nave",
           "illustrative": true,
-          "approved": true
+          "approved": false
         }
       ],
       "n8n_routing": {
@@ -104,6 +106,8 @@
     {
       "id": "sp-jardi-gracia",
       "name": "Jardí de Gràcia",
+      "nombre_corto": "Jardí",
+      "articulo": "el",
       "city": "Barcelona",
       "neighborhood": "Vila de Gràcia",
       "tagline": "Oasis botánico y patio íntimo entre callejuelas históricas",
@@ -180,7 +184,7 @@
           "url": "/media/placeholders/jardi-gracia/tour-360.html",
           "description": "Recorrido virtual por la casa y el patio",
           "illustrative": true,
-          "approved": true
+          "approved": false
         }
       ],
       "n8n_routing": {
@@ -191,6 +195,8 @@
     {
       "id": "sp-mirador-montjuic",
       "name": "Mirador de Montjuïc",
+      "nombre_corto": "Mirador",
+      "articulo": "el",
       "city": "Barcelona",
       "neighborhood": "Montjuïc (Sants-Montjuïc)",
       "tagline": "Salón panorámico con terraza privada y vistas al mar y al puerto",
@@ -280,7 +286,7 @@
           "url": "/media/placeholders/mirador-montjuic/tour-360.html",
           "description": "Recorrido virtual por el salón y la terraza",
           "illustrative": true,
-          "approved": true
+          "approved": false
         }
       ],
       "n8n_routing": {
@@ -291,6 +297,8 @@
     {
       "id": "sp-atelier-sant-antoni",
       "name": "Atelier de Sant Antoni",
+      "nombre_corto": "Atelier",
+      "articulo": "el",
       "city": "Barcelona",
       "neighborhood": "Sant Antoni (Eixample)",
       "tagline": "Estudio boutique diáfano para diseño, sprints y dinámicas ágiles",
@@ -365,7 +373,7 @@
           "url": "/media/placeholders/atelier-sant-antoni/tour-360.html",
           "description": "Recorrido virtual por el estudio",
           "illustrative": true,
-          "approved": true
+          "approved": false
         }
       ],
       "n8n_routing": {
@@ -376,6 +384,8 @@
     {
       "id": "sp-forum-les-corts",
       "name": "Fòrum de les Corts",
+      "nombre_corto": "Fòrum",
+      "articulo": "el",
       "city": "Barcelona",
       "neighborhood": "Les Corts (Eje Diagonal)",
       "tagline": "Sala ejecutiva y polivalente junto a los principales centros de negocio",
@@ -451,7 +461,7 @@
           "url": "/media/placeholders/forum-les-corts/tour-360.html",
           "description": "Recorrido virtual por la sala y el foyer",
           "illustrative": true,
-          "approved": true
+          "approved": false
         }
       ],
       "n8n_routing": {
@@ -462,6 +472,8 @@
     {
       "id": "sp-nau-besos",
       "name": "Nau del Besòs",
+      "nombre_corto": "Nau",
+      "articulo": "la",
       "city": "Barcelona",
       "neighborhood": "Sant Martí / Besòs",
       "tagline": "Nave monumental de 800 m² para ferias, convenciones y montajes de gran formato",
@@ -538,7 +550,7 @@
           "url": "/media/placeholders/nau-besos/tour-360.html",
           "description": "Recorrido virtual por la nave",
           "illustrative": true,
-          "approved": true
+          "approved": false
         }
       ],
       "n8n_routing": {

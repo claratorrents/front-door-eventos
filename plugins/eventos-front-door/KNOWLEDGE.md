@@ -184,7 +184,7 @@ Ruta estrella de la demo: **consulta → recomendación con fotos → elige espa
 - Chat web: tapar tarjetas, IBAN y DNI siempre, y email y teléfono si no hay permiso, antes de guardar la conversación o enviarla a n8n.
 - Chat web: usar la hora real para saber si se está en horario de atención.
 - n8n: si el cliente retira el permiso, borrar también sus datos del Sheet.
-- Media: las 12 fotos están en media/placeholders/ (ilustrativas, generadas con IA). Faltan los planos (SVG) y la página del tour 360°, que se hacen con el chat web.
+- Media: las 12 fotos están en media/placeholders/ (ilustrativas, generadas con IA). Los 6 planos son SVG esquemáticos generados con los datos (`scripts/generar_planos.py`, "Plano orientativo"). Los tours 360° están con `approved: false` hasta que exista uno de verdad; en el chat, "más fotos" es una galería.
 
 ### 3.2 Integración con el flujo de n8n de Ale (8 de noviembre)
 Documentos de Ale en `n8n/`: contrato del webhook, explicación del flujo, JSON del flujo (v1) y diagrama. La guía de Amit lleva credenciales y está en `.gitignore`: nunca se sube.
@@ -403,7 +403,7 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 - [x] Planos en SVG: las urls de `data/espacios.json` apuntan a `plano.svg` (`a68026c`). Los archivos todavía no existen.
 - [x] Paso 13: repositorio en GitHub, `github.com/claratorrents/front-door-eventos`.
 - [x] Integración con n8n: decisiones y contrato del webhook de Ale en §3.2 (`f33b7bb`).
-- Tests al 9/11: `test_recomendar.py` 35/35, `test_datos_consulta.py` 13/13, `test_router.py` 12/12, `test_enviar_n8n.py` 17/17; validador correcto (avisa de los planos y tours que faltan).
+- Tests al 9/11: `test_recomendar.py` 35/35, `test_generar_planos.py` 7/7, `test_datos_consulta.py` 13/13, `test_router.py` 12/12, `test_enviar_n8n.py` 17/17; validador correcto (avisa de los planos y tours que faltan).
 
 ### Pendiente inmediato
 - [ ] Decidir el nombre de la empresa.
