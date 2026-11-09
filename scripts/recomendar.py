@@ -25,6 +25,9 @@ Validar el espacio que ha elegido el cliente (skill router-intenciones §3):
   Devuelve si encaja y, si no, TODOS los motivos (aforo, antelacion, horario)
   con el dato que falla, más las alternativas de la recomendación normal.
   También avisos_zona y la foto de la tarjeta (foto_tarjeta), igual que la recomendación normal.
+  Si el espacio encaja pero queda en bajo_60, añade opcion_comodo: la mejor opción comodo
+  de la recomendación normal (mismos criterios: aforo de la disposición, antelación, horario,
+  avisos de zona y foto). Si no hay ninguna comodo, no se añade nada.
   descartados:  [{id, nombre, motivo, detalle}]    (solo por antelación u horario)
 
 Solo lee data/espacios.json. No da precios ni disponibilidad.
@@ -233,6 +236,12 @@ def validar_espacio(espacio_id, asistentes, disposicion, dias=None, hora_fin=Non
     if encaja:
         resultado["ocupacion"] = round(asistentes / aforo * 100)
         resultado["grupo"] = grupo(Fraction(asistentes, aforo))
+        if resultado["grupo"] == "bajo_60":
+            # Espacio amplio: la mejor opción comodo de la recomendación normal, si la hay
+            comodos = [r for r in recomendar(asistentes, disposicion, dias, hora_fin, espacios)["recomendados"]
+                       if r["grupo"] == "comodo" and r["id"] != esp["id"]]
+            if comodos:
+                resultado["opcion_comodo"] = comodos[0]
     else:
         resultado["alternativas"] = recomendar(asistentes, disposicion, dias, hora_fin, espacios)["recomendados"]
     return resultado

@@ -156,6 +156,16 @@ CASOS_VALIDAR_FOTO = [
      "llum-poblenou-foto-01"),
 ]
 
+# Validar un espacio que queda en bajo_60: opcion_comodo solo si la recomendación normal tiene una
+CASOS_VALIDAR_AMPLIO = [
+    ("validar: Nau, 100 banquet → bajo_60, opcion_comodo Mirador (con los campos foto y avisos_zona)",
+     dict(espacio_id="sp-nau-besos", asistentes=100, disposicion="banquet"),
+     "sp-mirador-montjuic"),
+    ("validar: Mirador, fiesta 100 cocktail hasta las 01:00 → bajo_60, sin opcion_comodo",
+     dict(espacio_id="sp-mirador-montjuic", asistentes=100, disposicion="cocktail", hora_fin="01:00"),
+     None),
+]
+
 
 def test_validar():
     fallos = 0
@@ -166,6 +176,18 @@ def test_validar():
         ok &= all(obtenidos[m][campo] == valor for m, (campo, valor) in motivos.items() if m in obtenidos)
         if alternativas is not None:
             ok &= [x["id"] for x in r.get("alternativas", [])] == alternativas
+        print(f"{'OK   ' if ok else 'FALLO'} {nombre}")
+        if not ok:
+            fallos += 1
+            print(f"      obtenido: {r}")
+    for nombre, args, opcion in CASOS_VALIDAR_AMPLIO:
+        r = validar_espacio(**args)
+        ok = r["encaja"] and r.get("grupo") == "bajo_60"
+        if opcion is None:
+            ok &= "opcion_comodo" not in r
+        else:
+            o = r.get("opcion_comodo") or {}
+            ok &= o.get("id") == opcion and o.get("grupo") == "comodo" and "foto" in o and "avisos_zona" in o
         print(f"{'OK   ' if ok else 'FALLO'} {nombre}")
         if not ok:
             fallos += 1
@@ -206,7 +228,7 @@ def main():
     fallos += test_fotos()
     fallos += test_media()
     fallos += test_validar()
-    total = len(CASOS) + 2 + len(CASOS_FOTO) + len(CASOS_MEDIA) + len(CASOS_VALIDAR) + len(CASOS_VALIDAR_ZONA) + len(CASOS_VALIDAR_FOTO)
+    total = len(CASOS) + 2 + len(CASOS_FOTO) + len(CASOS_MEDIA) + len(CASOS_VALIDAR) + len(CASOS_VALIDAR_ZONA) + len(CASOS_VALIDAR_FOTO) + len(CASOS_VALIDAR_AMPLIO)
     print(f"\n{total - fallos}/{total} casos correctos")
     sys.exit(1 if fallos else 0)
 
