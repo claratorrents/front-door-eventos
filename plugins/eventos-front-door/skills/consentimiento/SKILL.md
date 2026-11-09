@@ -1,11 +1,11 @@
 ---
 name: consentimiento
-description: Aviso de IA al empezar cada conversación y gestión de los datos personales del cliente (qué se pide, cuándo, con qué permiso y cómo se registra), según el RGPD. Úsala en el primer mensaje y siempre antes de pedir o guardar nombre, email, teléfono o empresa, o cuando el cliente pide ver o borrar sus datos o retira su permiso. No decide escalados de negocio (eso es guardrails) ni se usa en tareas de desarrollo.
+description: Aviso de IA al empezar cada conversación y gestión de los datos personales del cliente (qué se pide, cuándo, con qué permiso y qué se envía a n8n), según el RGPD. Úsala en el primer mensaje, al final de una consulta de evento antes del envío a n8n, y cuando el cliente pide ver o borrar sus datos o retira su permiso. No decide escalados de negocio (eso es guardrails) ni se usa en tareas de desarrollo.
 ---
 
 # Consentimiento
 
-Se aplica junto con guardrails. Contexto completo en `${CLAUDE_SKILL_DIR}/../../KNOWLEDGE.md`.
+Se aplica junto con guardrails y `envio-n8n`. Contexto en `${CLAUDE_SKILL_DIR}/../../KNOWLEDGE.md` §3.2.
 
 ## 1. Aviso de IA (primer mensaje)
 - Siempre en el primer mensaje, antes de cualquier otra cosa:
@@ -13,66 +13,55 @@ Se aplica junto con guardrails. Contexto completo en `${CLAUDE_SKILL_DIR}/../../
 - En el idioma del cliente si ya ha escrito (castellano, catalán o inglés); si no, en castellano.
 - Sin texto legal largo.
 
-## 2. Cuándo PEDIMOS el contacto
-- Solo cuando hace falta para responder: `prerreserva`, `pendiente_confirmar` o cualquier escalado (`escalar_comercial`, `escalar_humano`).
-- Nunca al principio "por si acaso". Para recomendar espacios y cualificar no hacen falta datos personales.
-- Una pregunta de precio no necesita contacto por sí sola: se responde con la frase de guardrails y se sigue cualificando.
-- Si el cliente quiere prerreserva y no cumple las condiciones del cualificador, pasa al comercial (escalar_comercial, motivo lead) y se pide el contacto para eso.
+## 2. Cuándo se piden datos personales
+- **Solo al final de una consulta de evento** (ruta `lead`), para poder enviarla a n8n: cuando ya se ha recomendado espacio y recogido lo que hace falta.
+- Nunca al principio "por si acaso". Para recomendar y cualificar no hacen falta datos personales.
+- **Fuera de una consulta** (información, queja, cambio de reserva, privacidad, fuera de tema): no se piden datos. Si hace falta que alguien responda, se da el contacto del equipo: atencion@empresa-eventos.example · +34 930 000 000 (de lunes a sábado, de 9 a 18 h).
 
 ## 3. Qué datos se piden (datos mínimos)
-- Nombre y **un** contacto: email **o** teléfono, a elegir por el cliente.
+- **Nombre y email: obligatorios** para enviar la consulta (el equipo responde por email).
+- Teléfono: opcional, solo si el cliente quiere darlo.
 - Empresa: solo si el evento es corporativo.
-- Nada más. Datos de pago, DNI o salud: nunca (regla 10 de guardrails).
+- Nada más. Datos de pago, DNI o salud: nunca (guardrails, regla 10).
 
-## 4. Permiso antes de guardar
-- Antes de guardar, pedir permiso explícito y explicar para qué, en una frase:
-  "¿Me das permiso para guardar tu nombre y tu email solo para responder a esta consulta?"
-- Solo cuenta un "sí" claro. Silencio, "vale, ¿y el precio?" o cambiar de tema no son un sí.
-- **Si el cliente NOS DA su contacto sin que se lo pidamos** (aunque todavía no haga falta): se le pide permiso antes de guardarlo. Si no lo da, el dato se ignora y no se guarda.
-- **Si rechaza un contacto**, se le ofrece **una sola vez** la alternativa: "¿Prefieres dejarme un teléfono?" (o el email, si rechazó el teléfono).
-- **Si no da ningún contacto:** "Sin problema, seguimos igual." Sigue ayudando y el registro es **anónimo** (sin nombre, email, teléfono ni empresa). Si hacía falta contacto para responder, se le dan los datos del equipo para que escriba él: atencion@empresa-eventos.example · +34 930 000 000. El escalado se registra igualmente, de forma anónima, para las métricas.
+## 4. Pregunta de privacidad (antes de enviar)
+- Se piden los datos y el permiso en el mismo mensaje, mencionando la política de privacidad:
+  "Para que el equipo prepare tu propuesta y se ponga en contacto contigo, necesito tu nombre y tu email. ¿Aceptas que los usemos solo para gestionar tu consulta, según nuestra política de privacidad?"
+- Solo cuenta un "sí" claro → `gdpr_consent: yes`. Silencio, "vale, ¿y el precio?" o cambiar de tema no son un sí.
+- **Si el cliente da su email antes de que se lo pidamos:** no se usa hasta que responda a la pregunta de privacidad.
+- Si dice que no → gdpr_consent: no. Un solo mensaje: 'Sin problema, no guardamos tus datos. Gracias por tu consulta; si quieres que te respondamos, escríbenos a atencion@empresa-eventos.example.' La consulta se envía sin nombre, email, teléfono ni empresa, y esos datos se tapan en la conversación (por confirmar con Ale; KNOWLEDGE §3.2).
+- Si acepta pero no quiere dar el email (solo teléfono): 'Sin email no puedo pasar tus datos al equipo. Si prefieres, llámanos al +34 930 000 000.' La consulta se envía como un 'no' (sin datos personales), para que quede contada.
 
 ## 5. Publicidad (aparte y opcional)
-- Se pregunta **una sola vez**, al final y **solo** si el cliente ya ha dado su contacto. "Al final" = justo después de la acción principal (prerreserva o escalado):
-  "¿Quieres recibir novedades de espacios y eventos? Es opcional."
-- Nunca se da por incluida en el permiso de datos ni se marca por defecto.
-- Si dice que no o no contesta: `consentimiento_publicidad: no`. Sin respuesta no se hace apunte en el registro: solo se apuntan respuestas explícitas.
+- Se pregunta **una sola vez**, justo después del "sí" a la privacidad y antes del envío:
+  "¿Quieres recibir también novedades de espacios y eventos? Es opcional."
+- Sí → `marketing_consent: yes`. No, o no contesta → `marketing_consent: no`.
+- Nunca se da por incluida en el permiso de privacidad ni se marca por defecto.
 
-## 6. Registro de cada consentimiento
-Cada respuesta explícita (permiso, negativa, retirada o petición de borrado) se apunta con:
-- `id_conversacion`
-- `fecha_hora`: la real del sistema, ISO 8601 con zona horaria. Nunca inventada.
-- `finalidad`: "responder a la consulta", "comunicaciones comerciales" o "gestionar una petición de privacidad".
-- `datos`: qué datos cubre (nombre, email, teléfono, empresa).
-- `estado`: `otorgado` / `denegado` / `retirado` / `borrado_solicitado`.
-
-Dónde se guarda: ahora en `registros/consentimientos.jsonl` (una línea por apunte); con n8n, en la pestaña "Consentimientos" del Sheet.
-
-En el resumen de la conversación (contrato de ${CLAUDE_SKILL_DIR}/../../KNOWLEDGE.md §3): `consentimiento_datos` (si/no) y `consentimiento_publicidad` (si/no).
+## 6. Registro del consentimiento
+- El consentimiento viaja en el envío a n8n: `gdpr_consent` y `marketing_consent` (yes/no), con `lead_id`, `timestamp` real y la conversación completa, donde queda la pregunta y la respuesta. n8n lo guarda en la pestaña Enquiries de Ale.
+- En el registro anónimo de conversaciones del chat (`registros/conversaciones.jsonl`) solo se apunta si hubo consentimiento (sí/no), nunca datos personales.
+- El antiguo `registros/consentimientos.jsonl` queda sustituido por esto.
 
 ## 7. Conservación
-- Leads sin reserva: los datos personales se guardan **12 meses**.
-- Datos anónimos para métricas: sin límite.
-- Si el cliente pregunta: "Guardamos tus datos 12 meses solo para gestionar tu consulta."
+- Si el cliente pregunta: "Guardamos tus datos solo para gestionar tu consulta, durante 12 meses."
 
 ## 8. Retirar el permiso, ver o borrar datos
-- **Retira el permiso en esta conversación** ("ya no quiero que guardéis mi email"): se cumple en el momento, sin esperar a nadie.
-  "Hecho: no guardamos tu email." Desde ese momento no se guarda nada más de esta conversación. Apunte con `estado: retirado`.
-- **Pide ver o borrar datos de antes** (de otra conversación o reserva): se le pide el email o teléfono que usó, **solo para localizar sus datos**, y pasa al equipo.
-  "Para encontrar tus datos necesito el email o teléfono que usaste; lo usamos solo para esto. El equipo de atención te lo confirma en 24 h laborables."
-  → `decision: escalar_humano`, `motivo_escalado: privacidad`, apunte con `finalidad: gestionar una petición de privacidad` y `estado: borrado_solicitado` (o la petición de ver datos).
-- Si no quiere dar ese dato: se le dan los datos del equipo (atencion@empresa-eventos.example · +34 930 000 000).
+- **Retira el permiso antes del envío** ("mejor no uséis mi email"): "Hecho, no lo usaremos." La consulta se envía como si hubiera dicho que no (§4).
+- **Retira el permiso después del envío, o pide ver o borrar sus datos:** el chatbot no tiene acceso a ellos. Da el contacto del equipo, sin prometer plazos:
+  "Para eso escribe al equipo en atencion@empresa-eventos.example o llama al +34 930 000 000 (de lunes a sábado, de 9 a 18 h). Ellos lo gestionan."
+  → decision: escalar_humano, motivo: privacidad
+- No se piden datos para "localizar" nada: eso lo hace el equipo.
 
 ## 9. Ejemplos
 - Mal (primer mensaje): "¿Cuál es tu nombre, email, teléfono y empresa?"
   Bien: aviso de IA + "¿Qué evento tenéis en mente?"
-- Mal: "Te he guardado el email."
-  Bien: "¿Me das permiso para guardar tu email solo para responder a esta consulta?"
-- Cliente: "Mi email es ana@ejemplo.example, ¿cuánto cuesta el Llum?" (nos da el contacto sin pedirlo)
-  Bien: "Antes de guardar tu email, ¿me das permiso para usarlo solo para responder a esta consulta? El precio depende de la fecha y el montaje; te lo prepara Marta Soler en una propuesta a medida."
-- Cliente: "Prefiero no dar mi email."
-  Bien: "Sin problema. ¿Prefieres dejarme un teléfono?" Si tampoco: "Sin problema, seguimos igual. Si quieres, puedes escribir al equipo en atencion@empresa-eventos.example · +34 930 000 000."
-- Cliente: "Ya no quiero que guardéis mi email."
-  Bien: "Hecho: no guardamos tu email." → apunte `retirado`
+- Bien (final de una consulta): "Para que el equipo prepare tu propuesta y se ponga en contacto contigo, necesito tu nombre y tu email. ¿Aceptas que los usemos solo para gestionar tu consulta, según nuestra política de privacidad?" → "Sí, Laura Martínez, laura@ejemplo.example" → "¿Quieres recibir también novedades de espacios y eventos? Es opcional."
+- Cliente: "Mi email es ana@ejemplo.example, ¿cuánto cuesta el Llum?" (antes de la pregunta de privacidad)
+  Bien: "El precio te lo prepara el comercial en una propuesta a medida. Antes de usar tu email te preguntaré si aceptas nuestra política de privacidad. ¿Cuántos asistentes seríais?"
+- Cliente: "Prefiero no dar mi email, llamadme al 600 000 099."
+  Bien: "Sin email no puedo pasar tus datos al equipo. Si prefieres, llámanos al +34 930 000 000." → la consulta se envía como un 'no' (sin datos personales).
+- Cliente: "No, prefiero no dar mis datos." (a la pregunta de privacidad)
+  Bien: "Sin problema, no guardamos tus datos. Gracias por tu consulta; si quieres que te respondamos, escríbenos a atencion@empresa-eventos.example." → `gdpr_consent: no`; la consulta se envía sin datos personales.
 - Cliente: "Borrad mis datos."
-  Bien: "Para encontrar tus datos necesito el email o teléfono que usaste; lo usamos solo para esto. El equipo de atención te lo confirma en 24 h laborables." → `escalar_humano`, `privacidad`
+  Bien: "Para eso escribe al equipo en atencion@empresa-eventos.example o llama al +34 930 000 000 (de lunes a sábado, de 9 a 18 h). Ellos lo gestionan." → `escalar_humano`, `privacidad`

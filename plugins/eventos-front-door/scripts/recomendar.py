@@ -24,6 +24,10 @@ Validar el espacio que ha elegido el cliente (skill router-intenciones §3):
       --disposicion cocktail --dias 127
   Devuelve si encaja y, si no, TODOS los motivos (aforo, antelacion, horario)
   con el dato que falla, más las alternativas de la recomendación normal.
+  También avisos_zona y la foto de la tarjeta (foto_tarjeta), igual que la recomendación normal.
+  Si el espacio encaja pero queda en bajo_60, añade opcion_comodo: la mejor opción comodo
+  de la recomendación normal (mismos criterios: aforo de la disposición, antelación, horario,
+  avisos de zona y foto). Si no hay ninguna comodo, no se añade nada.
   descartados:  [{id, nombre, motivo, detalle}]    (solo por antelación u horario)
 
 Solo lee data/espacios.json. No da precios ni disponibilidad.
@@ -104,6 +108,14 @@ def media_aprobada(espacio_id, tipo, espacios=None):
             if m.get("type") == tipo and m.get("approved") is True]
 
 
+def avisos_de_zona(reglas, fin):
+    """Zonas que cierran antes de la hora de fin pedida (fin en minutos, o None)."""
+    if fin is None:
+        return []
+    return [{"zona": zona, "hasta": h}
+            for zona, h in reglas.get("zone_end_times", {}).items() if minutos(h) < fin]
+
+
 def cargar_espacios():
     with open(ESPACIOS, encoding="utf-8") as f:
         return json.load(f)["venues"]
@@ -148,11 +160,7 @@ def recomendar(asistentes, disposicion, dias=None, hora_fin=None, espacios=None)
         # 4. Ocupación
         ocupacion = Fraction(asistentes, aforo)
         # Aviso si alguna zona cierra antes de la hora de fin pedida
-        avisos_zona = []
-        if fin is not None:
-            for zona, h in reglas.get("zone_end_times", {}).items():
-                if minutos(h) < fin:
-                    avisos_zona.append({"zona": zona, "hasta": h})
+        avisos_zona = avisos_de_zona(reglas, fin)
 
         candidatos.append({
             "id": esp["id"], "nombre": esp["name"], "aforo": aforo, "avisos_zona": avisos_zona,
@@ -221,10 +229,19 @@ def validar_espacio(espacio_id, asistentes, disposicion, dias=None, hora_fin=Non
                         "detalle": f"acaba a las {reglas['max_end_time']}; se pide hasta las {hora_fin}"})
 
     encaja = not motivos
-    resultado = {"espacio": esp["id"], "nombre": esp["name"], "encaja": encaja, "motivos": motivos}
+    avisos_zona = avisos_de_zona(reglas, fin)
+    resultado = {"espacio": esp["id"], "nombre": esp["name"], "encaja": encaja, "motivos": motivos,
+                 "avisos_zona": avisos_zona,
+                 "foto": foto_tarjeta(esp, disposicion, {a["zona"] for a in avisos_zona})}
     if encaja:
         resultado["ocupacion"] = round(asistentes / aforo * 100)
         resultado["grupo"] = grupo(Fraction(asistentes, aforo))
+        if resultado["grupo"] == "bajo_60":
+            # Espacio amplio: la mejor opción comodo de la recomendación normal, si la hay
+            comodos = [r for r in recomendar(asistentes, disposicion, dias, hora_fin, espacios)["recomendados"]
+                       if r["grupo"] == "comodo" and r["id"] != esp["id"]]
+            if comodos:
+                resultado["opcion_comodo"] = comodos[0]
     else:
         resultado["alternativas"] = recomendar(asistentes, disposicion, dias, hora_fin, espacios)["recomendados"]
     return resultado

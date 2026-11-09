@@ -1,83 +1,59 @@
 ---
 name: cualificador-leads
-description: Recoge los datos que cualifican un lead (fecha, asistentes, presupuesto, tipo de evento, empresa y urgencia), lo puntúa de 0 a 100 con scripts/puntuar_lead.py y decide si se ofrece el bloqueo provisional de 72 h o pasa al comercial. Úsala cuando el cliente quiere organizar un evento. La puntuación la calcula el script; el LLM solo pregunta, traduce las frases a niveles con la tabla de la §3 y redacta. No se usa para recomendar espacios, dar precios ni confirmar disponibilidad.
+description: Durante una consulta de evento, decide qué datos faltan y qué preguntar (tipo de evento, asistentes, espacio o zona, fecha, presupuesto y necesidades) para que la consulta llegue completa a n8n. Lo decide scripts/datos_consulta.py; el LLM solo pregunta y traduce las frases del cliente a niveles con la tabla de la §3. No puntúa: la puntuación oficial la hace n8n (KNOWLEDGE §3.2). No se usa para recomendar espacios, dar precios ni confirmar disponibilidad.
 ---
 
 # Cualificador de leads
 
-Se aplica junto con guardrails, consentimiento y recomendador-espacios. Contexto en `${CLAUDE_SKILL_DIR}/../../KNOWLEDGE.md` §3.1.
+Se aplica junto con guardrails, recomendador-espacios, consentimiento y `envio-n8n`. Contexto en `${CLAUDE_SKILL_DIR}/../../KNOWLEDGE.md` §3.2.
 
-## 1. Qué datos recoge
-Fecha, asistentes, presupuesto, tipo de evento, empresa y urgencia ("¿para cuándo necesitáis decidirlo?").
-- Asistentes y tipo de evento suelen llegar primero, porque los necesita el recomendador.
-- Después: fecha, presupuesto, empresa y urgencia.
-- **Una o dos preguntas por mensaje**, intercaladas con la conversación. Nunca un cuestionario seguido.
-- Si el cliente no quiere contestar algo, no se insiste: se puntúa con lo que hay.
-- Para recoger estos datos no hace falta consentimiento (no son datos personales). El nombre y el contacto se piden solo cuando toca (skill consentimiento).
+## 1. Para qué sirve
+Que la consulta llegue a n8n con lo que su flujo necesita:
+- **Zona o espacio elegido**: sin ella, n8n no asigna espacio ni envía el email automático.
+- **Fecha**: sin fecha (o con fecha pasada), tampoco hay email automático.
+- **Presupuesto**: sin él, n8n nunca califica el lead como fuerte.
+El cualificador **no puntúa ni decide** nada sobre el lead: solo qué preguntar.
 
-## 2. La puntuación la calcula el script
-Se ejecuta `${CLAUDE_SKILL_DIR}/../../scripts/puntuar_lead.py` con el nivel de cada criterio. Se vuelve a ejecutar cada vez que llega un dato nuevo.
+## 2. Qué datos recoge, en este orden
+| # | Dato | Tipo | Campo del envío |
+|---|---|---|---|
+| 1 | Tipo de evento | imprescindible | `event_type` |
+| 2 | Asistentes | imprescindible | `guests` |
+| 3 | Espacio elegido o, si no, zona | imprescindible | `preferred_location` |
+| 4 | Fecha, aunque sea aproximada (día, mes o temporada) | imprescindible | `event_date` (solo si hay día exacto) |
+| 5 | Día exacto, si solo dio el mes o la temporada ("¿Tenéis ya un día concreto, o al menos el mes?") | recomendable | `event_date` |
+| 6 | Presupuesto | recomendable | `budget_eur` |
+| 7 | Necesidades (catering, audiovisuales, extras…) | recomendable | `message` |
 
-| Criterio | Peso | Niveles |
-|---|---:|---|
-| Fecha | 25 | día exacto 25 · mes o rango corto 15 · solo temporada o año 5 · nada 0 |
-| Asistentes | 20 | número concreto 20 · aproximado 10 · no lo sabe 0 |
-| Presupuesto | 20 | cifra concreta 20 · aproximado o rango 10 · no lo sabe o no lo dice 0 |
-| Tipo de evento | 15 | está en `event_types` del espacio de referencia 15 · otro tipo claro 10 · no está claro 0 |
-| Empresa | 10 | corporativo con nombre de empresa 10 · corporativo sin nombre 5 · particular 5 · sin dato 0 |
-| Urgencia | 10 | decide en 14 días o menos 10 · en menos de un mes 5 · sin prisa o no lo sabe 0 |
-
-- **Espacio de referencia para el tipo:** el espacio elegido por el cliente si lo hay; si no, el primero recomendado. Si no hay ningún espacio recomendado: 10 si el tipo está claro, 0 si no.
-- El **presupuesto puntúa por tenerlo**, no por si llega: el chatbot no maneja precios y nunca compara el presupuesto con nada.
-- El día exacto se deduce del nivel de fecha (no es una entrada aparte).
-- **La puntuación es un dato interno: nunca se dice al cliente** (guardrails, regla 5).
+- La empresa, el nombre y el email los pide la skill consentimiento, no esta.
+- El espacio sale del recomendador: después de las tarjetas se pregunta "¿Cuál os encaja más?". Si no quiere elegir, basta con la zona.
 
 ## 3. De frases a niveles (tabla fija)
-| Criterio | Frases | Nivel |
+| Dato | Frases | Nivel |
 |---|---|---|
 | Fecha | "el 14 de marzo", "el sábado 6 de junio" | día exacto |
-| Fecha | "en marzo", "la segunda quincena de mayo", "entre el 10 y el 20" | mes o rango corto |
-| Fecha | "en primavera", "el año que viene", "después del verano" | solo temporada o año |
-| Asistentes / presupuesto | "120", "somos 45", "6.000 €", "máximo 4.000 €" | concreto |
-| Asistentes / presupuesto | "unos", "alrededor de", "aproximadamente", "entre X e Y" | aproximado |
-| Empresa | dice el nombre de la empresa | corporativo con nombre |
-| Empresa | "somos una empresa", "para el equipo", "para clientes" sin nombre | corporativo sin nombre |
-| Empresa | boda, cumpleaños, celebración familiar | particular |
-| Urgencia | "esta semana", "en los próximos días" | 14 días o menos |
-| Urgencia | "este mes" | según los días que queden hasta fin de mes con la fecha real: 14 o menos → 14 días o menos; si no → menos de un mes |
-| Urgencia | "no hay prisa", "ya veremos", no lo dice | sin prisa |
+| Fecha | "en marzo", "la segunda quincena de mayo", "entre el 10 y el 20" | mes o rango |
+| Fecha | "en primavera", "el año que viene" | temporada |
+| Asistentes / presupuesto | "120", "6.000 €", "unos 100", "entre 2.000 y 3.000" | dado (n8n acepta números y rangos) |
+| Cualquiera | "no lo sé", "aún no", "ya veremos" | no lo sabe |
 
-Si una frase no está en la tabla, se elige el nivel más bajo de los que encajan.
+## 4. La decisión la toma el script
+Se ejecuta `${CLAUDE_SKILL_DIR}/../../scripts/datos_consulta.py` con lo que se sabe y con lo que ya se ha preguntado. Devuelve:
+- los datos que faltan, en el orden de la §2;
+- **las siguientes preguntas** (máximo dos, las dos primeras que falten);
+- `listo_para_enviar`: verdadero cuando cada dato está dado **o ya se preguntó una vez**.
 
-## 4. Decisión
-El script devuelve la puntuación, el desglose, la decisión, el motivo y las condiciones que faltan.
+Reglas:
+- **Cada dato se pregunta una sola vez.** Si el cliente no lo sabe o no contesta, no se insiste: cuenta como preguntado.
+- Una o dos preguntas por mensaje, intercaladas con la conversación. Nunca un cuestionario seguido.
+- Cuando `listo_para_enviar` es verdadero → skill consentimiento (§4, pregunta de privacidad) → `envio-n8n`.
 
-**Bloqueo provisional (`prerreserva`)** solo si se cumplen todas:
-1. más de 70 puntos;
-2. día exacto;
-3. el cliente ha elegido un espacio recomendado;
-4. ese espacio cumple la antelación mínima para ese día.
+## 5. Escalados dentro de una consulta
+Descuentos, catering o extras a medida, excepciones de horario o aforo, permisos: no se escalan aparte. Se apuntan para el campo `message` en una frase ("Pide un 20 % de descuento"; "Quiere música hasta las 4") y se sigue con la consulta (KNOWLEDGE §3.2, decisión 6). Al cliente: "Lo verás con el comercial cuando te contacte."
 
-**Si pasa de 70 pero falta el día o el espacio:** se pregunta lo que falte (máximo dos preguntas en un mensaje) antes de escalar:
-"¿Tenéis ya un día concreto y cuál de los espacios os encaja más? Así puedo reservaros la fecha de forma provisional."
-Si no lo tiene, pasa al comercial.
-
-**Ofrecer el bloqueo** (necesita un "sí" explícito y el contacto con permiso; skill consentimiento):
-"Puedo bloquear el [espacio] para el [día] de forma provisional y sin compromiso durante 72 h laborables. [Comercial] te enviará la propuesta con precio y condiciones en 24 h laborables. ¿Lo bloqueo?"
-
-**Después del "sí":**
-- Mientras n8n no confirme de verdad (SIMULADO): "He pedido el bloqueo provisional del [espacio] para el [día]. [Comercial] te lo confirma y te envía la propuesta en 24 h laborables. Si no te encaja, la fecha se libera sola a las 72 h."
-- Solo con confirmación real de n8n: "He bloqueado provisionalmente el [espacio] para el [día]. [Comercial] te envía la propuesta en 24 h laborables. Si no te encaja, la fecha se libera sola a las 72 h."
-- Nunca "reservado" ni "confirmado" (guardrails, reglas 2 y 4).
-
-**En cualquier otro caso → comercial** (`escalar_comercial`, motivo `lead`), con el comercial del espacio de referencia (o David Ramos si no hay espacio):
-"Paso tu consulta a [comercial], que te enviará una propuesta a medida en 24 h laborables."
-
-## 5. Ejemplos
-- "Cena de empresa para 120 personas en marzo, unos 6.000 €, somos de [empresa], decidimos esta semana."
-  Niveles: mes 15 · concreto 20 · aproximado 10 · cena en Llum 15 · con nombre 10 · 14 días o menos 10 = **80**. Falta día y espacio → se preguntan; si no los tiene → comercial (`lead`).
-- Lo mismo, pero "el 14 de marzo" y elige Llum del Poblenou → **90** → se ofrece el bloqueo.
-- "Boda para unas 100 personas el año que viene, aún no sabemos presupuesto."
-  Niveles: temporada 5 · aproximado 10 · nada 0 · boda no está en Mirador 10 · particular 5 · sin prisa 0 = **30** → comercial (`lead`).
-- Mal: "Tu lead tiene 80 puntos." Bien: no mencionar la puntuación.
-- Mal (tras el "sí", con n8n simulado): "¡Listo, reservado!" Bien: "He pedido el bloqueo provisional…"
+## 6. Ejemplos
+- "Queremos hacer algo para la empresa." → faltan tipo y asistentes → "¿Qué tipo de evento tenéis en mente y para cuántas personas?"
+- "Cena para 120 en marzo; nos gusta el Llum." → faltan día exacto y presupuesto → "¿Tenéis ya un día concreto? ¿Y un presupuesto aproximado?"
+- El cliente contesta "Aún no sabemos ni el día ni el presupuesto." → se han preguntado una vez → falta necesidades → "¿Necesitaréis algo especial, como catering o audiovisuales?" → después, `listo_para_enviar`.
+- Mal: "Tu lead tiene 80 puntos." El cualificador ya no puntúa.
+- Mal: preguntar el presupuesto por segunda vez después de "aún no lo sabemos".

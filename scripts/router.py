@@ -99,7 +99,7 @@ def enrutar(intenciones, ruta_tema=None, legal=False, consulta_en_marcha=False):
             accion, a_n8n = "ofrecer_envio", True
         skills_fila, si_toca_fila = fila["skills"], fila["skills_si_toca"]
         if i == "persona" and consulta_en_marcha:
-            si_toca_fila = ["consentimiento"]   # si acepta el envío: pregunta de privacidad
+            si_toca_fila = ["consentimiento", "envio-n8n"]   # si acepta el envío: privacidad y envío
         acciones.append({"intencion": i, "skills": skills_fila, "skills_si_toca": si_toca_fila,
                          "decision": fila["decision"], "motivo_escalado": motivo,
                          "accion": accion, "a_n8n": a_n8n, "ruta": ruta})

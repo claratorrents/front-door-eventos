@@ -326,7 +326,7 @@ plugins/eventos-front-door/
 - Instalar: `/plugin install eventos-front-door@<nombre-del-marketplace>`, o desde el menú de `/plugin`.
 
 ### Comprobado al instalar el plugin (7 de noviembre, Claude Code 2.1.317)
-- **El plugin se genera, no se edita:** `python3 scripts/empaquetar_plugin.py` crea `plugins/eventos-front-door/` (6 skills, 4 scripts sin tests, `data/`, `KNOWLEDGE.md`, `AGENTS.md`, README) y `.claude-plugin/marketplace.json`.
+- **El plugin se genera, no se edita:** `python3 scripts/empaquetar_plugin.py` crea `plugins/eventos-front-door/` (desde la versión 0.2.0, del 9 de noviembre: 7 skills, 5 scripts sin tests, `data/`, `media/`, `KNOWLEDGE.md`, `AGENTS.md`, README) y `.claude-plugin/marketplace.json`.
 - **Validación:** `claude plugin validate plugins/eventos-front-door` y `claude plugin validate .` pasan. Solo avisa de que falta una licencia, que únicamente exige el directorio público de plugins.
 - **Instalación desde el terminal (funciona):** `claude plugin marketplace add <ruta-del-repo>` y después `claude plugin install eventos-front-door@front-door-eventos --scope user`. No pide iniciar sesión. `claude plugin list` lo muestra activado y `claude plugin details eventos-front-door` lista las 6 skills (unos 670 tokens fijos por sesión).
 - **Marketplace local:** con un marketplace de carpeta local, Claude Code lee el plugin directamente de `plugins/eventos-front-door` del repositorio, sin copiarlo aparte.
@@ -408,7 +408,7 @@ Pesos de la prueba para el cualificador, como punto de partida: fecha 25 · asis
 ### Pendiente inmediato
 - [ ] Decidir el nombre de la empresa.
 - [ ] Paso 2 de la integración con n8n (adaptar el proyecto a la §3.2), en 8 puntos: 1. `AGENTS.md` y `KNOWLEDGE.md` · 2. consentimiento · 3. cualificador · 4. router · 5. guardrails · 6. recomendador · 7. skill nueva de envío a n8n · 8. regenerar el plugin y prueba completa.
-  - Hecho: 1 (`747b8ab`, `af71d87`); 2, consentimiento versión 3 (`f80294f`, `0405c3e`); 3, cualificador con `scripts/datos_consulta.py`, que ya no puntúa (`8d1ce27`, corrección 09); 4, router sin la intención `reserva`, con `a_n8n` y `--consulta-en-marcha` (`ee2c71f`, `bf737b3`, corrección 10); 5, guardrails (`52b9313`, `b815673`, corrección 11); 6, recomendador (`e641c20`, `0c5cd9a`, `f61f1f4`, corrección 12); 7, skill `envio-n8n` con `scripts/enviar_n8n.py` y el registro anónimo (commit "Envío a n8n: skill, script y registro anónimo").
+  - Hecho: 1 (`747b8ab`, `af71d87`); 2, consentimiento versión 3 (`f80294f`, `0405c3e`); 3, cualificador con `scripts/datos_consulta.py`, que ya no puntúa (`8d1ce27`, corrección 09); 4, router sin la intención `reserva`, con `a_n8n` y `--consulta-en-marcha` (`ee2c71f`, `bf737b3`, corrección 10); 5, guardrails (`52b9313`, `b815673`, corrección 11); 6, recomendador (`e641c20`, `0c5cd9a`, `f61f1f4`, corrección 12); 7, skill `envio-n8n` con `scripts/enviar_n8n.py` y el registro anónimo (`b689180`, `c2dc7f9`); 8, plugin 0.2.0 regenerado y prueba completa de la ruta estrella con envío simulado (`pruebas/prueba-envio-n8n-01.md`: 19 de 21 reglas; quedan abiertos dos fallos: el recomendador no usa la zona y la privacidad llega antes de tener los datos).
   - **Punto 7 (skill `envio-n8n`), decidido el 8 de noviembre** (hecho: lo aplican la skill y `scripts/enviar_n8n.py`) (sale de la prueba 03 de consentimiento):
     - Sin "sí" a la privacidad: `marketing_consent: no`.
     - Si el cliente no contesta a la publicidad o cierra el chat: se envía con `marketing_consent: no`.

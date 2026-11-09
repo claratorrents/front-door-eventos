@@ -8,7 +8,7 @@
     {
       "name": "eventos-front-door",
       "source": "./plugins/eventos-front-door",
-      "description": "Chatbot front door para una empresa de alquiler de espacios para eventos: router, guardrails, consentimiento, recomendador, cualificador y media, con scripts de reglas fijas y datos sintéticos."
+      "description": "Chatbot front door para una empresa de alquiler de espacios para eventos: router, guardrails, consentimiento, recomendador, cualificador, media y envío a n8n, con scripts de reglas fijas y datos sintéticos."
     }
   ]
 }

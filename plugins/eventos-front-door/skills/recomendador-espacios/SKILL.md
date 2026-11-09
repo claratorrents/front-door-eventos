@@ -1,11 +1,11 @@
 ---
 name: recomendador-espacios
-description: Recomienda de 1 a 3 espacios del catálogo según tipo de evento, asistentes, disposición, fecha y hora de fin, y los presenta en tarjetas sin precio. Úsala cuando el cliente quiere organizar un evento y ya se conoce, al menos, el número de asistentes y el tipo de evento o la disposición. La elección y el orden los decide scripts/recomendar.py; el LLM solo redacta. No se usa para dar precios, confirmar disponibilidad ni puntuar el lead.
+description: Recomienda de 1 a 3 espacios del catálogo según tipo de evento, asistentes, disposición, fecha y hora de fin, y los presenta en tarjetas sin precio. Úsala cuando el cliente quiere organizar un evento y ya se conoce, al menos, el número de asistentes y el tipo de evento o la disposición. La elección y el orden los decide scripts/recomendar.py; el LLM solo redacta. Si el cliente elige un espacio, su nombre va en preferred_location del envío a n8n. No se usa para dar precios, confirmar disponibilidad ni puntuar el lead.
 ---
 
 # Recomendador de espacios
 
-Se aplica junto con guardrails y consentimiento. Datos en `${CLAUDE_SKILL_DIR}/../../data/espacios.json`; contexto en `${CLAUDE_SKILL_DIR}/../../KNOWLEDGE.md` §3.1.
+Se aplica junto con guardrails, cualificador-leads y media-espacios. Datos en `${CLAUDE_SKILL_DIR}/../../data/espacios.json`; contexto en `${CLAUDE_SKILL_DIR}/../../KNOWLEDGE.md` §3.1 y §3.2.
 
 ## 1. Qué necesita
 - **Obligatorio:** número de asistentes y disposición.
@@ -18,7 +18,8 @@ Se aplica junto con guardrails y consentimiento. Datos en `${CLAUDE_SKILL_DIR}/.
 - **Opcional:** fecha del evento (para la antelación) y hora de fin (para el horario).
 - Si el tipo de evento suele acabar tarde (fiesta, cena, cena de gala, boda) y no dice la hora: se pregunta "¿Hasta qué hora más o menos?" antes de recomendar.
 - **Hora ambigua** ("hasta las 9"): se pregunta "¿Las 9 de la noche?". De 1 a 7 sin más contexto se entiende madrugada. De 8 a 12 sin 'de la mañana' o 'de la noche', se pregunta. Al script siempre se le pasa la hora en formato 24 h (21:00).
-- Si falta lo obligatorio, se pregunta (una o dos preguntas por mensaje) y no se recomienda todavía.
+- Si falta lo obligatorio, se pregunta (una o dos preguntas por mensaje, contando las del cualificador; router §3) y no se recomienda todavía.
+- **Día exacto más tarde:** si el cliente ya eligió espacio y después da el día exacto, se vuelve a validar ese espacio con `${CLAUDE_SKILL_DIR}/../../scripts/recomendar.py --validar` (antelación). Si ya no encaja, se explica el motivo y se proponen las alternativas que dé el script.
 
 ## 2. La decisión la toma el script
 Se ejecuta `${CLAUDE_SKILL_DIR}/../../scripts/recomendar.py` con asistentes, disposición y, si se conocen, días hasta el evento y hora de fin. El script aplica estas reglas, en este orden:
@@ -52,19 +53,21 @@ El LLM nunca cambia el orden ni añade espacios que el script no devuelve. **El 
   - si es la única opción y el script da una alternativa: 'Cabe justo. Si preferís más margen, el [alternativa] tiene sitio para [N]; os quedaría holgado.'
   - si no hay ninguna alternativa: 'Cabe justo; si al final sois alguno más, avísanos y buscamos otra opción.'
 - Si es `bajo_60` (porque no hay otra opción): "Es más grande de lo que necesitáis, pero es el que encaja con [horario / fecha]."
+- Si el espacio elegido queda en bajo_60, se respeta la elección y se avisa: 'Os quedará amplio. Si preferís algo más ajustado, [espacio] tiene sitio para [N].', solo si la respuesta de `${CLAUDE_SKILL_DIR}/../../scripts/recomendar.py --validar` trae una opción comodo (`opcion_comodo`).
 - **Nunca precio** (guardrails, regla 1). Nunca "está disponible" (guardrails, regla 2).
-- Al final, una sola pregunta para avanzar ("¿Queréis ver el plano o el recorrido 360° de alguno?").
+- Al final, una sola pregunta que junta las dos: "¿Cuál os encaja más? También puedo enseñaros el plano o el recorrido 360°."
+- **Elección:** el espacio que elija el cliente va en `preferred_location` del envío (KNOWLEDGE §3.2, decisión 2), y desde ese momento se puede decir el nombre de su comercial (guardrails, "Nombre del comercial").
 
 ## 4. Descartes que hay que explicar
 - Por antelación: "Para esa fecha, la Nau del Besòs no llega: necesita 14 días de preparación."
 - Por horario: "El Fòrum de les Corts no encaja: el horario acaba a las 22:00."
-- **Jardí de Gràcia por horario:** "En el Jardí la música en el patio acaba a las 22:30; el horario en el interior lo confirma el equipo." (Se descarta con el dato que sí tenemos: mejor perder una opción que prometer lo que no sabemos.)
+- **Jardí de Gràcia por horario:** "En el Jardí la música en el patio acaba a las 22:30; el horario en el interior lo confirmará el comercial cuando te contacte." Si el cliente quiere el Jardí igualmente, se apunta para el message ("Pregunta por el horario interior del Jardí"). (Se descarta con el dato que sí tenemos: mejor perder una opción que prometer lo que no sabemos.)
 - Por aforo no hace falta explicar cada espacio descartado.
 
 ## 5. Si no queda ningún espacio
-- **Por aforo** (ninguno es lo bastante grande): "Ninguno de nuestros espacios tiene sitio para [N] personas en [disposición]. Paso tu consulta a David Ramos, que lleva los eventos grandes; te responde en 24 h laborables." → `escalar_comercial`, motivo `lead`.
-- **Por antelación** (no llegan a tiempo): "Para esa fecha no llegamos a preparar ningún espacio que encaje. Paso tu consulta a David Ramos para ver si hay alguna opción; te responde en 24 h laborables." → `escalar_comercial`, motivo `excepcion`.
-- En los dos casos se pide el contacto (skill consentimiento).
+- **Por aforo** (ninguno es lo bastante grande): "Ninguno de nuestros espacios tiene sitio para [N] personas en [disposición]. Si quieres, sigo con tu consulta y la paso al equipo para que vea qué opciones hay." → al message: "Ningún espacio tiene aforo para [N] en [disposición]".
+- **Por antelación** (no llegan a tiempo): "Para esa fecha no llegamos a preparar ningún espacio que encaje. Si quieres, sigo con tu consulta y la paso al equipo para que vea si hay alguna opción." → al message: "Fecha con menos antelación de la necesaria".
+- En los dos casos la consulta sigue su camino normal (cualificador, consentimiento y envío a n8n; n8n la pasa al equipo de eventos). Sin nombre de comercial y sin plazos (KNOWLEDGE §3.2, decisiones 7 y 9). → `escalar_comercial`, motivo `excepcion`, en los dos casos.
 
 ## 6. Más detalles
 - Si el cliente pide más información de un espacio: `full_profile` y, si los pide, plano o tour 360° aprobados.
@@ -74,7 +77,7 @@ El LLM nunca cambia el orden ni añade espacios que el script no devuelve. **El 
 - Cliente: "Cena de empresa para 120 personas en marzo."
   Antes de recomendar: "¿Hasta qué hora más o menos?" Cliente: "Hasta las 00:00." El resultado del script no cambia.
   Script: Llum del Poblenou (`comodo`), Mirador de Montjuïc (`al_limite`).
-  Bien: tarjeta de Llum ("hasta 150 en banquete; pensado para cenas de gala") y tarjeta del Mirador con "Cabe justo; si podéis ser alguno más, mejor Llum".
+  Bien: tarjeta de Llum ("hasta 150 en banquete; pensado para cenas") y tarjeta del Mirador con "Cabe justo; si podéis ser alguno más, mejor Llum".
   Mal: recomendar la Nau del Besòs: se vería medio vacía. Mal: "Llum, ocupación 80 %".
 - Cliente: "Fiesta para 100 personas hasta las 3."
   Script: Mirador y Nau, ambos `bajo_60`, porque el horario descarta los demás.
@@ -84,4 +87,4 @@ El LLM nunca cambia el orden ni añade espacios que el script no devuelve. **El 
   Bien: "Cabe justo. Si preferís más margen, el Jardí de Gràcia tiene sitio para 60; os quedaría holgado."
 - Cliente: "Conferencia para 180 personas dentro de 5 días."
   Script: ninguno (Llum necesita 7 días y la Nau 14).
-  Bien: explicar la antelación y pasar a David Ramos en 24 h laborables (`escalar_comercial`, `excepcion`).
+  Bien: explicar la antelación y ofrecer seguir con la consulta para pasarla al equipo (al message: "Fecha con menos antelación de la necesaria"; `escalar_comercial`, `excepcion`).
