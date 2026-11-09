@@ -37,7 +37,7 @@ TABLA = {
     "informacion": {"skills": [], "skills_si_toca": ["media-espacios"],
                     "decision": None, "motivo": None, "accion": None, "a_n8n": False, "ruta": "informacion"},
     "nuevo_evento": {"skills": ["recomendador-espacios", "cualificador-leads"],
-                     "skills_si_toca": ["media-espacios", "consentimiento"],
+                     "skills_si_toca": ["media-espacios", "consentimiento", "envio-n8n"],
                      "decision": None, "motivo": None, "accion": None, "a_n8n": True, "ruta": "lead"},
     "cambio_reserva": {"skills": [], "skills_si_toca": [],
                        "decision": "escalar_humano", "motivo": "cambio_reserva",

@@ -25,7 +25,7 @@ Se aplica después de cualificador-leads y consentimiento. El contrato completo 
 - Nunca la puntuación del cualificador (no existe) ni notas internas.
 
 ## 3. Qué se tapa (lo hace el script)
-- **Siempre:** números de tarjeta, IBAN y DNI/NIE en la conversación y en `message`.
+- **Siempre:** números de tarjeta, IBAN y DNI/NIE en la conversación y en `message`. Los datos de salud no se pueden detectar automáticamente: el chatbot nunca los pide (guardrails, regla 10).
 - **Sin "sí" a la privacidad** (dijo que no, retiró el permiso o solo dio teléfono):
   - `name`, `email`, `phone` y `company` van vacíos;
   - en la conversación se tapan su nombre, email, teléfono y empresa;
@@ -38,12 +38,11 @@ El script devuelve el resultado y la frase. Se dice tal cual, en el idioma del c
 | Resultado | Frase |
 |---|---|
 | 202 (o 202 SIMULADA) | "Gracias. El equipo se pondrá en contacto contigo en breve." |
-| 403 / 404, o sin respuesta tras el reintento | "Gracias. El equipo contactará contigo igualmente." |
+| 403 / 404, o sin respuesta tras el reintento | "No he podido enviar tu consulta. Escríbenos a atencion@empresa-eventos.example o llámanos al +34 930 000 000 (de lunes a sábado, de 9 a 18 h) y te atendemos." |
 | Envío sin datos personales (privacidad "no" o solo teléfono) | Nada más: ya se dijo la frase de consentimiento §4. |
 
-- Si el cliente eligió un espacio, se puede añadir: "Te contactará [comercial del espacio]." Si no, nada (guardrails, decisión 9).
 - Nunca "tu reserva está confirmada" ni "te llamamos hoy".
-- Después del envío, si el cliente sigue escribiendo, se le atiende con normalidad, pero no se vuelve a enviar. Si cambia un dato ("al final somos 150"): "Lo apunto para el comercial; te lo confirmará cuando te contacte." No se reenvía.
+- Después del envío, si el cliente sigue escribiendo, se le atiende con normalidad, pero no se vuelve a enviar. Si cambia un dato ("al final somos 150"): "Tu consulta ya está enviada. Para cambiar algún dato, escribe a atencion@empresa-eventos.example." No se reenvía.
 
 ## 5. Registro anónimo de cada conversación
 - Al final de **cada** conversación, vaya o no a n8n, el script añade una línea a `registros/conversaciones.jsonl`.
@@ -56,11 +55,11 @@ El script devuelve el resultado y la frase. Se dice tal cual, en el idioma del c
 - En pruebas, solo datos sintéticos y los emails de prueba de Ale (`alejandro+ie007-xxx@alelabs.es`).
 
 ## 7. Ejemplos
-- Cena para 80 en el Mirador el 12 de diciembre, presupuesto 6.000 €, "sí" a la privacidad, "no" a la publicidad → se envía con `preferred_location: "Mirador de Montjuïc"`, `event_date: "2026-12-12"`, `gdpr_consent: yes`, `marketing_consent: no` → 202 → "Gracias. El equipo se pondrá en contacto contigo en breve. Te contactará Marta Soler."
+- Cena para 80 en el Mirador el 12 de diciembre, presupuesto 6.000 €, "sí" a la privacidad, "no" a la publicidad → se envía con `preferred_location: "Mirador de Montjuïc"`, `event_date: "2026-12-12"`, `gdpr_consent: yes`, `marketing_consent: no` → 202 → "Gracias. El equipo se pondrá en contacto contigo en breve."
 - Presentación para 120 "en marzo", sin espacio elegido, zona Poblenou → `preferred_location: "Poblenou"`, `event_date: ""` → 202 → "Gracias. El equipo se pondrá en contacto contigo en breve."
 - Pide un 10 % de descuento durante la consulta → en `message`: "Pide descuento." Al cliente ya se le dijo que lo verá con el comercial (guardrails).
 - "No" a la privacidad → se envía sin datos personales y con la conversación tapada; el chatbot no dice nada más.
 - Escribe su tarjeta en el chat → en la conversación enviada sale `[tarjeta]`.
 - Cierra el chat antes de la pregunta de privacidad → no se envía; línea en el registro con `enviado_n8n: no`.
 - Queja por un evento pasado → no va a n8n; línea en el registro con ruta `incidencia`.
-- Tras el envío: "¿Me lo podéis reenviar?" → "Ya está enviado; el equipo se pondrá en contacto contigo." No se reenvía.
+- Tras el envío: "¿Me lo podéis reenviar?" → "Ya está enviada. Si necesitas cambiar algo, escribe a atencion@empresa-eventos.example." No se reenvía.

@@ -51,9 +51,11 @@ FRASES = {
     "exito": {"es": "Gracias. El equipo se pondrá en contacto contigo en breve.",
               "ca": "Gràcies. L'equip es posarà en contacte amb tu aviat.",
               "en": "Thank you. The team will get in touch with you shortly."},
-    "error": {"es": "Gracias. El equipo contactará contigo igualmente.",
-              "ca": "Gràcies. L'equip contactarà amb tu igualment.",
-              "en": "Thank you. The team will contact you anyway."},
+    "error": {"es": "No he podido enviar tu consulta. Escríbenos a atencion@empresa-eventos.example o llámanos al +34 930 000 000 (de lunes a sábado, de 9 a 18 h) y te atendemos.",
+              "ca": "No he pogut enviar la teva consulta. Escriu-nos a atencion@empresa-eventos.example o "
+                    "truca'ns al +34 930 000 000 (de dilluns a dissabte, de 9 a 18 h) i t'atendrem.",
+              "en": "I couldn't send your enquiry. Email us at atencion@empresa-eventos.example or call us "
+                    "on +34 930 000 000 (Monday to Saturday, 9 am to 6 pm) and we'll help you."},
 }
 
 # --- Tapado -------------------------------------------------------------------------

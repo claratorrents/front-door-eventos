@@ -14,10 +14,10 @@ from router import enrutar  # noqa: E402
 # (descripción, intenciones, opciones, comprobaciones). Esperados del equipo
 # (versión adaptada a n8n, KNOWLEDGE.md §3.2).
 CASOS = [
-    ("nuevo_evento → ruta lead, guardrails + recomendador + cualificador, si toca media + consentimiento, a_n8n true",
+    ("nuevo_evento → ruta lead, guardrails + recomendador + cualificador, si toca media + consentimiento + envio-n8n, a_n8n true",
      ["nuevo_evento"], {},
      {"ruta": "lead", "skills": ["guardrails", "recomendador-espacios", "cualificador-leads"],
-      "skills_si_toca": ["media-espacios", "consentimiento"], "a_n8n": True}),
+      "skills_si_toca": ["media-espacios", "consentimiento", "envio-n8n"], "a_n8n": True}),
     ("cambio_reserva → escalar_humano, cambio_reserva, ruta cambio, solo guardrails, a_n8n false",
      ["cambio_reserva"], {},
      {"decision": "escalar_humano", "motivo_escalado": "cambio_reserva", "ruta": "cambio",

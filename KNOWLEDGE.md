@@ -56,7 +56,7 @@ Antes, el chat comprobaba disponibilidad y hacía prerreservas, y n8n abría tic
 
 **Riesgos:** los chatbots están muy vistos, así que la diferencia debe venir del enrutado, la cualificación y la integración. Hay muchas rutas, así que la demo se centra en **tres**. Necesita una base de conocimiento para no inventar.
 
-### Las 8 skills (6 activas: la 5 y la 6 se descartan, §3.2)
+### Las skills (7 activas: la 5 y la 6 se descartan y se añade la 9, envio-n8n, §3.2)
 
 | # | Skill | Bloque | Qué hace | Comprobación clave |
 |---|---|---|---|---|
@@ -68,6 +68,7 @@ Antes, el chat comprobaba disponibilidad y hacía prerreservas, y n8n abría tic
 | 6 | ~~gestor-reservas~~ | — | **Descartada (sustituido por §3.2).** Antes: prerreserva con bloqueo provisional de 72 h | — |
 | 7 | consentimiento | Reglas | Aviso de IA, permiso antes de guardar, datos mínimos, publicidad aparte | El consentimiento viaja en el envío a n8n (`gdpr_consent`, `marketing_consent`). Antes: registro con fecha/hora real, finalidad e id_conversacion (sustituido por consentimiento v3 §6) |
 | 8 | guardrails | Reglas | Tema, tono, escalado a persona | **Nunca da precios, presupuestos ni disponibilidad**; nunca descuentos; quejas y legal a persona |
+| 9 | envio-n8n | Vender | Al final de una consulta, envía a n8n los 15 campos del contrato una sola vez y apunta cada conversación en el registro anónimo (§3.2) | **Script** `enviar_n8n.py`: tapa los datos que tocan, nunca reenvía y sin URL ni clave en el código |
 
 **Orden:** 8 → 7 → 2 → 4. Las skills 5 y 6 se descartan (sustituido por §3.2).
 
@@ -208,7 +209,7 @@ Documentos de Ale en `n8n/`: contrato del webhook, explicación del flujo, JSON 
 8. **La intención `reserva` se junta con `nuevo_evento`:** no hay bloqueos, y el espacio elegido viaja en `preferred_location`.
 9. **Nombre del comercial:** solo se dice si el cliente ha elegido un espacio (n8n le asignará el comercial de ese espacio, porque el catálogo es el mismo). Si no: "el comercial que lleve tu evento".
 10. **Cualificador:** su script ya no puntúa; devuelve qué datos faltan por preguntar.
-11. **Registro de cada conversación:** el chat guarda un registro anónimo de cada conversación en `registros/conversaciones.jsonl` (intención, ruta, resuelto sí/no, enviado a n8n sí/no, consentimiento sí/no), basado en el contrato anterior. El dashboard junta ese registro con las hojas de Ale. Campos: ver [Registro anónimo de conversaciones](#registro-anónimo-de-conversaciones).
+11. **Registro de cada conversación:** el chat guarda un registro anónimo de cada conversación en `registros/conversaciones.jsonl` (intención, ruta, resuelto sí/no, enviado a n8n sí/no, consentimiento sí/no). El dashboard junta ese registro con las hojas de Ale. Campos: ver [Registro anónimo de conversaciones](#registro-anónimo-de-conversaciones).
 
 **Cuándo se envía**
 - Una sola vez por consulta, al final de una ruta `lead`, cuando el cliente ha dado nombre y email y ha respondido a la pregunta de privacidad.
@@ -239,7 +240,7 @@ POST a `N8N_WEBHOOK_URL` con las cabeceras `Content-Type: application/json` y `X
 | Respuesta | Qué hace el chatbot |
 |---|---|
 | 202 | "Gracias. El equipo se pondrá en contacto contigo en breve." (en el idioma del cliente) |
-| 403 / 404 | No reintenta. "El equipo contactará contigo igualmente." Se registra el error en el log del servidor |
+| 403 / 404 | No reintenta. "No he podido enviar tu consulta. Escríbenos a atencion@empresa-eventos.example o llámanos al +34 930 000 000 (de lunes a sábado, de 9 a 18 h) y te atendemos." Se registra el error en el log del servidor |
 | Sin respuesta en 10 s | Un único reintento con el mismo `lead_id` |
 
 **Reglas que no se saltan**
